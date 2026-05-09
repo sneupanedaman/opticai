@@ -646,7 +646,7 @@ function updateDashboard(type, summary, filename) {
   // Update sidebar dots & badges
   const dot = document.getElementById('dot-' + type);
   const badge = document.getElementById('badge-' + type);
-  if (dot) { dot.classList.remove('demo', 'empty'); dot.classList.add(''); dot.style.background = '#10b981'; }
+  if (dot) { dot.className = 'ds-dot'; dot.style.background = '#10b981'; }
   if (badge) { badge.textContent = 'Live'; badge.className = 'ds-badge'; }
 
   // Update KPIs
