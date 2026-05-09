@@ -489,9 +489,9 @@ function summarizeData(type, rows) {
     return {
       summary: `Total sales: $${(totalSales/1000).toFixed(1)}K across ${rows.length} periods. Locations: ${locSummary}.${avgCheck ? ` Avg check: $${avgCheck.toFixed(2)}.` : ''}`,
       kpis: { 
-  sales: `$${totalSales >= 1000000 ? (totalSales/1000000).toFixed(2)+'M' : (totalSales/1000).toFixed(0)+'K'}`,
-  check: avgCheck ? `$${avgCheck.toFixed(2)}` : null
-},
+        sales: `$${totalSales >= 1000000 ? (totalSales/1000000).toFixed(2)+'M' : (totalSales/1000).toFixed(0)+'K'}`,
+        check: avgCheck ? `$${avgCheck.toFixed(2)}` : null
+      },
       chartData: buildSalesChart(rows, salesCol, locationCol, dateCol),
       locations
     };
@@ -570,14 +570,13 @@ function buildSalesChart(rows, salesCol, locationCol, dateCol) {
   if (!salesCol) return null;
   if (locationCol) {
     const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].slice(0, 4);
-    const rawDates = dateCol ? [...new Set(rows.map(r => r[dateCol]))] : null;
-    const dates = rawDates ? rawDates.slice(0, 20).map((d, i) => 'W' + (i+1)) : null;
+    const dates = dateCol ? [...new Set(rows.map(r => r[dateCol]))].slice(0, 20) : null;
     const labels = dates || rows.filter(r => r[locationCol] === locs[0]).map((_, i) => 'W' + (i+1));
     const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981'];
     const datasets = locs.map((loc, i) => {
       const locRows = rows.filter(r => r[locationCol] === loc);
       return {
-        label: loc, data: locRows.map(r => (parseFloat(r[salesCol])||0) / 1000),
+        label: loc, data: locRows.map(r => parseFloat(r[salesCol])||0),
         borderColor: colors[i], backgroundColor: colors[i].replace(')', ',0.08)').replace('rgb','rgba'),
         tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2
       };
@@ -585,7 +584,7 @@ function buildSalesChart(rows, salesCol, locationCol, dateCol) {
     return { labels, datasets, locations: locs };
   }
   const labels = dateCol ? rows.map(r => r[dateCol]) : rows.map((_,i) => 'W'+(i+1));
-  return { labels, datasets: [{ label: 'Sales', data: rows.map(r => (parseFloat(r[salesCol])||0) / 1000), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 }], locations: ['All'] };
+  return { labels, datasets: [{ label: 'Sales', data: rows.map(r => parseFloat(r[salesCol])||0), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 }], locations: ['All'] };
 }
 
 function buildLaborChart(rows, laborPctCol, locationCol, dateCol) {
@@ -658,6 +657,8 @@ function updateDashboard(type, summary, filename) {
     if (summary.kpis.sales) updateKpi('sales', summary.kpis.sales, 'Live', true);
     if (summary.kpis.labor) updateKpi('labor', summary.kpis.labor, 'Live', true);
     if (summary.kpis.foodcost) updateKpi('foodcost', summary.kpis.foodcost, 'Live', true);
+    if (summary.kpis.check) updateKpi('check', summary.kpis.check, 'Live', true);
+    if (summary.kpis.prime) updateKpi('prime', summary.kpis.prime, 'Live', true);
   }
 
   // Update charts
