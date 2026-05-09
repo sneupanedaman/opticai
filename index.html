@@ -5,814 +5,320 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OpticAI — Restaurant Intelligence</title>
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #0d0f12; --bg2: #13161b; --bg3: #1a1e26;
   --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
   --text: #e8eaf0; --text2: #8b909e; --text3: #555b6a;
   --accent: #3b82f6; --accent2: #1d4ed8;
-  --green: #10b981; --red: #ef4444; --amber: #f59e0b; --purple: #8b5cf6;
+  --green: #10b981; --amber: #f59e0b; --purple: #8b5cf6;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; overflow: hidden; }
-.app { display: flex; height: 100vh; }
+html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; }
 
-/* SIDEBAR */
-.sidebar { width: 240px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
-.sidebar-logo { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.logo-row { display: flex; align-items: center; gap: 10px; }
-.logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.logo-icon i { color: #fff; font-size: 17px; }
-.logo-name { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-.logo-tagline { font-size: 11px; color: var(--text3); }
-.sidebar-section { padding: 14px 10px 4px; }
-.sidebar-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 6px; margin-bottom: 5px; }
-.location-pill { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; cursor: pointer; color: var(--text2); transition: all 0.15s; font-size: 13px; }
-.location-pill:hover { background: var(--bg3); color: var(--text); }
-.location-pill.active { background: rgba(59,130,246,0.12); color: var(--accent); }
-.location-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-.location-dot.amber { background: var(--amber); }
-.location-dot.purple { background: var(--purple); }
+/* NAV */
+nav { display: flex; align-items: center; padding: 20px 48px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(13,15,18,0.92); backdrop-filter: blur(12px); z-index: 10; }
+.nav-logo { display: flex; align-items: center; gap: 10px; }
+.nav-logo-icon { width: 30px; height: 30px; background: var(--accent); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+.nav-logo-icon i { color: #fff; font-size: 16px; }
+.nav-logo-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.nav-link { font-size: 13px; color: var(--text2); cursor: pointer; transition: color 0.15s; }
+.nav-link:hover { color: var(--text); }
+.nav-cta { padding: 7px 16px; background: var(--accent); border: none; border-radius: 7px; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
+.nav-cta:hover { background: var(--accent2); }
 
-/* DATASET UPLOAD ITEMS */
-.dataset-list { padding: 14px 10px 4px; }
-.ds-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 7px; font-size: 12px; color: var(--text2); cursor: pointer; transition: all 0.15s; position: relative; }
-.ds-item:hover { background: var(--bg3); }
-.ds-item.loaded { color: var(--text); }
-.ds-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-.ds-dot.empty { background: var(--border2); }
-.ds-dot.demo { background: var(--amber); }
-.ds-name { flex: 1; }
-.ds-badge { font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(16,185,129,0.12); color: var(--green); }
-.ds-badge.demo-badge { background: rgba(245,158,11,0.12); color: var(--amber); }
-.ds-upload-btn { font-size: 10px; color: var(--accent); opacity: 0; transition: opacity 0.15s; white-space: nowrap; }
-.ds-item:hover .ds-upload-btn { opacity: 1; }
-input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+/* HERO */
+.hero { max-width: 900px; margin: 0 auto; padding: 100px 48px 80px; text-align: center; }
+.hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); border-radius: 20px; padding: 5px 14px; font-size: 12px; color: #93c5fd; margin-bottom: 28px; }
+.hero-badge i { font-size: 13px; }
+.hero-h1 { font-size: 52px; font-weight: 600; line-height: 1.1; letter-spacing: -0.03em; color: var(--text); margin-bottom: 20px; }
+.hero-h1 em { font-style: italic; font-weight: 300; color: var(--text2); }
+.hero-sub { font-size: 18px; color: var(--text2); line-height: 1.65; max-width: 600px; margin: 0 auto 40px; font-weight: 400; }
+.hero-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.btn-hero { padding: 13px 28px; border-radius: 9px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: flex; align-items: center; gap: 8px; border: none; }
+.btn-hero-primary { background: var(--accent); color: #fff; }
+.btn-hero-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-hero-secondary { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+.btn-hero-secondary:hover { background: var(--bg2); color: var(--text); }
 
-/* MAIN */
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-.topbar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-.topbar-title { font-size: 14px; font-weight: 500; color: var(--text); }
-.topbar-sep { color: var(--border2); }
-.date-range { font-size: 12px; color: var(--text3); background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; }
-.topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-.btn-sm { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: flex; align-items: center; gap: 5px; }
-.btn-sm:hover { background: var(--bg3); color: var(--text); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn-primary:hover { background: var(--accent2); }
+/* DASHBOARD PREVIEW */
+.preview-wrap { max-width: 1100px; margin: 0 auto 100px; padding: 0 32px; }
+.preview-label { text-align: center; font-size: 12px; color: var(--text3); margin-bottom: 16px; letter-spacing: 0.05em; text-transform: uppercase; }
+.preview-frame { background: var(--bg2); border: 1px solid var(--border2); border-radius: 14px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.5); }
+.preview-bar { background: var(--bg3); padding: 10px 16px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+.preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+.preview-url { margin-left: 12px; background: var(--bg2); border-radius: 5px; padding: 4px 12px; font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.preview-content { padding: 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.preview-kpi { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.preview-kpi-label { font-size: 10px; color: var(--text3); margin-bottom: 4px; }
+.preview-kpi-val { font-size: 18px; font-weight: 500; font-family: 'DM Mono', monospace; }
+.preview-kpi-delta { font-size: 10px; margin-top: 2px; }
+.preview-charts { padding: 0 20px 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.preview-chart-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; height: 140px; display: flex; flex-direction: column; }
+.preview-chart-title { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
+.preview-chart-body { flex: 1; display: flex; align-items: flex-end; gap: 3px; }
+.preview-bar-item { flex: 1; border-radius: 3px 3px 0 0; opacity: 0.8; }
+.preview-line { flex: 1; position: relative; overflow: hidden; }
+.preview-line svg { width: 100%; height: 100%; }
+.preview-chat { margin: 0 20px 20px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.preview-chat-msg { font-size: 12px; color: var(--text2); margin-bottom: 8px; line-height: 1.5; }
+.preview-chat-q { display: inline-block; background: var(--accent); color: #fff; padding: 6px 10px; border-radius: 7px; font-size: 11px; margin-bottom: 6px; }
+.preview-chat-a { background: var(--bg2); border: 1px solid var(--border); border-radius: 7px; padding: 8px 10px; font-size: 11px; color: var(--text2); line-height: 1.5; }
 
-/* DATA STATUS BANNER */
-.data-status-bar { margin: 10px 16px 0; border-radius: 8px; padding: 8px 12px; display: flex; align-items: flex-start; gap: 8px; font-size: 12px; flex-shrink: 0; }
-.data-status-bar.demo-mode { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.22); color: var(--amber); }
-.data-status-bar.mixed-mode { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.22); color: #93c5fd; }
-.data-status-bar.live-mode { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.22); color: var(--green); }
-.data-status-bar i { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+/* HOW IT WORKS */
+.section { max-width: 900px; margin: 0 auto 100px; padding: 0 48px; }
+.section-label { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+.section-h2 { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 14px; line-height: 1.2; }
+.section-sub { font-size: 16px; color: var(--text2); line-height: 1.65; max-width: 560px; margin-bottom: 48px; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.step { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+.step-num { width: 28px; height: 28px; border-radius: 7px; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 14px; font-family: 'DM Mono', monospace; }
+.step-title { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.step-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
 
-.content { flex: 1; display: flex; overflow: hidden; min-height: 0; }
-.left-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+/* DATASETS */
+.datasets-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 48px; }
+.ds-tile { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 14px; }
+.ds-tile-icon { font-size: 20px; color: var(--accent); margin-bottom: 8px; }
+.ds-tile-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.ds-tile-desc { font-size: 11px; color: var(--text3); line-height: 1.5; }
 
-/* KPI ROW */
-.kpi-row { display: flex; gap: 10px; padding: 10px 16px 0; flex-shrink: 0; }
-.kpi-card { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; position: relative; transition: border-color 0.3s; }
-.kpi-card.live { border-color: rgba(16,185,129,0.3); }
-.kpi-card.demo-card { border-color: rgba(245,158,11,0.2); }
-.kpi-source { position: absolute; top: 8px; right: 10px; font-size: 9px; padding: 1px 5px; border-radius: 3px; }
-.kpi-source.live-src { background: rgba(16,185,129,0.15); color: var(--green); }
-.kpi-source.demo-src { background: rgba(245,158,11,0.15); color: var(--amber); }
-.kpi-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; white-space: nowrap; }
-.kpi-value { font-size: 20px; font-weight: 500; color: var(--text); letter-spacing: -0.02em; font-family: 'DM Mono', monospace; }
-.kpi-delta { font-size: 11px; margin-top: 3px; white-space: nowrap; }
-.delta-up { color: var(--green); }
-.delta-down { color: var(--red); }
-.delta-warn { color: var(--amber); }
+/* SAMPLE QS */
+.questions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.question-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; align-items: flex-start; gap: 10px; }
+.question-card i { color: var(--accent); font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.question-text { font-size: 13px; color: var(--text2); line-height: 1.55; }
+.question-text strong { color: var(--text); font-weight: 500; }
 
-/* CHARTS */
-.chart-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 10px 16px 14px; gap: 10px; min-height: 0; }
-.chart-row { display: flex; gap: 10px; flex: 1; min-height: 0; }
-.chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; min-width: 0; }
-.chart-card.wide { flex: 2; }
-.chart-card.narrow { flex: 1; }
-.chart-title { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-.chart-wrap { flex: 1; position: relative; min-height: 0; }
-.chart-wrap canvas { position: absolute; top: 0; left: 0; }
-.chart-legend { display: flex; gap: 12px; margin-bottom: 6px; flex-shrink: 0; flex-wrap: wrap; }
-.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
-.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+/* VS SECTION */
+.vs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.vs-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.vs-card.featured { border-color: rgba(59,130,246,0.4); background: rgba(59,130,246,0.05); }
+.vs-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.vs-card-name { font-size: 14px; font-weight: 500; }
+.vs-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(59,130,246,0.15); color: var(--accent); margin-left: auto; }
+.vs-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 12px; color: var(--text2); border-bottom: 1px solid var(--border); }
+.vs-row:last-child { border-bottom: none; }
+.vs-row i { font-size: 14px; flex-shrink: 0; }
+.vs-row .check { color: var(--green); }
+.vs-row .cross { color: var(--text3); }
+.vs-row .partial { color: var(--amber); }
 
-/* CHAT PANEL */
-.chat-panel { width: 340px; flex-shrink: 0; background: var(--bg2); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
-.chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.chat-header i { color: var(--accent); font-size: 16px; }
-.chat-header-text { font-size: 13px; font-weight: 500; }
-.chat-header-badge { margin-left: auto; background: rgba(16,185,129,0.15); color: var(--green); font-size: 10px; padding: 2px 8px; border-radius: 10px; }
-.suggested-qs { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
-.sq-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; }
-.sq-btn { padding: 7px 10px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-size: 12px; cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: all 0.15s; line-height: 1.35; }
-.sq-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.07); }
-.messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-.messages::-webkit-scrollbar { width: 4px; }
-.messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-.msg { max-width: 100%; }
-.msg-user { align-self: flex-end; }
-.msg-ai { align-self: flex-start; width: 100%; }
-.msg-bubble { padding: 9px 12px; border-radius: 10px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
-.msg-user .msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 3px; }
-.msg-ai .msg-bubble { background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 3px; }
-.msg-label { font-size: 10px; color: var(--text3); margin-bottom: 3px; padding: 0 2px; }
-.msg-user .msg-label { text-align: right; }
-.typing { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
-.typing-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); animation: blink 1.2s infinite; }
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes blink { 0%,80%,100%{opacity:0.3}40%{opacity:1} }
-.chat-input-row { padding: 10px 12px; border-top: 1px solid var(--border); display: flex; gap: 7px; flex-shrink: 0; }
-.chat-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; height: 40px; }
-.chat-input:focus { border-color: var(--accent); }
-.chat-input::placeholder { color: var(--text3); }
-.send-btn { width: 40px; height: 40px; background: var(--accent); border: none; border-radius: 8px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; flex-shrink: 0; }
-.send-btn:hover { background: var(--accent2); }
-.send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.send-btn i { font-size: 16px; }
+/* PRIVACY */
+.privacy-bar { max-width: 900px; margin: 0 auto 60px; padding: 0 48px; }
+.privacy-inner { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text2); }
+.privacy-inner i { color: var(--green); font-size: 16px; flex-shrink: 0; }
 
-/* UPLOAD MODAL */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
-.modal-overlay.open { display: flex; }
-.modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 14px; padding: 24px; width: 480px; max-width: 95vw; }
-.modal-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-.modal-sub { font-size: 13px; color: var(--text3); margin-bottom: 20px; }
-.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-.upload-tile { border: 1px dashed var(--border2); border-radius: 10px; padding: 16px 12px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
-.upload-tile:hover { border-color: var(--accent); background: rgba(59,130,246,0.05); }
-.upload-tile.has-file { border-color: var(--green); border-style: solid; background: rgba(16,185,129,0.05); }
-.upload-tile i { display: block; font-size: 24px; color: var(--text3); margin-bottom: 6px; }
-.upload-tile.has-file i { color: var(--green); }
-.upload-tile-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
-.upload-tile-sub { font-size: 11px; color: var(--text3); }
-.upload-tile.has-file .upload-tile-sub { color: var(--green); }
-.upload-tile input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.modal-cols-hint { font-size: 11px; color: var(--text3); margin-bottom: 16px; line-height: 1.6; background: var(--bg3); padding: 10px 12px; border-radius: 7px; }
-.modal-cols-hint strong { color: var(--text2); }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+/* CTA FOOTER */
+.cta-footer { max-width: 900px; margin: 0 auto 80px; padding: 0 48px; text-align: center; }
+.cta-footer-inner { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; padding: 56px 48px; }
+.cta-footer h2 { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 12px; }
+.cta-footer p { font-size: 16px; color: var(--text2); margin-bottom: 32px; }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; }
+.footer-left { font-size: 12px; color: var(--text3); }
+.footer-right { font-size: 12px; color: var(--text3); }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hero-badge, .hero-h1, .hero-sub, .hero-actions { animation: fadeUp 0.6s ease both; }
+.hero-badge { animation-delay: 0.05s; }
+.hero-h1 { animation-delay: 0.12s; }
+.hero-sub { animation-delay: 0.2s; }
+.hero-actions { animation-delay: 0.28s; }
 </style>
 </head>
 <body>
 
-<div class="app">
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-row">
-        <div class="logo-icon"><i class="ti ti-chart-dots-3"></i></div>
-        <div class="logo-text">
-          <div class="logo-name">OpticAI</div>
-          <div class="logo-tagline">Restaurant Intelligence</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="sidebar-label">Locations</div>
-      <div class="location-pill active"><div class="location-dot"></div> All Locations</div>
-      <div class="location-pill"><div class="location-dot"></div> Downtown</div>
-      <div class="location-pill"><div class="location-dot amber"></div> Midtown</div>
-      <div class="location-pill"><div class="location-dot purple"></div> Westside</div>
-    </div>
-
-    <div class="dataset-list">
-      <div class="sidebar-label">Datasets</div>
-      <div class="ds-item" id="ds-sales" onclick="openUploadModal()">
-        <div class="ds-dot demo" id="dot-sales"></div>
-        <div class="ds-name">Sales</div>
-        <div class="ds-badge demo-badge" id="badge-sales">Demo</div>
-        <span class="ds-upload-btn">Upload ↑</span>
-      </div>
-      <div class="ds-item" id="ds-labor" onclick="openUploadModal()">
-        <div class="ds-dot demo" id="dot-labor"></div>
-        <div class="ds-name">Labor</div>
-        <div class="ds-badge demo-badge" id="badge-labor">Demo</div>
-        <span class="ds-upload-btn">Upload ↑</span>
-      </div>
-      <div class="ds-item" id="ds-foodcost" onclick="openUploadModal()">
-        <div class="ds-dot demo" id="dot-foodcost"></div>
-        <div class="ds-name">Food Cost</div>
-        <div class="ds-badge demo-badge" id="badge-foodcost">Demo</div>
-        <span class="ds-upload-btn">Upload ↑</span>
-      </div>
-      <div class="ds-item" id="ds-pmix" onclick="openUploadModal()">
-        <div class="ds-dot demo" id="dot-pmix"></div>
-        <div class="ds-name">PMIX</div>
-        <div class="ds-badge demo-badge" id="badge-pmix">Demo</div>
-        <span class="ds-upload-btn">Upload ↑</span>
-      </div>
-      <div class="ds-item" id="ds-inventory" onclick="openUploadModal()">
-        <div class="ds-dot empty" id="dot-inventory"></div>
-        <div class="ds-name">Inventory</div>
-        <div class="ds-badge demo-badge" id="badge-inventory">Demo</div>
-        <span class="ds-upload-btn">Upload ↑</span>
-      </div>
-    </div>
-
-    <div style="padding: 12px 10px; margin-top: auto; border-top: 1px solid var(--border);">
-      <button class="btn-sm btn-primary" style="width:100%; justify-content:center;" onclick="openUploadModal()">
-        <i class="ti ti-upload"></i> Upload Data
-      </button>
-    </div>
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon"><i class="ti ti-chart-dots-3"></i></div>
+    <span class="nav-logo-name">OpticAI</span>
   </div>
+  <div class="nav-right">
+    <span class="nav-link" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</span>
+    <span class="nav-link" onclick="document.getElementById('compare').scrollIntoView({behavior:'smooth'})">vs. alternatives</span>
+    <button class="nav-cta" onclick="window.location.href='app.html'">Open dashboard <i class="ti ti-arrow-right" style="font-size:13px"></i></button>
+  </div>
+</nav>
 
-  <!-- MAIN -->
-  <div class="main">
-    <div class="topbar">
-      <span class="topbar-title">Operations Dashboard</span>
-      <span class="topbar-sep">·</span>
-      <span class="date-range" id="dateRangeLabel">Feb 3 – Apr 27, 2025 · 12 weeks · Demo Data</span>
-      <div class="topbar-right">
-        <button class="btn-sm btn-primary" onclick="openUploadModal()"><i class="ti ti-upload"></i> Upload CSV</button>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge"><i class="ti ti-sparkles"></i> Multi-location · Multi-dataset · Actually works</div>
+  <h1 class="hero-h1">Restaurant analytics<br><em>that answers real questions</em></h1>
+  <p class="hero-sub">Upload your sales, labor, food cost, PMIX, and inventory data. Ask anything. Get instant, specific answers — across all your locations at once.</p>
+  <div class="hero-actions">
+    <button class="btn-hero btn-hero-primary" onclick="window.location.href='app.html'">
+      <i class="ti ti-player-play"></i> Try the live demo
+    </button>
+    <button class="btn-hero btn-hero-secondary" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">
+      <i class="ti ti-info-circle"></i> How it works
+    </button>
+  </div>
+</div>
+
+<!-- DASHBOARD PREVIEW -->
+<div class="preview-wrap">
+  <div class="preview-label">Live demo — real AI analysis</div>
+  <div class="preview-frame">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ef4444"></div>
+      <div class="preview-dot" style="background:#f59e0b"></div>
+      <div class="preview-dot" style="background:#10b981"></div>
+      <div class="preview-url">opticai.vercel.app/app</div>
+    </div>
+    <div class="preview-content">
+      <div class="preview-kpi"><div class="preview-kpi-label">Total Sales</div><div class="preview-kpi-val" style="color:#e8eaf0">$1.24M</div><div class="preview-kpi-delta" style="color:#10b981">↑ 4.2%</div></div>
+      <div class="preview-kpi"><div class="preview-kpi-label">Labor %</div><div class="preview-kpi-val" style="color:#f59e0b">31.8%</div><div class="preview-kpi-delta" style="color:#f59e0b">↑ above target</div></div>
+      <div class="preview-kpi"><div class="preview-kpi-label">Food Cost %</div><div class="preview-kpi-val" style="color:#e8eaf0">28.4%</div><div class="preview-kpi-delta" style="color:#10b981">↓ 0.6pts</div></div>
+      <div class="preview-kpi"><div class="preview-kpi-label">Prime Cost</div><div class="preview-kpi-val" style="color:#f59e0b">60.2%</div><div class="preview-kpi-delta" style="color:#f59e0b">Watch closely</div></div>
+      <div class="preview-kpi"><div class="preview-kpi-label">Avg Check</div><div class="preview-kpi-val" style="color:#e8eaf0">$18.40</div><div class="preview-kpi-delta" style="color:#10b981">↑ $0.80</div></div>
+    </div>
+    <div class="preview-charts">
+      <div class="preview-chart-card">
+        <div class="preview-chart-title">Weekly sales by location</div>
+        <div class="preview-line">
+          <svg viewBox="0 0 300 80" preserveAspectRatio="none">
+            <polyline points="0,60 25,55 50,57 75,45 100,40 125,48 150,35 175,42 200,38 225,50 250,30 275,25" fill="none" stroke="#3b82f6" stroke-width="2"/>
+            <polyline points="0,45 25,50 50,43 75,55 100,62 125,50 150,58 175,52 200,56 225,48 250,55 275,58" fill="none" stroke="#f59e0b" stroke-width="2"/>
+            <polyline points="0,70 25,65 50,67 75,58 100,62 125,55 150,64 175,54 200,60 225,62 250,50 275,46" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+      <div class="preview-chart-card">
+        <div class="preview-chart-title">PMIX by category</div>
+        <div class="preview-chart-body" style="align-items:center;justify-content:center">
+          <svg viewBox="0 0 80 80" width="80" height="80">
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#3b82f6" stroke-width="12" stroke-dasharray="71 117"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="41 147" stroke-dashoffset="-71"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="34 154" stroke-dashoffset="-112"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#8b5cf6" stroke-width="12" stroke-dasharray="19 169" stroke-dashoffset="-146"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#ef4444" stroke-width="12" stroke-dasharray="22 166" stroke-dashoffset="-165"/>
+            <circle cx="40" cy="40" r="22" fill="#13161b"/>
+          </svg>
+        </div>
       </div>
     </div>
-
-    <!-- DATA STATUS BANNER -->
-    <div class="data-status-bar demo-mode" id="statusBar">
-      <i class="ti ti-info-circle"></i>
-      <span id="statusText">Running on <strong>demo data</strong>. Click any dataset in the sidebar or use the Upload button to analyze your real restaurant data. Uploaded datasets will update the dashboard and AI analysis automatically.</span>
-    </div>
-
-    <div class="content">
-      <div class="left-panel">
-        <!-- KPI ROW -->
-        <div class="kpi-row">
-          <div class="kpi-card demo-card" id="kpi-sales">
-            <span class="kpi-source demo-src" id="src-sales">Demo</span>
-            <div class="kpi-label">Total Sales</div>
-            <div class="kpi-value" id="val-sales">$1.24M</div>
-            <div class="kpi-delta delta-up" id="delta-sales">↑ 4.2% vs prior period</div>
-          </div>
-          <div class="kpi-card demo-card" id="kpi-labor">
-            <span class="kpi-source demo-src" id="src-labor">Demo</span>
-            <div class="kpi-label">Labor %</div>
-            <div class="kpi-value" id="val-labor">31.8%</div>
-            <div class="kpi-delta delta-warn" id="delta-labor">↑ 2.1pts — above target</div>
-          </div>
-          <div class="kpi-card demo-card" id="kpi-foodcost">
-            <span class="kpi-source demo-src" id="src-foodcost">Demo</span>
-            <div class="kpi-label">Food Cost %</div>
-            <div class="kpi-value" id="val-foodcost">28.4%</div>
-            <div class="kpi-delta delta-up" id="delta-foodcost">↓ 0.6pts vs prior</div>
-          </div>
-          <div class="kpi-card demo-card" id="kpi-prime">
-            <span class="kpi-source demo-src" id="src-prime">Demo</span>
-            <div class="kpi-label">Prime Cost</div>
-            <div class="kpi-value" id="val-prime">60.2%</div>
-            <div class="kpi-delta delta-warn" id="delta-prime">↑ 1.5pts — watch closely</div>
-          </div>
-          <div class="kpi-card demo-card" id="kpi-check">
-            <span class="kpi-source demo-src" id="src-check">Demo</span>
-            <div class="kpi-label">Avg Check</div>
-            <div class="kpi-value" id="val-check">$18.40</div>
-            <div class="kpi-delta delta-up" id="delta-check">↑ $0.80 vs prior</div>
-          </div>
-        </div>
-
-        <!-- CHARTS -->
-        <div class="chart-section">
-          <div class="chart-row">
-            <div class="chart-card wide">
-              <div class="chart-title">
-                Weekly sales by location
-                <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace" id="salesChartSrc">demo data</span>
-              </div>
-              <div class="chart-legend">
-                <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> <span id="leg1">Downtown</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> <span id="leg2">Midtown</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> <span id="leg3">Westside</span></div>
-              </div>
-              <div class="chart-wrap"><canvas id="salesChart"></canvas></div>
-            </div>
-            <div class="chart-card narrow">
-              <div class="chart-title">PMIX — margin by category <span style="font-size:10px;color:var(--text3)" id="pmixSrc">demo</span></div>
-              <div class="chart-wrap"><canvas id="pmixChart"></canvas></div>
-            </div>
-          </div>
-          <div class="chart-row">
-            <div class="chart-card" style="flex:1">
-              <div class="chart-title">Labor % by location <span style="font-size:10px;color:var(--text3)" id="laborSrc">demo · 30% target</span></div>
-              <div class="chart-wrap"><canvas id="laborChart"></canvas></div>
-            </div>
-            <div class="chart-card" style="flex:1">
-              <div class="chart-title">Avg daily sales by day of week <span style="font-size:10px;color:var(--text3)" id="dowSrc">demo</span></div>
-              <div class="chart-wrap"><canvas id="dowChart"></canvas></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CHAT PANEL -->
-      <div class="chat-panel">
-        <div class="chat-header">
-          <i class="ti ti-message-bolt"></i>
-          <span class="chat-header-text">AI Analyst</span>
-          <span class="chat-header-badge">● Live</span>
-        </div>
-        <div class="suggested-qs">
-          <div class="sq-label">Try asking</div>
-          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Why was labor high at Midtown last week?</button>
-          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Which menu items are hurting margin?</button>
-          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Why did sales dip on Tuesdays?</button>
-          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Give me a weekly ops briefing</button>
-          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Compare all 3 locations</button>
-        </div>
-        <div class="messages" id="messages">
-          <div class="msg msg-ai">
-            <div class="msg-label">OpticAI</div>
-            <div class="msg-bubble">Hey! I've analyzed your last 12 weeks across all 3 locations. Labor is running hot at Midtown and Tuesday sales are consistently 18% below average. You can also upload your own CSV data using the button above — I'll analyze your real numbers. Ask me anything!</div>
-          </div>
-        </div>
-        <div class="chat-input-row">
-          <textarea class="chat-input" id="chatInput" placeholder="Ask about your operations..." rows="1" onkeydown="handleKey(event)"></textarea>
-          <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="ti ti-send"></i></button>
-        </div>
-      </div>
+    <div class="preview-chat">
+      <div class="preview-chat-q">Why was labor high at Midtown last week?</div>
+      <div class="preview-chat-a">Midtown's labor hit 38.2% last week — 8pts above target. The spike traces to Tuesday and Wednesday specifically, where a new kitchen manager (started W6) is overscheduling BOH staff without adjusting for Midtown's structurally lower midweek volume. Recommend a scheduling audit: cut 2 BOH shifts on Tue-Wed and cross-train for flexibility. This alone could recover ~1.5pts of prime cost.</div>
     </div>
   </div>
 </div>
 
-<!-- UPLOAD MODAL -->
-<div class="modal-overlay" id="uploadModal">
-  <div class="modal">
-    <div class="modal-title">Upload your restaurant data</div>
-    <div class="modal-sub">Upload any combination of datasets. Uploaded data updates the dashboard and AI analysis instantly. Demo data stays for anything not yet uploaded.</div>
-
-    <div class="modal-cols-hint">
-      <strong>Accepted columns (flexible):</strong><br>
-      Sales: <code>date, location, sales, revenue, net_sales, covers, checks</code><br>
-      Labor: <code>date, location, labor_cost, labor_pct, hours, wages</code><br>
-      Food Cost: <code>date, location, food_cost, food_cost_pct, cogs</code><br>
-      PMIX: <code>item, category, quantity, revenue, food_cost_pct</code><br>
-      Inventory: <code>item, category, on_hand, par, variance, cost</code>
+<!-- HOW IT WORKS -->
+<div class="section" id="how">
+  <div class="section-label">How it works</div>
+  <h2 class="section-h2">Three steps to real answers</h2>
+  <p class="section-sub">No dashboards to configure. No queries to write. Just upload your data and ask.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Upload your exports</div>
+      <div class="step-desc">Drag in CSVs from your POS, scheduling system, or accounting software. OpticAI detects columns automatically — no template required.</div>
     </div>
-
-    <div class="upload-grid">
-      <div class="upload-tile" id="tile-sales">
-        <i class="ti ti-chart-line"></i>
-        <div class="upload-tile-name">Sales</div>
-        <div class="upload-tile-sub" id="tile-sales-sub">Click to upload CSV</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'sales')">
-      </div>
-      <div class="upload-tile" id="tile-labor">
-        <i class="ti ti-users"></i>
-        <div class="upload-tile-name">Labor</div>
-        <div class="upload-tile-sub" id="tile-labor-sub">Click to upload CSV</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'labor')">
-      </div>
-      <div class="upload-tile" id="tile-foodcost">
-        <i class="ti ti-chef-hat"></i>
-        <div class="upload-tile-name">Food Cost</div>
-        <div class="upload-tile-sub" id="tile-foodcost-sub">Click to upload CSV</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'foodcost')">
-      </div>
-      <div class="upload-tile" id="tile-pmix">
-        <i class="ti ti-receipt"></i>
-        <div class="upload-tile-name">PMIX</div>
-        <div class="upload-tile-sub" id="tile-pmix-sub">Click to upload CSV</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'pmix')">
-      </div>
-      <div class="upload-tile" id="tile-inventory">
-        <i class="ti ti-building-warehouse"></i>
-        <div class="upload-tile-name">Inventory</div>
-        <div class="upload-tile-sub" id="tile-inventory-sub">Click to upload CSV</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'inventory')">
-      </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Ask in plain English</div>
+      <div class="step-desc">Ask any operational question. OpticAI understands restaurant context — it knows what prime cost means, what a healthy labor % looks like, and how to read PMIX data.</div>
     </div>
-
-    <div class="modal-actions">
-      <button class="btn-sm" onclick="closeUploadModal()">Close</button>
-      <button class="btn-sm btn-primary" onclick="closeUploadModal()"><i class="ti ti-check"></i> Done</button>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Get specific answers</div>
+      <div class="step-desc">Not generic summaries — specific numbers, root causes, and recommendations tied to your actual data, across all your locations at once.</div>
     </div>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script>
-// ---- STATE ----
-const uploadedData = { sales: null, labor: null, foodcost: null, pmix: null, inventory: null };
+<!-- DATASETS -->
+<div class="section">
+  <div class="section-label">Supported datasets</div>
+  <h2 class="section-h2">All your operational data, connected</h2>
+  <p class="section-sub">Upload any combination. Dashboard updates per dataset — demo data fills in what you haven't uploaded yet.</p>
+  <div class="datasets-grid">
+    <div class="ds-tile"><div class="ds-tile-icon"><i class="ti ti-chart-line"></i></div><div class="ds-tile-name">Sales</div><div class="ds-tile-desc">Revenue, covers, avg check, day-of-week trends</div></div>
+    <div class="ds-tile"><div class="ds-tile-icon"><i class="ti ti-users"></i></div><div class="ds-tile-name">Labor</div><div class="ds-tile-desc">Labor %, hours, wages, scheduling by location</div></div>
+    <div class="ds-tile"><div class="ds-tile-icon"><i class="ti ti-chef-hat"></i></div><div class="ds-tile-name">Food Cost</div><div class="ds-tile-desc">COGS, food cost %, waste, vendor performance</div></div>
+    <div class="ds-tile"><div class="ds-tile-icon"><i class="ti ti-receipt"></i></div><div class="ds-tile-name">PMIX</div><div class="ds-tile-desc">Item mix, margin by category, attach rates</div></div>
+    <div class="ds-tile"><div class="ds-tile-icon"><i class="ti ti-building-warehouse"></i></div><div class="ds-tile-name">Inventory</div><div class="ds-tile-desc">On-hand, par levels, variance, cost</div></div>
+  </div>
+</div>
 
-// ---- DEMO DATA ----
-const DEMO = {
-  weeks: ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'],
-  salesDowntown: [42,45,43,48,50,47,52,49,51,46,53,55],
-  salesMidtown:  [38,36,39,35,33,37,34,36,35,38,36,34],
-  salesWestside: [28,30,29,32,31,33,30,34,32,31,35,36],
-  laborDowntown: [29,30,28,29,30,28,29,31,30,29,30,29],
-  laborMidtown:  [30,31,32,33,36,34,35,38,37,38,37,38],
-  laborWestside: [28,27,29,28,30,29,28,30,29,30,29,31],
-  dow: [8200,6700,8100,9100,12400,15200,11800],
-  pmix: { labels: ['Entrees 38%','Beverages 22%','Apps 18%','Desserts 10%','Alcohol 12%'], data: [38,22,18,10,12] }
-};
+<!-- SAMPLE QUESTIONS -->
+<div class="section">
+  <div class="section-label">What you can ask</div>
+  <h2 class="section-h2">Questions your team actually has</h2>
+  <p class="section-sub">OpticAI understands the relationships between your datasets — not just individual metrics.</p>
+  <div class="questions-grid">
+    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Why was labor high at Midtown last week?</strong> — Get root cause analysis, not just a number.</div></div>
+    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Which menu items are hurting margin?</strong> — Cross-reference PMIX with food cost to find the real culprits.</div></div>
+    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Why did sales dip on Tuesdays?</strong> — Structural vs. seasonal analysis across all locations.</div></div>
+    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Give me a weekly ops briefing.</strong> — Full executive summary: wins, risks, and recommendations.</div></div>
+    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Compare performance across all 3 locations.</strong> — Side-by-side analysis of every key metric.</div></div>
+    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Where's my biggest opportunity to reduce prime cost?</strong> — Combined labor + food cost analysis with dollar impact.</div></div>
+  </div>
+</div>
 
-// ---- CHARTS ----
-let salesChart, pmixChart, laborChart, dowChart;
+<!-- VS COMPARISON -->
+<div class="section" id="compare">
+  <div class="section-label">How we compare</div>
+  <h2 class="section-h2">Built for what existing tools get wrong</h2>
+  <p class="section-sub">Current restaurant analytics tools force you to choose between coverage and intelligence. OpticAI doesn't.</p>
+  <div class="vs-grid">
+    <div class="vs-card">
+      <div class="vs-card-header"><div class="vs-card-name" style="color:var(--text2)">Toast Analytics</div></div>
+      <div class="vs-row"><i class="ti ti-check check"></i> Strong POS analysis</div>
+      <div class="vs-row"><i class="ti ti-x cross"></i> Single location only</div>
+      <div class="vs-row"><i class="ti ti-x cross"></i> No labor or food cost</div>
+      <div class="vs-row"><i class="ti ti-x cross"></i> No natural language Q&A</div>
+      <div class="vs-row"><i class="ti ti-x cross"></i> No cross-dataset insight</div>
+    </div>
+    <div class="vs-card featured">
+      <div class="vs-card-header"><div class="vs-card-name">OpticAI</div><span class="vs-badge">This tool</span></div>
+      <div class="vs-row"><i class="ti ti-check check"></i> Multi-location analysis</div>
+      <div class="vs-row"><i class="ti ti-check check"></i> All 5 datasets connected</div>
+      <div class="vs-row"><i class="ti ti-check check"></i> Natural language Q&A</div>
+      <div class="vs-row"><i class="ti ti-check check"></i> Cross-dataset root cause</div>
+      <div class="vs-row"><i class="ti ti-check check"></i> Works with your exports</div>
+    </div>
+    <div class="vs-card">
+      <div class="vs-card-header"><div class="vs-card-name" style="color:var(--text2)">R365 / BI Tools</div></div>
+      <div class="vs-row"><i class="ti ti-check check"></i> Multi-dataset support</div>
+      <div class="vs-row"><i class="ti ti-minus partial"></i> Multi-location (limited)</div>
+      <div class="vs-row"><i class="ti ti-minus partial"></i> AI chat (unreliable)</div>
+      <div class="vs-row"><i class="ti ti-x cross"></i> Breaks outside preset queries</div>
+      <div class="vs-row"><i class="ti ti-x cross"></i> Heavy setup required</div>
+    </div>
+  </div>
+</div>
 
-function initCharts() {
-  salesChart = new Chart(document.getElementById('salesChart'), {
-    type: 'line',
-    data: { labels: DEMO.weeks, datasets: [
-      { label: 'Downtown', data: DEMO.salesDowntown, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 },
-      { label: 'Midtown',  data: DEMO.salesMidtown,  borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.06)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 },
-      { label: 'Westside', data: DEMO.salesWestside, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.06)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 },
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-      scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555b6a', font: { size: 11 } } },
-                y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555b6a', font: { size: 11 }, callback: v => '$' + v + 'K' } } } }
-  });
+<!-- PRIVACY -->
+<div class="privacy-bar">
+  <div class="privacy-inner">
+    <i class="ti ti-shield-check"></i>
+    <span><strong style="color:var(--text)">Your data never leaves your browser.</strong> Uploaded CSVs are processed locally in your session only. Nothing is stored on our servers, shared with third parties, or retained after you close the tab.</span>
+  </div>
+</div>
 
-  pmixChart = new Chart(document.getElementById('pmixChart'), {
-    type: 'doughnut',
-    data: { labels: DEMO.pmix.labels, datasets: [{ data: DEMO.pmix.data, backgroundColor: ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444'], borderWidth: 0, hoverOffset: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '62%',
-      plugins: { legend: { position: 'bottom', labels: { color: '#8b909e', font: { size: 11 }, boxWidth: 10, padding: 8 } } } }
-  });
+<!-- CTA FOOTER -->
+<div class="cta-footer">
+  <div class="cta-footer-inner">
+    <h2>See it with your own data</h2>
+    <p>Upload a real export from your POS or scheduling system and ask the question you've been wanting answered.</p>
+    <button class="btn-hero btn-hero-primary" onclick="window.location.href='app.html'" style="margin:0 auto">
+      <i class="ti ti-player-play"></i> Open the live demo
+    </button>
+  </div>
+</div>
 
-  laborChart = new Chart(document.getElementById('laborChart'), {
-    type: 'line',
-    data: { labels: DEMO.weeks, datasets: [
-      { label: 'Downtown', data: DEMO.laborDowntown, borderColor: '#3b82f6', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
-      { label: 'Midtown',  data: DEMO.laborMidtown,  borderColor: '#f59e0b', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
-      { label: 'Westside', data: DEMO.laborWestside, borderColor: '#8b5cf6', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-      scales: { x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 } } },
-                y: { min: 25, max: 42, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 }, callback: v => v + '%' } } } }
-  });
+<footer>
+  <div class="footer-left">© 2025 OpticAI — Restaurant Intelligence</div>
+  <div class="footer-right">Built with Claude AI</div>
+</footer>
 
-  dowChart = new Chart(document.getElementById('dowChart'), {
-    type: 'bar',
-    data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-      datasets: [{ data: DEMO.dow, backgroundColor: ['#3b82f6','#ef4444','#3b82f6','#3b82f6','#10b981','#10b981','#3b82f6'], borderRadius: 5, borderWidth: 0 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-      scales: { x: { grid: { display: false }, ticks: { color: '#555b6a', font: { size: 11 } } },
-                y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 }, callback: v => '$' + (v/1000).toFixed(0) + 'K' } } } }
-  });
-}
-
-// ---- CSV PARSING ----
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
-  return lines.slice(1).filter(l => l.trim()).map(line => {
-    const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = vals[i] || '');
-    return obj;
-  });
-}
-
-function summarizeData(type, rows) {
-  if (!rows || rows.length === 0) return null;
-  const keys = Object.keys(rows[0]);
-
-  if (type === 'sales') {
-    const salesCol = keys.find(k => ['sales','revenue','net_sales','total_sales','amount'].includes(k));
-    const locationCol = keys.find(k => ['location','store','site','restaurant'].includes(k));
-    const dateCol = keys.find(k => ['date','week','period'].includes(k));
-    const checksCol = keys.find(k => ['checks','covers','transactions','count'].includes(k));
-
-    const totalSales = rows.reduce((s, r) => s + (parseFloat(r[salesCol]) || 0), 0);
-    const locations = locationCol ? [...new Set(rows.map(r => r[locationCol]).filter(Boolean))] : ['All locations'];
-    const avgCheck = checksCol ? totalSales / rows.reduce((s,r) => s + (parseFloat(r[checksCol])||0), 0) : null;
-
-    const locSummary = locations.map(loc => {
-      const locRows = locationCol ? rows.filter(r => r[locationCol] === loc) : rows;
-      const locTotal = locRows.reduce((s,r) => s+(parseFloat(r[salesCol])||0),0);
-      return `${loc}: $${(locTotal/1000).toFixed(1)}K total`;
-    }).join(', ');
-
-    return {
-      summary: `Total sales: $${(totalSales/1000).toFixed(1)}K across ${rows.length} periods. Locations: ${locSummary}.${avgCheck ? ` Avg check: $${avgCheck.toFixed(2)}.` : ''}`,
-      kpis: { 
-        sales: `$${totalSales >= 1000000 ? (totalSales/1000000).toFixed(2)+'M' : (totalSales/1000).toFixed(0)+'K'}`,
-        check: avgCheck ? `$${avgCheck.toFixed(2)}` : null
-      },
-      chartData: buildSalesChart(rows, salesCol, locationCol, dateCol),
-      locations
-    };
-  }
-
-  if (type === 'labor') {
-    const laborPctCol = keys.find(k => ['labor_pct','labor_percent','labor_%','labor_percentage'].includes(k));
-    const laborCostCol = keys.find(k => ['labor_cost','labor','wages','total_labor'].includes(k));
-    const locationCol = keys.find(k => ['location','store','site'].includes(k));
-    const dateCol = keys.find(k => ['date','week','period'].includes(k));
-
-    let avgLabor = null;
-    if (laborPctCol) {
-      const vals = rows.map(r => parseFloat(r[laborPctCol])).filter(v => !isNaN(v));
-      avgLabor = vals.reduce((a,b) => a+b, 0) / vals.length;
-    }
-
-    return {
-      summary: `Labor data: ${rows.length} records.${avgLabor ? ` Avg labor %: ${avgLabor.toFixed(1)}%.` : ''} Columns detected: ${keys.join(', ')}.`,
-      kpis: { labor: avgLabor ? `${avgLabor.toFixed(1)}%` : null },
-      chartData: buildLaborChart(rows, laborPctCol, locationCol, dateCol)
-    };
-  }
-
-  if (type === 'foodcost') {
-    const fcPctCol = keys.find(k => ['food_cost_pct','food_cost_percent','fc_pct','food_%','cogs_pct'].includes(k));
-    const fcCostCol = keys.find(k => ['food_cost','cogs','food_costs'].includes(k));
-    let avgFC = null;
-    if (fcPctCol) {
-      const vals = rows.map(r => parseFloat(r[fcPctCol])).filter(v => !isNaN(v));
-      avgFC = vals.reduce((a,b) => a+b, 0) / vals.length;
-    }
-    return {
-      summary: `Food cost data: ${rows.length} records.${avgFC ? ` Avg food cost %: ${avgFC.toFixed(1)}%.` : ''} Columns: ${keys.join(', ')}.`,
-      kpis: { foodcost: avgFC ? `${avgFC.toFixed(1)}%` : null }
-    };
-  }
-
-  if (type === 'pmix') {
-    const itemCol = keys.find(k => ['item','item_name','menu_item','name','product'].includes(k));
-    const catCol = keys.find(k => ['category','cat','group','type'].includes(k));
-    const qtyCol = keys.find(k => ['quantity','qty','count','sold','units'].includes(k));
-    const revCol = keys.find(k => ['revenue','sales','amount','total'].includes(k));
-    const fcCol = keys.find(k => ['food_cost_pct','fc_pct','cost_pct'].includes(k));
-
-    const totalItems = rows.length;
-    const categories = catCol ? [...new Set(rows.map(r => r[catCol]).filter(Boolean))] : [];
-    const topItems = itemCol ? rows
-      .map(r => ({ name: r[itemCol], rev: parseFloat(r[revCol])||0 }))
-      .sort((a,b) => b.rev - a.rev).slice(0, 5)
-      .map(r => r.name).join(', ') : '';
-
-    const catData = buildPmixChart(rows, catCol, revCol);
-    return {
-      summary: `PMIX data: ${totalItems} menu items.${categories.length ? ` Categories: ${categories.join(', ')}.` : ''}${topItems ? ` Top items by revenue: ${topItems}.` : ''}`,
-      kpis: {},
-      chartData: catData
-    };
-  }
-
-  if (type === 'inventory') {
-    const itemCol = keys.find(k => ['item','name','product'].includes(k));
-    const varianceCol = keys.find(k => ['variance','variance_pct','overage','underage'].includes(k));
-    const totalItems = rows.length;
-    const highVariance = varianceCol ? rows.filter(r => Math.abs(parseFloat(r[varianceCol])||0) > 10).length : null;
-    return {
-      summary: `Inventory data: ${totalItems} items.${highVariance !== null ? ` ${highVariance} items with >10% variance.` : ''} Columns: ${keys.join(', ')}.`,
-      kpis: {}
-    };
-  }
-
-  return { summary: `${rows.length} rows, columns: ${keys.join(', ')}`, kpis: {} };
-}
-
-function buildSalesChart(rows, salesCol, locationCol, dateCol) {
-  if (!salesCol) return null;
-  if (locationCol) {
-    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].slice(0, 4);
-    const dates = dateCol ? [...new Set(rows.map(r => r[dateCol]))].slice(0, 20) : null;
-    const labels = dates || rows.filter(r => r[locationCol] === locs[0]).map((_, i) => 'W' + (i+1));
-    const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981'];
-    const datasets = locs.map((loc, i) => {
-      const locRows = rows.filter(r => r[locationCol] === loc);
-      return {
-        label: loc, data: locRows.map(r => parseFloat(r[salesCol])||0),
-        borderColor: colors[i], backgroundColor: colors[i].replace(')', ',0.08)').replace('rgb','rgba'),
-        tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2
-      };
-    });
-    return { labels, datasets, locations: locs };
-  }
-  const labels = dateCol ? rows.map(r => r[dateCol]) : rows.map((_,i) => 'W'+(i+1));
-  return { labels, datasets: [{ label: 'Sales', data: rows.map(r => parseFloat(r[salesCol])||0), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 }], locations: ['All'] };
-}
-
-function buildLaborChart(rows, laborPctCol, locationCol, dateCol) {
-  if (!laborPctCol) return null;
-  if (locationCol) {
-    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].slice(0, 4);
-    const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981'];
-    const datasets = locs.map((loc, i) => {
-      const locRows = rows.filter(r => r[locationCol] === loc);
-      return { label: loc, data: locRows.map(r => parseFloat(r[laborPctCol])||0), borderColor: colors[i], tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false };
-    });
-    const labels = rows.filter(r => r[locationCol] === locs[0]).map((_, i) => 'W'+(i+1));
-    return { labels, datasets };
-  }
-  const labels = rows.map((_,i) => 'W'+(i+1));
-  return { labels, datasets: [{ label: 'Labor %', data: rows.map(r => parseFloat(r[laborPctCol])||0), borderColor: '#3b82f6', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false }] };
-}
-
-function buildPmixChart(rows, catCol, revCol) {
-  if (!catCol || !revCol) return null;
-  const cats = {};
-  rows.forEach(r => {
-    const cat = r[catCol] || 'Other';
-    cats[cat] = (cats[cat] || 0) + (parseFloat(r[revCol]) || 0);
-  });
-  const total = Object.values(cats).reduce((a,b) => a+b, 0);
-  const sorted = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0, 6);
-  return {
-    labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
-    data: sorted.map(([,v]) => (v/total)*100)
-  };
-}
-
-// ---- FILE UPLOAD HANDLER ----
-function handleFileUpload(event, type) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const rows = parseCSV(e.target.result);
-      const summary = summarizeData(type, rows);
-      uploadedData[type] = { rows, summary, filename: file.name };
-      updateDashboard(type, summary, file.name);
-      appendMsg('ai', `✓ ${file.name} uploaded successfully!\n\n${summary.summary}\n\nThe dashboard has been updated with your real data. Ask me anything about it.`);
-    } catch(err) {
-      appendMsg('ai', `Hmm, I had trouble parsing ${file.name}. Make sure it's a valid CSV with headers. Error: ${err.message}`);
-    }
-  };
-  reader.readAsText(file);
-
-  // Update tile UI
-  const tile = document.getElementById('tile-' + type);
-  if (tile) {
-    tile.classList.add('has-file');
-    const sub = document.getElementById('tile-' + type + '-sub');
-    if (sub) sub.textContent = file.name;
-  }
-}
-
-function updateDashboard(type, summary, filename) {
-  // Update sidebar dots & badges
-  const dot = document.getElementById('dot-' + type);
-  const badge = document.getElementById('badge-' + type);
-  if (dot) { dot.className = 'ds-dot'; dot.style.background = '#10b981'; }
-  if (badge) { badge.textContent = 'Live'; badge.className = 'ds-badge'; }
-
-  // Update KPIs
-  if (summary.kpis) {
-    if (summary.kpis.sales) updateKpi('sales', summary.kpis.sales, 'Live', true);
-    if (summary.kpis.labor) updateKpi('labor', summary.kpis.labor, 'Live', true);
-    if (summary.kpis.foodcost) updateKpi('foodcost', summary.kpis.foodcost, 'Live', true);
-    if (summary.kpis.check) updateKpi('check', summary.kpis.check, 'Live', true);
-    if (summary.kpis.prime) updateKpi('prime', summary.kpis.prime, 'Live', true);
-  }
-
-  // Update charts
-  if (type === 'sales' && summary.chartData) {
-    const cd = summary.chartData;
-    salesChart.data.labels = cd.labels;
-    salesChart.data.datasets = cd.datasets;
-    salesChart.update();
-    document.getElementById('salesChartSrc').textContent = 'live data — ' + filename;
-    if (cd.locations) {
-      cd.locations.forEach((loc, i) => {
-        const el = document.getElementById('leg' + (i+1));
-        if (el) el.textContent = loc;
-      });
-    }
-  }
-  if (type === 'labor' && summary.chartData) {
-    laborChart.data.labels = summary.chartData.labels;
-    laborChart.data.datasets = summary.chartData.datasets;
-    laborChart.update();
-    document.getElementById('laborSrc').textContent = 'live data — ' + filename;
-  }
-  if (type === 'pmix' && summary.chartData) {
-    pmixChart.data.labels = summary.chartData.labels;
-    pmixChart.data.datasets[0].data = summary.chartData.data;
-    pmixChart.update();
-    document.getElementById('pmixSrc').textContent = 'live';
-  }
-
-  updateStatusBar();
-}
-
-function updateKpi(id, value, srcLabel, isLive) {
-  const valEl = document.getElementById('val-' + id);
-  const srcEl = document.getElementById('src-' + id);
-  const card = document.getElementById('kpi-' + id);
-  if (valEl) valEl.textContent = value;
-  if (srcEl) { srcEl.textContent = srcLabel; srcEl.className = isLive ? 'kpi-source live-src' : 'kpi-source demo-src'; }
-  if (card) { card.classList.toggle('live', isLive); card.classList.toggle('demo-card', !isLive); }
-}
-
-function updateStatusBar() {
-  const loaded = Object.values(uploadedData).filter(Boolean).length;
-  const bar = document.getElementById('statusBar');
-  const text = document.getElementById('statusText');
-  const loadedNames = Object.entries(uploadedData).filter(([,v]) => v).map(([k]) => k).join(', ');
-  const demoNames = Object.entries(uploadedData).filter(([,v]) => !v).map(([k]) => k).join(', ');
-
-  if (loaded === 0) {
-    bar.className = 'data-status-bar demo-mode';
-    text.innerHTML = 'Running on <strong>demo data</strong>. Upload your real CSVs to see your own numbers.';
-  } else if (loaded === 5) {
-    bar.className = 'data-status-bar live-mode';
-    text.innerHTML = '● All datasets are <strong>live</strong>. Analysis reflects your real operational data.';
-  } else {
-    bar.className = 'data-status-bar mixed-mode';
-    text.innerHTML = `<strong>Live:</strong> ${loadedNames} &nbsp;·&nbsp; <strong>Demo:</strong> ${demoNames}. Upload remaining datasets to complete your analysis.`;
-  }
-}
-
-// ---- MODAL ----
-function openUploadModal() { document.getElementById('uploadModal').classList.add('open'); }
-function closeUploadModal() { document.getElementById('uploadModal').classList.remove('open'); }
-document.getElementById('uploadModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUploadModal(); });
-
-// ---- AI CHAT ----
-const DEMO_CONTEXT = `You are OpticAI, an expert restaurant operations analyst AI. You have access to 12 weeks of operational data (Feb 3 – Apr 27, 2025) for a 3-location casual dining restaurant group.
-
-LOCATIONS: Downtown, Midtown, Westside
-
-SALES: Downtown $42K–$55K/wk trending up. Midtown $33K–$39K/wk trending DOWN. Westside $28K–$36K/wk growing. Total 12-week: $1.24M.
-
-LABOR: Blended 31.8% (target 30%). Downtown stable 29–31%. Midtown SPIKING to 38% W8–W12 on Tue-Wed — root cause is new kitchen manager overscheduling since W6. Westside stable 27–31%.
-
-FOOD COST: 28.4% blended, down 0.6pts. Chicken over-ordered 12% across all locations ($2,800–$3,500/mo savings opportunity). Salmon 38% FC but strong dollar margin. Kids meals low FC but suppressed price.
-
-PMIX: Entrees 38%, Beverages 22%, Apps 18%, Desserts 10%, Alcohol 12%. Margin killers: Classic Burger (34% FC, low attach). Margin heroes: cocktails (18% FC), Salmon, Flatbreads. Dessert attach only 14%.
-
-SALES BY DOW: Sat $15.2K peak, Fri $12.4K. Tuesday 18% below avg — structural post-COVID office density loss, permanent shift.
-
-PRIME COST: 60.2% (industry benchmark 55–60%, at high end). Fixing Midtown labor saves ~1.5pts, chicken waste ~0.4pts → could reach ~58.3%.
-
-ANOMALIES: 1) Midtown Tue-Wed labor spike 3 consecutive weeks. 2) Tuesday structural dip. 3) Chicken over-ordering all 3 locations.
-
-Respond as a sharp, direct restaurant ops analyst. Specific numbers, actionable recommendations, concise (3–6 sentences unless full briefing requested). Bullet points for recs. No markdown headers.`;
-
-let conversationHistory = [];
-let liveDataContext = '';
-const messagesEl = document.getElementById('messages');
-const inputEl = document.getElementById('chatInput');
-const sendBtn = document.getElementById('sendBtn');
-
-function buildSystemPrompt() {
-  const hasLive = Object.values(uploadedData).some(Boolean);
-  if (!hasLive) return DEMO_CONTEXT;
-
-  let liveSection = '\n\nLIVE UPLOADED DATA (use this instead of demo data where applicable):\n';
-  Object.entries(uploadedData).forEach(([type, data]) => {
-    if (data) liveSection += `\n${type.toUpperCase()} (from ${data.filename}):\n${data.summary.summary}\n`;
-  });
-
-  const demoTypes = Object.entries(uploadedData).filter(([,v]) => !v).map(([k]) => k);
-  if (demoTypes.length > 0) liveSection += `\nNote: ${demoTypes.join(', ')} data is still demo data — say so if asked about those specifically.`;
-
-  return DEMO_CONTEXT + liveSection;
-}
-
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
-function sendSuggested(text) { inputEl.value = text.trim(); sendMessage(); }
-
-async function sendMessage() {
-  const text = inputEl.value.trim();
-  if (!text) return;
-  inputEl.value = '';
-  sendBtn.disabled = true;
-  appendMsg('user', text);
-  conversationHistory.push({ role: 'user', content: text });
-  const typingEl = appendTyping();
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: buildSystemPrompt(), messages: conversationHistory })
-    });
-    const data = await res.json();
-    const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, I had trouble with that. Try again.';
-    typingEl.remove();
-    appendMsg('ai', reply);
-    conversationHistory.push({ role: 'assistant', content: reply });
-  } catch(err) {
-    typingEl.remove();
-    appendMsg('ai', 'Sorry, I had trouble with that. Try again.');
-  }
-  sendBtn.disabled = false;
-}
-
-function appendMsg(role, text) {
-  const w = document.createElement('div');
-  w.className = 'msg msg-' + (role === 'user' ? 'user' : 'ai');
-  const l = document.createElement('div'); l.className = 'msg-label'; l.textContent = role === 'user' ? 'You' : 'OpticAI';
-  const b = document.createElement('div'); b.className = 'msg-bubble'; b.textContent = text;
-  w.appendChild(l); w.appendChild(b); messagesEl.appendChild(w);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-  return w;
-}
-function appendTyping() {
-  const w = document.createElement('div'); w.className = 'msg msg-ai';
-  w.innerHTML = '<div class="msg-label">OpticAI</div><div class="msg-bubble"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>';
-  messagesEl.appendChild(w); messagesEl.scrollTop = messagesEl.scrollHeight;
-  return w;
-}
-
-initCharts();
-</script>
 </body>
 </html>
