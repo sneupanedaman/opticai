@@ -134,6 +134,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .send-btn:hover { background: var(--accent2); }
 .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .send-btn i { font-size: 16px; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* UPLOAD MODAL */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
@@ -313,12 +314,16 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           <span class="chat-header-text">AI Analyst</span>
           <span class="chat-header-badge">● Live</span>
         </div>
+        <div style="padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0;">
+          <button id="briefingBtn" onclick="generateBriefing()" style="width:100%;padding:9px 14px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:8px;color:#93c5fd;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;transition:all 0.15s;">
+            <i class="ti ti-file-analytics" style="font-size:15px"></i> Generate Weekly Ops Briefing
+          </button>
+        </div>
         <div class="suggested-qs">
           <div class="sq-label">Try asking</div>
           <button class="sq-btn" onclick="sendSuggested(this.textContent)">Why was labor high at Midtown last week?</button>
           <button class="sq-btn" onclick="sendSuggested(this.textContent)">Which menu items are hurting margin?</button>
           <button class="sq-btn" onclick="sendSuggested(this.textContent)">Why did sales dip on Tuesdays?</button>
-          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Give me a weekly ops briefing</button>
           <button class="sq-btn" onclick="sendSuggested(this.textContent)">Compare all 3 locations</button>
         </div>
         <div class="messages" id="messages">
@@ -813,6 +818,95 @@ function appendTyping() {
   const w = document.createElement('div'); w.className = 'msg msg-ai';
   w.innerHTML = '<div class="msg-label">OpticAI</div><div class="msg-bubble"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>';
   messagesEl.appendChild(w); messagesEl.scrollTop = messagesEl.scrollHeight;
+  return w;
+}
+
+async function generateBriefing() {
+  const btn = document.getElementById('briefingBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader" style="font-size:15px;animation:spin 1s linear infinite"></i> Generating briefing...';
+
+  const briefingPrompt = `Generate a comprehensive Weekly Operations Briefing for this restaurant group. Format it clearly with these exact sections:
+
+WEEKLY OPS BRIEFING
+===================
+
+PERFORMANCE SNAPSHOT
+List the 5 key KPIs with their values and trend direction.
+
+WINS THIS PERIOD
+2-3 things going well that the team should be recognized for.
+
+WATCH LIST
+2-3 specific issues that need attention, with the data that supports each concern.
+
+ROOT CAUSE ANALYSIS
+For each watch list item, explain why it is happening based on the data.
+
+ACTION ITEMS FOR THIS WEEK
+Numbered list of 3-5 specific, actionable steps the GM should take this week, with expected dollar or percentage impact where possible.
+
+LOCATION SPOTLIGHT
+One paragraph on the location that needs the most attention right now and what leadership should focus on there.
+
+Keep it direct, specific, and written for a GM — not an analyst. Use real numbers from the data.`;
+
+  const typingEl = appendTyping();
+  conversationHistory.push({ role: 'user', content: briefingPrompt });
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: buildSystemPrompt(), messages: conversationHistory })
+    });
+    const data = await res.json();
+    const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, could not generate briefing.';
+    typingEl.remove();
+    appendBriefingMsg(reply);
+    conversationHistory.push({ role: 'assistant', content: reply });
+  } catch(err) {
+    typingEl.remove();
+    appendMsg('ai', 'Sorry, could not generate the briefing. Try again.');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-file-analytics" style="font-size:15px"></i> Generate Weekly Ops Briefing';
+}
+
+function appendBriefingMsg(text) {
+  const w = document.createElement('div');
+  w.className = 'msg msg-ai';
+  w.style.width = '100%';
+
+  const label = document.createElement('div');
+  label.className = 'msg-label';
+  label.innerHTML = '<i class="ti ti-file-analytics" style="font-size:11px;margin-right:3px"></i> Weekly Ops Briefing';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.style.cssText = 'background:var(--bg2);border:1px solid rgba(59,130,246,0.25);font-size:12px;line-height:1.7;white-space:pre-wrap;';
+
+  // Format the briefing with styled sections
+  const lines = text.split('\n');
+  let html = '';
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed === 'WEEKLY OPS BRIEFING' || trimmed === '===================') {
+      if (trimmed !== '===================') html += `<div style="font-size:13px;font-weight:600;color:#93c5fd;margin-bottom:4px;letter-spacing:0.02em">${trimmed}</div>`;
+    } else if (trimmed.match(/^[A-Z][A-Z\s]+$/) && trimmed.length > 3) {
+      html += `<div style="font-size:10px;font-weight:600;color:#3b82f6;text-transform:uppercase;letter-spacing:0.08em;margin-top:14px;margin-bottom:5px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">${trimmed}</div>`;
+    } else if (trimmed.startsWith('- ') || trimmed.match(/^\d+\./)) {
+      html += `<div style="padding-left:10px;color:var(--text);margin:2px 0">${trimmed}</div>`;
+    } else if (trimmed) {
+      html += `<div style="color:var(--text2);margin:2px 0">${trimmed}</div>`;
+    }
+  });
+
+  bubble.innerHTML = html || text;
+  w.appendChild(label);
+  w.appendChild(bubble);
+  messagesEl.appendChild(w);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
   return w;
 }
 
