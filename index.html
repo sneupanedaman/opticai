@@ -263,35 +263,62 @@ footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex;
   </div>
 </div>
 
-<!-- VS COMPARISON -->
+<!-- PROBLEM SECTION -->
 <div class="section" id="compare">
-  <div class="section-label">How we compare</div>
-  <h2 class="section-h2">Built for what existing tools get wrong</h2>
-  <p class="section-sub">Current restaurant analytics tools force you to choose between coverage and intelligence. OpticAI doesn't.</p>
+  <div class="section-label">The problem we solve</div>
+  <h2 class="section-h2">Most restaurants are flying blind — and they know it</h2>
+  <p class="section-sub">Your data exists. It's sitting in your POS, your scheduling tool, your accounting software. The problem is nobody's connecting it — or asking the right questions of it.</p>
   <div class="vs-grid">
     <div class="vs-card">
-      <div class="vs-card-header"><div class="vs-card-name" style="color:var(--text2)">Toast Analytics</div></div>
-      <div class="vs-row"><i class="ti ti-check check"></i> Strong POS analysis</div>
-      <div class="vs-row"><i class="ti ti-x cross"></i> Single location only</div>
-      <div class="vs-row"><i class="ti ti-x cross"></i> No labor or food cost</div>
-      <div class="vs-row"><i class="ti ti-x cross"></i> No natural language Q&A</div>
-      <div class="vs-row"><i class="ti ti-x cross"></i> No cross-dataset insight</div>
-    </div>
-    <div class="vs-card featured">
-      <div class="vs-card-header"><div class="vs-card-name">OpticAI</div><span class="vs-badge">This tool</span></div>
-      <div class="vs-row"><i class="ti ti-check check"></i> Multi-location analysis</div>
-      <div class="vs-row"><i class="ti ti-check check"></i> All 5 datasets connected</div>
-      <div class="vs-row"><i class="ti ti-check check"></i> Natural language Q&A</div>
-      <div class="vs-row"><i class="ti ti-check check"></i> Cross-dataset root cause</div>
-      <div class="vs-row"><i class="ti ti-check check"></i> Works with your exports</div>
+      <div class="vs-card-header" style="margin-bottom:10px">
+        <i class="ti ti-alert-triangle" style="font-size:18px;color:var(--amber)"></i>
+        <div class="vs-card-name" style="color:var(--text)">The data is siloed</div>
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.65">Your POS knows sales. Your scheduling tool knows labor. Your accounting software knows food cost. But none of them talk to each other — so when prime cost spikes, nobody can tell you <em>why</em>.</div>
     </div>
     <div class="vs-card">
-      <div class="vs-card-header"><div class="vs-card-name" style="color:var(--text2)">R365 / BI Tools</div></div>
-      <div class="vs-row"><i class="ti ti-check check"></i> Multi-dataset support</div>
-      <div class="vs-row"><i class="ti ti-minus partial"></i> Multi-location (limited)</div>
-      <div class="vs-row"><i class="ti ti-minus partial"></i> AI chat (unreliable)</div>
-      <div class="vs-row"><i class="ti ti-x cross"></i> Breaks outside preset queries</div>
-      <div class="vs-row"><i class="ti ti-x cross"></i> Heavy setup required</div>
+      <div class="vs-card-header" style="margin-bottom:10px">
+        <i class="ti ti-alert-triangle" style="font-size:18px;color:var(--amber)"></i>
+        <div class="vs-card-name" style="color:var(--text)">No analyst on staff</div>
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.65">Enterprise restaurant groups have analysts who do this work. Independent operators and growing SMBs don't. That means decisions get made on gut feel — or not at all. Operators without real-time analytics lose 4–8% of revenue annually to food cost variance alone.</div>
+    </div>
+    <div class="vs-card">
+      <div class="vs-card-header" style="margin-bottom:10px">
+        <i class="ti ti-alert-triangle" style="font-size:18px;color:var(--amber)"></i>
+        <div class="vs-card-name" style="color:var(--text)">Existing tools are built for IT, not operators</div>
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.65">The tools that do exist require complex setup, BI training, or expensive implementation. Most restaurant managers just need a fast, honest answer — not a dashboard to configure.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;background:var(--bg2);border:1px solid rgba(59,130,246,0.25);border-radius:12px;padding:28px 32px;">
+    <div style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">What OpticAI does differently</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.6">
+        <i class="ti ti-check" style="color:var(--green);font-size:16px;flex-shrink:0;margin-top:2px"></i>
+        <span><strong style="color:var(--text)">Connects all your data in one place.</strong> Sales, labor, food cost, PMIX, and inventory — analyzed together, not in isolation.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.6">
+        <i class="ti ti-check" style="color:var(--green);font-size:16px;flex-shrink:0;margin-top:2px"></i>
+        <span><strong style="color:var(--text)">No BI skills required.</strong> Just upload a CSV export from whatever tools you already use and ask a question in plain English.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.6">
+        <i class="ti ti-check" style="color:var(--green);font-size:16px;flex-shrink:0;margin-top:2px"></i>
+        <span><strong style="color:var(--text)">Built for multi-location operators.</strong> Compare locations side-by-side, spot which store is dragging down group performance, and why.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.6">
+        <i class="ti ti-check" style="color:var(--green);font-size:16px;flex-shrink:0;margin-top:2px"></i>
+        <span><strong style="color:var(--text)">Answers, not dashboards.</strong> OpticAI tells you what's wrong, why it's happening, and what to do — not just what the number is.</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 24px;display:flex;align-items:flex-start;gap:14px;">
+    <i class="ti ti-quote" style="font-size:24px;color:var(--text3);flex-shrink:0"></i>
+    <div>
+      <div style="font-size:14px;color:var(--text);line-height:1.65;font-style:italic;margin-bottom:8px">"I've been a restaurant operator for a long time and one of the biggest challenges is finding a back-office solution that is robust <em>and</em> easy to use. It gives you all the right answers to the questions you need to run a successful operation."</div>
+      <div style="font-size:12px;color:var(--text3)">— Multi-location restaurant operator</div>
     </div>
   </div>
 </div>
