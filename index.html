@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpticAI — Restaurant Intelligence</title>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f12;
+  --bg2: #13161b;
+  --bg3: #1a1e26;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8eaf0;
+  --text2: #8b909e;
+  --text3: #555b6a;
+  --accent: #3b82f6;
+  --accent2: #1d4ed8;
+  --green: #10b981;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --purple: #8b5cf6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; overflow: hidden; }
+
+.app { display: flex; height: 100vh; }
+
+/* SIDEBAR */
+.sidebar { width: 240px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+.sidebar-logo { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); }
+.logo-row { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-icon i { color: #fff; font-size: 17px; }
+.logo-name { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.logo-tagline { font-size: 11px; color: var(--text3); }
+
+.sidebar-section { padding: 14px 10px 4px; }
+.sidebar-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 6px; margin-bottom: 5px; }
+
+.location-pill { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; cursor: pointer; color: var(--text2); transition: all 0.15s; font-size: 13px; }
+.location-pill:hover { background: var(--bg3); color: var(--text); }
+.location-pill.active { background: rgba(59,130,246,0.12); color: var(--accent); }
+.location-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.location-dot.amber { background: var(--amber); }
+.location-dot.purple { background: var(--purple); }
+
+.dataset-list { padding: 14px 10px 4px; }
+.ds-item { display: flex; align-items: center; gap: 8px; padding: 5px 10px; font-size: 12px; color: var(--text2); }
+.ds-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.ds-dot.empty { background: var(--border2); }
+
+.sidebar-bottom { margin-top: auto; padding: 12px 10px; border-top: 1px solid var(--border); }
+.upload-area { border: 1px dashed var(--border2); border-radius: 8px; padding: 14px; text-align: center; cursor: pointer; color: var(--text3); font-size: 12px; transition: all 0.2s; }
+.upload-area:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.05); }
+.upload-area i { display: block; font-size: 22px; margin-bottom: 5px; }
+
+/* MAIN */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.topbar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.topbar-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.topbar-sep { color: var(--border2); }
+.date-range { font-size: 12px; color: var(--text3); background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; }
+.topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.btn-sm { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: flex; align-items: center; gap: 5px; }
+.btn-sm:hover { background: var(--bg3); color: var(--text); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); }
+
+.content { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+
+/* LEFT PANEL */
+.left-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.kpi-row { display: flex; gap: 10px; padding: 14px 16px 0; flex-shrink: 0; }
+.kpi-card { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.kpi-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; white-space: nowrap; }
+.kpi-value { font-size: 20px; font-weight: 500; color: var(--text); letter-spacing: -0.02em; font-family: 'DM Mono', monospace; }
+.kpi-delta { font-size: 11px; margin-top: 3px; white-space: nowrap; }
+.delta-up { color: var(--green); }
+.delta-down { color: var(--red); }
+.delta-warn { color: var(--amber); }
+
+.anomaly-bar { margin: 10px 16px 0; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.22); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--amber); flex-shrink: 0; }
+.anomaly-bar i { font-size: 15px; flex-shrink: 0; }
+
+.chart-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 10px 16px 14px; gap: 10px; min-height: 0; }
+.chart-row { display: flex; gap: 10px; flex: 1; min-height: 0; }
+.chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; min-width: 0; }
+.chart-card.wide { flex: 2; }
+.chart-card.narrow { flex: 1; }
+.chart-title { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.chart-wrap { flex: 1; position: relative; min-height: 0; }
+.chart-wrap canvas { position: absolute; top: 0; left: 0; }
+
+/* LEGEND */
+.chart-legend { display: flex; gap: 12px; margin-bottom: 8px; flex-shrink: 0; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* CHAT PANEL */
+.chat-panel { width: 340px; flex-shrink: 0; background: var(--bg2); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+.chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.chat-header i { color: var(--accent); font-size: 16px; }
+.chat-header-text { font-size: 13px; font-weight: 500; }
+.chat-header-badge { margin-left: auto; background: rgba(16,185,129,0.15); color: var(--green); font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+
+.suggested-qs { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+.sq-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; }
+.sq-btn { padding: 7px 10px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-size: 12px; cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: all 0.15s; line-height: 1.35; }
+.sq-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.07); }
+
+.messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-track { background: transparent; }
+.messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.msg { max-width: 100%; }
+.msg-user { align-self: flex-end; }
+.msg-ai { align-self: flex-start; width: 100%; }
+.msg-bubble { padding: 9px 12px; border-radius: 10px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+.msg-user .msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 3px; }
+.msg-ai .msg-bubble { background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 3px; }
+.msg-label { font-size: 10px; color: var(--text3); margin-bottom: 3px; padding: 0 2px; }
+.msg-user .msg-label { text-align: right; }
+
+.typing { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
+.typing-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); animation: blink 1.2s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100% { opacity:0.3; } 40% { opacity:1; } }
+
+.chat-input-row { padding: 10px 12px; border-top: 1px solid var(--border); display: flex; gap: 7px; flex-shrink: 0; }
+.chat-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; height: 40px; line-height: 1.4; }
+.chat-input:focus { border-color: var(--accent); }
+.chat-input::placeholder { color: var(--text3); }
+.send-btn { width: 40px; height: 40px; background: var(--accent); border: none; border-radius: 8px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; flex-shrink: 0; }
+.send-btn:hover { background: var(--accent2); }
+.send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.send-btn i { font-size: 16px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-icon"><i class="ti ti-chart-dots-3"></i></div>
+        <div class="logo-text">
+          <div class="logo-name">OpticAI</div>
+          <div class="logo-tagline">Restaurant Intelligence</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Locations</div>
+      <div class="location-pill active"><div class="location-dot"></div> All Locations</div>
+      <div class="location-pill"><div class="location-dot"></div> Downtown</div>
+      <div class="location-pill"><div class="location-dot amber"></div> Midtown</div>
+      <div class="location-pill"><div class="location-dot purple"></div> Westside</div>
+    </div>
+
+    <div class="dataset-list">
+      <div class="sidebar-label">Loaded Datasets</div>
+      <div class="ds-item"><div class="ds-dot"></div> Sales (12 wks)</div>
+      <div class="ds-item"><div class="ds-dot"></div> Labor & Scheduling</div>
+      <div class="ds-item"><div class="ds-dot"></div> Food Cost</div>
+      <div class="ds-item"><div class="ds-dot"></div> PMIX</div>
+      <div class="ds-item"><div class="ds-dot empty"></div> Inventory</div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="upload-area">
+        <i class="ti ti-upload"></i>
+        Upload CSV / Export
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title">Operations Dashboard</span>
+      <span class="topbar-sep">·</span>
+      <span class="date-range">Feb 3 – Apr 27, 2025 &nbsp;·&nbsp; 12 weeks</span>
+      <div class="topbar-right">
+        <button class="btn-sm"><i class="ti ti-calendar"></i> Date Range</button>
+        <button class="btn-sm btn-primary"><i class="ti ti-file-export"></i> Export</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="left-panel">
+        <!-- KPI ROW -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-label">Total Sales</div>
+            <div class="kpi-value">$1.24M</div>
+            <div class="kpi-delta delta-up">↑ 4.2% vs prior period</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Labor %</div>
+            <div class="kpi-value">31.8%</div>
+            <div class="kpi-delta delta-warn">↑ 2.1pts — above target</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Food Cost %</div>
+            <div class="kpi-value">28.4%</div>
+            <div class="kpi-delta delta-up">↓ 0.6pts vs prior</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Prime Cost</div>
+            <div class="kpi-value">60.2%</div>
+            <div class="kpi-delta delta-warn">↑ 1.5pts — watch closely</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Avg Check</div>
+            <div class="kpi-value">$18.40</div>
+            <div class="kpi-delta delta-up">↑ $0.80 vs prior</div>
+          </div>
+        </div>
+
+        <!-- ANOMALY ALERT -->
+        <div class="anomaly-bar">
+          <i class="ti ti-alert-triangle"></i>
+          <span><strong>Anomaly detected:</strong> Midtown labor spiked to 38.2% on Tue–Wed for 3 consecutive weeks. Ask the AI why →</span>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="chart-section">
+          <div class="chart-row">
+            <div class="chart-card wide">
+              <div class="chart-title">
+                Weekly sales by location
+                <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">$K</span>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Downtown</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Midtown</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> Westside</div>
+              </div>
+              <div class="chart-wrap">
+                <canvas id="salesChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card narrow">
+              <div class="chart-title">PMIX — margin by category</div>
+              <div class="chart-wrap">
+                <canvas id="pmixChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-row">
+            <div class="chart-card" style="flex:1">
+              <div class="chart-title">
+                Labor % by location
+                <span style="font-size:11px;color:var(--text3)">30% target</span>
+              </div>
+              <div class="chart-wrap">
+                <canvas id="laborChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card" style="flex:1">
+              <div class="chart-title">Avg daily sales by day of week</div>
+              <div class="chart-wrap">
+                <canvas id="dowChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAT PANEL -->
+      <div class="chat-panel">
+        <div class="chat-header">
+          <i class="ti ti-message-bolt"></i>
+          <span class="chat-header-text">AI Analyst</span>
+          <span class="chat-header-badge">● Live</span>
+        </div>
+
+        <div class="suggested-qs">
+          <div class="sq-label">Try asking</div>
+          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Why was labor high at Midtown last week?</button>
+          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Which menu items are hurting margin?</button>
+          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Why did sales dip on Tuesdays?</button>
+          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Give me a weekly ops briefing</button>
+          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Compare performance across all 3 locations</button>
+        </div>
+
+        <div class="messages" id="messages">
+          <div class="msg msg-ai">
+            <div class="msg-label">OpticAI</div>
+            <div class="msg-bubble">Hey! I've analyzed your last 12 weeks across all 3 locations. A few things stand out — labor is running hot at Midtown, and Tuesday sales are consistently 18% below your weekly average. Ask me anything about your data.</div>
+          </div>
+        </div>
+
+        <div class="chat-input-row">
+          <textarea class="chat-input" id="chatInput" placeholder="Ask about your operations..." rows="1" onkeydown="handleKey(event)"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="ti ti-send"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ---- CHART DATA ----
+const weeks = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'];
+const downtown = [42,45,43,48,50,47,52,49,51,46,53,55];
+const midtown  = [38,36,39,35,33,37,34,36,35,38,36,34];
+const westside = [28,30,29,32,31,33,30,34,32,31,35,36];
+
+new Chart(document.getElementById('salesChart'), {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: [
+      { label: 'Downtown', data: downtown, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.4, fill: true, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2 },
+      { label: 'Midtown',  data: midtown,  borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.06)', tension: 0.4, fill: true, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2 },
+      { label: 'Westside', data: westside, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.06)', tension: 0.4, fill: true, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555b6a', font: { size: 11, family: 'DM Sans' } } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555b6a', font: { size: 11, family: 'DM Sans' }, callback: v => '$' + v + 'K' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('pmixChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Entrees 38%','Beverages 22%','Apps 18%','Desserts 10%','Alcohol 12%'],
+    datasets: [{ data: [38, 22, 18, 10, 12], backgroundColor: ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444'], borderWidth: 0, hoverOffset: 6 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { color: '#8b909e', font: { size: 11, family: 'DM Sans' }, boxWidth: 10, padding: 8 } } },
+    cutout: '62%'
+  }
+});
+
+const laborDowntown = [29,30,28,29,30,28,29,31,30,29,30,29];
+const laborMidtown  = [30,31,32,33,36,34,35,38,37,38,37,38];
+const laborWestside = [28,27,29,28,30,29,28,30,29,30,29,31];
+
+new Chart(document.getElementById('laborChart'), {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: [
+      { label: 'Downtown', data: laborDowntown, borderColor: '#3b82f6', tension: 0.4, pointRadius: 2, pointHoverRadius: 4, borderWidth: 1.5, fill: false },
+      { label: 'Midtown',  data: laborMidtown,  borderColor: '#f59e0b', tension: 0.4, pointRadius: 2, pointHoverRadius: 4, borderWidth: 1.5, fill: false },
+      { label: 'Westside', data: laborWestside, borderColor: '#8b5cf6', tension: 0.4, pointRadius: 2, pointHoverRadius: 4, borderWidth: 1.5, fill: false },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      annotation: {}
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10, family: 'DM Sans' } } },
+      y: { min: 25, max: 42, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10, family: 'DM Sans' }, callback: v => v + '%' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('dowChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets: [{ 
+      data: [8200, 6700, 8100, 9100, 12400, 15200, 11800], 
+      backgroundColor: ['#3b82f6','#ef4444','#3b82f6','#3b82f6','#10b981','#10b981','#3b82f6'], 
+      borderRadius: 5, borderWidth: 0 
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#555b6a', font: { size: 11, family: 'DM Sans' } } },
+      y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10, family: 'DM Sans' }, callback: v => '$' + (v/1000).toFixed(0) + 'K' } }
+    }
+  }
+});
+
+// ---- AI CHAT ----
+const DATA_CONTEXT = `You are OpticAI, an expert restaurant operations analyst AI built into a multi-location restaurant intelligence platform. You have access to 12 weeks of operational data (Feb 3 – Apr 27, 2025) for a 3-location casual dining restaurant group.
+
+LOCATIONS: Downtown, Midtown, Westside
+
+SALES DATA (weekly avg $K):
+- Downtown: $42K–$55K/wk, trending UP strongly. Best performer.
+- Midtown: $33K–$39K/wk, trending DOWN. Losing share. Concern.
+- Westside: $28K–$36K/wk, slowly but steadily growing.
+- Total 12-week revenue: $1.24M across all locations.
+
+LABOR DATA:
+- Overall blended labor %: 31.8% (internal target: 30%)
+- Downtown: stable and healthy at 29–31%
+- Midtown: SPIKING — climbed from 30% in W1 to 38% in W8–W12. Specifically spikes on Tuesday and Wednesday for 3 consecutive weeks.
+- Root cause of Midtown spike: New kitchen manager started in W6. Is overscheduling BOH staff on Tuesdays and Wednesdays without adjusting for Midtown's structurally lower midweek volume. The scheduling hasn't been adapted to that location's traffic pattern.
+- Westside: stable and healthy at 27–31%
+
+FOOD COST DATA:
+- Overall blended food cost %: 28.4%, down 0.6pts (positive — result of better vendor contract negotiation)
+- Biggest waste driver: Chicken dishes — over-ordering by ~12% across all 3 locations
+- Highest food cost item: Salmon at 38% FC, but high price point makes it a strong margin contributor in dollars
+- Kids meals: low food cost (23%) but deeply discounted price suppresses margin
+- Opportunity: right-sizing chicken par levels could save $2,800–$3,500/month across the group
+
+PMIX / MENU PERFORMANCE:
+- Sales mix: Entrees 38%, Beverages 22%, Apps 18%, Desserts 10%, Alcohol 12%
+- Margin KILLERS: Classic Burger ($14.99 price point, 34% food cost, low attach rate for add-ons)
+- Margin HEROES: Signature cocktails (18% FC, high velocity), Salmon entree, Flatbread apps
+- Opportunity: Pushing flatbread app attach rate from 22% to 30% would add ~$4,200/month in high-margin revenue
+- Dessert attach rate is only 14% — significant upsell gap
+
+SALES BY DAY OF WEEK:
+- Saturday: peak at $15,200/day avg across all locations
+- Friday: strong at $12,400/day
+- Tuesday: CONSISTENTLY 18% below weekly average — lowest day across all locations
+- Tuesday dip is structural, not seasonal: the market area lost significant office lunch density post-COVID with remote/hybrid work patterns. This is a permanent shift, not a fixable problem.
+- Recommendation for Tuesday: lean into it with targeted promos, prix fixe, or use it as a training/deep-clean day to reduce labor cost rather than fighting the volume
+
+PRIME COST (Labor + Food Cost):
+- Current: 60.2%
+- Industry benchmark: 55–60% for casual dining. They are at the HIGH end of acceptable.
+- Path to improvement: fix Midtown labor scheduling (saves ~1.5pts) + reduce chicken waste (saves ~0.4pts) = could get to ~58.3%
+
+ANOMALIES DETECTED BY SYSTEM:
+1. Midtown labor Tue-Wed spike — 3 consecutive weeks, new manager root cause
+2. Tuesday structural sales dip — consistent and permanent, not anomalous per se
+3. Chicken over-ordering — all 3 locations, driving food waste
+
+COMPETITIVE CONTEXT (if asked):
+- Toast Analytics: strong on POS data but limited to single-location view, no labor or food cost integration
+- R365/MSTR-based tools: cross-dataset but weak at natural language analysis and tend to break when queries go outside pre-defined datasets
+- OpticAI's advantage: multi-location, multi-dataset, AI that understands the relationships between sales/labor/food cost/PMIX together
+
+Respond as a sharp, direct, knowledgeable restaurant ops analyst. Be specific with numbers from the data above. Give concrete, actionable recommendations. Keep responses concise (3–6 sentences) unless the user asks for a full briefing. Use short bullet points for recommendations. Do not use markdown headers with # symbols. Reference specific locations and time periods when relevant. Sound like you genuinely understand restaurant operations, not just data.`;
+
+let conversationHistory = [];
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function sendSuggested(text) {
+  inputEl.value = text.trim();
+  sendMessage();
+}
+
+async function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  inputEl.value = '';
+  sendBtn.disabled = true;
+
+  appendMsg('user', text);
+  conversationHistory.push({ role: 'user', content: text });
+
+  const typingEl = appendTyping();
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: DATA_CONTEXT,
+        messages: conversationHistory
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.map(b => b.text || '').filter(Boolean).join('') || 'Sorry, I had trouble with that. Try again.';
+
+    typingEl.remove();
+    appendMsg('ai', reply);
+    conversationHistory.push({ role: 'assistant', content: reply });
+
+  } catch (err) {
+    typingEl.remove();
+    appendMsg('ai', 'Connection error — make sure you have internet access and try again.');
+  }
+
+  sendBtn.disabled = false;
+}
+
+function appendMsg(role, text) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'msg msg-' + (role === 'user' ? 'user' : 'ai');
+
+  const label = document.createElement('div');
+  label.className = 'msg-label';
+  label.textContent = role === 'user' ? 'You' : 'OpticAI';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = text;
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(bubble);
+  messagesEl.appendChild(wrapper);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return wrapper;
+}
+
+function appendTyping() {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'msg msg-ai';
+  wrapper.innerHTML = `
+    <div class="msg-label">OpticAI</div>
+    <div class="msg-bubble">
+      <div class="typing">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>`;
+  messagesEl.appendChild(wrapper);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return wrapper;
+}
+</script>
+</body>
+</html>
