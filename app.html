@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script defer src="/_vercel/insights/script.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OpticAI — Restaurant Intelligence</title>
@@ -156,10 +155,81 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .modal-cols-hint { font-size: 11px; color: var(--text3); margin-bottom: 16px; line-height: 1.6; background: var(--bg3); padding: 10px 12px; border-radius: 7px; }
 .modal-cols-hint strong { color: var(--text2); }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+  html, body { overflow: auto; height: auto; }
+  .app { flex-direction: column; height: auto; min-height: 100vh; }
+
+  /* Hide sidebar on mobile */
+  .sidebar { display: none; }
+
+  /* Mobile topbar */
+  .topbar { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+  .topbar-title { font-size: 13px; }
+  .date-range { display: none; }
+  .topbar-sep { display: none; }
+  .btn-sm:not(.btn-primary) { display: none; }
+
+  /* Mobile menu bar above topbar */
+  .mobile-bar { display: flex; align-items: center; justify-content: space-between; background: var(--bg2); border-bottom: 1px solid var(--border); padding: 10px 14px; }
+  .mobile-logo { display: flex; align-items: center; gap: 8px; }
+  .mobile-logo-icon { width: 26px; height: 26px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .mobile-logo-icon i { color: #fff; font-size: 14px; }
+  .mobile-logo-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .mobile-upload-btn { padding: 6px 12px; background: var(--accent); border: none; border-radius: 6px; color: #fff; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+  /* Main panel full width */
+  .main { overflow: visible; }
+  .content { flex-direction: column; overflow: visible; height: auto; }
+  .left-panel { overflow: visible; min-height: 0; }
+
+  /* Status bar */
+  .data-status-bar { margin: 8px 12px 0; font-size: 11px; }
+
+  /* KPI cards — 2 per row on mobile */
+  .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 12px 0; flex-shrink: 0; }
+  .kpi-card { padding: 10px 12px; }
+  .kpi-value { font-size: 18px; }
+  .kpi-delta { white-space: normal; font-size: 10px; }
+
+  /* Charts — stack vertically */
+  .chart-section { flex: none; overflow: visible; padding: 8px 12px 12px; gap: 8px; }
+  .chart-row { flex-direction: column; flex: none; min-height: 0; gap: 8px; }
+  .chart-card { height: 200px; }
+  .chart-card.wide { flex: none; }
+  .chart-card.narrow { flex: none; }
+  .chart-wrap { height: 140px; position: relative; }
+  .chart-wrap canvas { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
+
+  /* Chat panel — full width below dashboard */
+  .chat-panel { width: 100%; border-left: none; border-top: 1px solid var(--border); height: auto; min-height: 500px; flex-shrink: 0; }
+  .messages { min-height: 200px; max-height: 400px; }
+
+  /* Modal full screen on mobile */
+  .modal { width: 95vw; max-height: 90vh; overflow-y: auto; padding: 16px; }
+  .upload-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .modal-cols-hint { display: none; }
+}
+
+@media (max-width: 480px) {
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+  .kpi-value { font-size: 16px; }
+  .upload-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 
+<div class="mobile-bar" style="display:none">
+  <div class="mobile-logo">
+    <div class="mobile-logo-icon"><i class="ti ti-chart-dots-3"></i></div>
+    <span class="mobile-logo-name">OpticAI</span>
+  </div>
+  <button class="mobile-upload-btn" onclick="openUploadModal()">
+    <i class="ti ti-upload" style="font-size:13px"></i> Upload Data
+  </button>
+</div>
 <div class="app">
   <!-- SIDEBAR -->
   <div class="sidebar">
@@ -229,6 +299,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
       <span class="topbar-sep">·</span>
       <span class="date-range" id="dateRangeLabel">Feb 3 – Apr 27, 2025 · 12 weeks · Demo Data</span>
       <div class="topbar-right">
+        <button class="btn-sm" onclick="openCustomizePanel()"><i class="ti ti-layout-dashboard"></i> Customize</button>
         <button class="btn-sm btn-primary" onclick="openUploadModal()"><i class="ti ti-upload"></i> Upload CSV</button>
       </div>
     </div>
@@ -328,9 +399,9 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           <button class="sq-btn" onclick="sendSuggested(this.textContent)">Compare all 3 locations</button>
         </div>
         <div class="messages" id="messages">
-          <div class="msg msg-ai">
+          <div class="msg msg-ai" id="welcomeMsg">
             <div class="msg-label">OpticAI</div>
-            <div class="msg-bubble">Hey! I've analyzed your last 12 weeks across all 3 locations. Labor is running hot at Midtown and Tuesday sales are consistently 18% below average. You can also upload your own CSV data using the button above — I'll analyze your real numbers. Ask me anything!</div>
+            <div class="msg-bubble">Hey! I've analyzed your last 12 weeks across all 3 locations. Labor is running hot at Midtown and Tuesday sales are consistently 18% below average. You can also upload your own CSV data — I'll analyze your real numbers. Ask me anything!</div>
           </div>
         </div>
         <div class="chat-input-row">
@@ -338,6 +409,43 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="ti ti-send"></i></button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMIZE MODAL -->
+<div class="modal-overlay" id="customizeModal">
+  <div class="modal" style="width:540px;max-height:85vh;overflow-y:auto;">
+    <div class="modal-title">Customize Dashboard</div>
+    <div class="modal-sub">Show, hide, or reorder your KPI tiles and charts.</div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">KPI Tiles</div>
+      <div id="kpiToggles" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Charts</div>
+      <div id="chartToggles" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">Build a custom chart from your uploaded columns</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <select id="customChartCol" style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;">
+          <option value="">Select a metric column...</option>
+        </select>
+        <select id="customChartType" style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;">
+          <option value="bar">Bar chart</option>
+          <option value="line">Line chart</option>
+        </select>
+        <button onclick="buildCustomChart()" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">Add Chart</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeCustomizePanel()">Close</button>
+      <button class="btn-sm btn-primary" onclick="resetDashboard()"><i class="ti ti-refresh"></i> Reset to Default</button>
     </div>
   </div>
 </div>
@@ -388,6 +496,12 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
         <div class="upload-tile-sub" id="tile-inventory-sub">Click to upload CSV</div>
         <input type="file" accept=".csv" onchange="handleFileUpload(event, 'inventory')">
       </div>
+      <div class="upload-tile" id="tile-custom" style="grid-column:1/-1;background:rgba(59,130,246,0.04);border-color:rgba(59,130,246,0.25);border-style:dashed;">
+        <i class="ti ti-table-plus" style="color:var(--accent)"></i>
+        <div class="upload-tile-name">Custom CSV</div>
+        <div class="upload-tile-sub" id="tile-custom-sub">Any data · requires Date + Location columns</div>
+        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'custom')">
+      </div>
     </div>
 
     <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;margin-bottom:14px;">
@@ -404,7 +518,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ---- STATE ----
-const uploadedData = { sales: null, labor: null, foodcost: null, pmix: null, inventory: null };
+const uploadedData = { sales: null, labor: null, foodcost: null, pmix: null, inventory: null, custom: null };
 
 // ---- DEMO DATA ----
 const DEMO = {
@@ -451,7 +565,7 @@ function initCharts() {
     ]},
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
       scales: { x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 } } },
-                y: { min: 25, max: 42, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 }, callback: v => v + '%' } } } }
+                y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 }, callback: v => v + '%' } } } }
   });
 
   dowChart = new Chart(document.getElementById('dowChart'), {
@@ -573,6 +687,42 @@ function summarizeData(type, rows) {
     };
   }
 
+  if (type === 'custom') {
+    const dateCol = keys.find(k => ['date','week','period','day'].includes(k));
+    const locationCol = keys.find(k => ['location','store','site','restaurant'].includes(k));
+    const metricCols = keys.filter(k => !['date','week','period','day','location','store','site','restaurant'].includes(k));
+
+    if (!dateCol || !locationCol) {
+      return {
+        summary: `Custom CSV requires at least "date" and "location" columns. Found: ${keys.join(', ')}. Please rename your columns and re-upload.`,
+        kpis: {},
+        error: 'missing_required_columns'
+      };
+    }
+
+    const locations = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))];
+    const periods = [...new Set(rows.map(r => r[dateCol]).filter(Boolean))];
+
+    // Check for ambiguous columns
+    const ambiguous = metricCols.filter(k => ambiguousColumns[k]);
+
+    const metricSummaries = metricCols.map(col => {
+      const vals = rows.map(r => parseFloat(r[col])).filter(v => !isNaN(v));
+      if (vals.length === 0) return `${col}: text data`;
+      const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+      const min = Math.min(...vals); const max = Math.max(...vals);
+      return `${col}: avg=${avg.toFixed(2)}, range=${min.toFixed(1)}–${max.toFixed(1)}`;
+    }).join('; ');
+
+    return {
+      summary: `Custom dataset: ${rows.length} rows, ${locations.length} location(s) (${locations.join(', ')}), ${periods.length} time periods. Metrics detected: ${metricCols.join(', ')}. ${metricSummaries}`,
+      kpis: {},
+      ambiguousColumns: ambiguous,
+      metricCols,
+      locations
+    };
+  }
+
   return { summary: `${rows.length} rows, columns: ${keys.join(', ')}`, kpis: {} };
 }
 
@@ -594,7 +744,7 @@ function buildSalesChart(rows, salesCol, locationCol, dateCol) {
     return { labels, datasets, locations: locs };
   }
   const labels = dateCol ? rows.map(r => r[dateCol]) : rows.map((_,i) => 'W'+(i+1));
-  return { labels, datasets: [{ label: 'Sales', data: rows.map(r => parseFloat(r[salesCol])||0), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 }], locations: ['All'] };
+  return { labels, datasets: [{ label: 'Sales', data: rows.map(r => (parseFloat(r[salesCol])||0)/1000), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 }], locations: ['All'] };
 }
 
 function buildLaborChart(rows, laborPctCol, locationCol, dateCol) {
@@ -670,6 +820,8 @@ function updateDashboard(type, summary, filename) {
     if (summary.kpis.check) updateKpi('check', summary.kpis.check, 'Live', true);
     if (summary.kpis.prime) updateKpi('prime', summary.kpis.prime, 'Live', true);
   }
+  // Auto-calculate prime cost when both labor and food cost are live
+  recalcPrimeCost();
 
   // Update charts
   if (type === 'sales' && summary.chartData) {
@@ -698,7 +850,82 @@ function updateDashboard(type, summary, filename) {
     document.getElementById('pmixSrc').textContent = 'live';
   }
 
+  // Handle custom CSV — add to sidebar and notify
+  if (type === 'custom') {
+    const dot = document.getElementById('dot-custom');
+    const badge = document.getElementById('badge-custom');
+    // Add sidebar item if not exists
+    let sidebarItem = document.getElementById('ds-custom');
+    if (!sidebarItem) {
+      const datasetList = document.querySelector('.dataset-list');
+      const newItem = document.createElement('div');
+      newItem.className = 'ds-item'; newItem.id = 'ds-custom';
+      newItem.innerHTML = `<div class="ds-dot" id="dot-custom" style="background:#10b981"></div><div class="ds-name">${filename.replace('.csv','')}</div><div class="ds-badge" id="badge-custom">Live</div>`;
+      datasetList.appendChild(newItem);
+    }
+    // If ambiguous columns found, ask user
+    if (summary.ambiguousColumns && summary.ambiguousColumns.length > 0) {
+      checkAmbiguousColumns(summary.ambiguousColumns, filename, () => {});
+    }
+    if (summary.error === 'missing_required_columns') {
+      appendMsg('ai', `⚠️ ${summary.summary}`);
+      return;
+    }
+  }
+
   updateStatusBar();
+}
+
+function recalcPrimeCost() {
+  const laborData = uploadedData['labor'];
+  const fcData = uploadedData['foodcost'];
+  if (!laborData || !fcData) return;
+  const laborVal = parseFloat(laborData.summary?.kpis?.labor);
+  const fcVal = parseFloat(fcData.summary?.kpis?.foodcost);
+  if (!isNaN(laborVal) && !isNaN(fcVal)) {
+    const prime = (laborVal + fcVal).toFixed(1) + '%';
+    updateKpi('prime', prime, 'Live', true);
+  }
+}
+
+// Ambiguous column registry — columns needing user clarification
+const ambiguousColumns = {
+  'transaction': { options: ['Check count (# of tickets)', 'Guest count (# of covers)', 'Something else'], label: 'transaction' },
+  'transactions': { options: ['Check count (# of tickets)', 'Guest count (# of covers)', 'Something else'], label: 'transactions' },
+  'count': { options: ['Check count (# of tickets)', 'Guest count (# of covers)', 'Transaction count', 'Something else'], label: 'count' },
+  'guest_count': { options: ['Guest covers', 'Something else'], label: 'guest_count' },
+  'covers': { options: ['Guest covers (# of people)', 'Check count (# of tickets)', 'Something else'], label: 'covers' },
+};
+
+// Field mapping registry — user-defined overrides
+const fieldMappings = {};
+
+function checkAmbiguousColumns(keys, filename, callback) {
+  const found = keys.filter(k => ambiguousColumns[k]);
+  if (found.length === 0) { callback({}); return; }
+
+  // Ask user in chat for each ambiguous column
+  const col = found[0]; // handle one at a time
+  const info = ambiguousColumns[col];
+  const optionBtns = info.options.map((opt, i) =>
+    `<button onclick="resolveAmbiguity('${col}','${opt}','${filename}',${JSON.stringify(found.slice(1))})" style="display:block;width:100%;text-align:left;padding:6px 10px;margin:3px 0;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#93c5fd'" onmouseout="this.style.borderColor='';this.style.color='var(--text2)'">${opt}</button>`
+  ).join('');
+
+  const w = document.createElement('div');
+  w.className = 'msg msg-ai'; w.id = 'ambig-' + col;
+  w.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(245,158,11,0.3);">
+    <div style="color:var(--amber);font-size:12px;margin-bottom:8px;">⚠️ I found a column called <strong>"${col}"</strong> in ${filename}. What does it represent?</div>
+    ${optionBtns}
+  </div>`;
+  messagesEl.appendChild(w);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function resolveAmbiguity(col, choice, filename, remaining) {
+  fieldMappings[col] = choice;
+  const el = document.getElementById('ambig-' + col);
+  if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> = ${choice}. Analysis updated.</div>`;
+  appendMsg('ai', `Thanks! I'll treat "${col}" as "${choice}" in all analysis going forward.`);
 }
 
 function updateKpi(id, value, srcLabel, isLive) {
@@ -786,6 +1013,9 @@ async function sendMessage() {
   if (!text) return;
   inputEl.value = '';
   sendBtn.disabled = true;
+  // Remove welcome message permanently on first interaction
+  const welcome = document.getElementById('welcomeMsg');
+  if (welcome) welcome.remove();
   appendMsg('user', text);
   conversationHistory.push({ role: 'user', content: text });
   const typingEl = appendTyping();
@@ -911,7 +1141,156 @@ function appendBriefingMsg(text) {
   return w;
 }
 
+// ── CUSTOMIZE PANEL ──
+const kpiConfig = [
+  { id: 'sales',    label: 'Total Sales' },
+  { id: 'labor',    label: 'Labor %' },
+  { id: 'foodcost', label: 'Food Cost %' },
+  { id: 'prime',    label: 'Prime Cost' },
+  { id: 'check',    label: 'Avg Check' },
+];
+const chartConfig = [
+  { id: 'salesChartCard',  label: 'Weekly Sales by Location' },
+  { id: 'pmixChartCard',   label: 'PMIX — Margin by Category' },
+  { id: 'laborChartCard',  label: 'Labor % by Location' },
+  { id: 'dowChartCard',    label: 'Avg Daily Sales by Day of Week' },
+];
+
+function openCustomizePanel() {
+  // Build KPI toggles
+  const kpiContainer = document.getElementById('kpiToggles');
+  kpiContainer.innerHTML = kpiConfig.map(k => {
+    const card = document.getElementById('kpi-' + k.id);
+    const visible = card ? card.style.display !== 'none' : true;
+    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
+      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleKpi('${k.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
+      ${k.label}
+    </label>`;
+  }).join('');
+
+  // Build chart toggles — add IDs to chart cards first
+  document.querySelectorAll('.chart-card').forEach((card, i) => {
+    if (chartConfig[i]) card.id = chartConfig[i].id;
+  });
+  const chartContainer = document.getElementById('chartToggles');
+  chartContainer.innerHTML = chartConfig.map(c => {
+    const card = document.getElementById(c.id);
+    const visible = card ? card.style.display !== 'none' : true;
+    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
+      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleChart('${c.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
+      ${c.label}
+    </label>`;
+  }).join('');
+
+  // Populate custom chart column selector
+  const colSelect = document.getElementById('customChartCol');
+  colSelect.innerHTML = '<option value="">Select a metric column...</option>';
+  Object.entries(uploadedData).forEach(([type, data]) => {
+    if (data && data.summary?.metricCols) {
+      data.summary.metricCols.forEach(col => {
+        colSelect.innerHTML += `<option value="${type}:${col}">${col} (from ${type})</option>`;
+      });
+    }
+  });
+
+  document.getElementById('customizeModal').classList.add('open');
+}
+
+function closeCustomizePanel() { document.getElementById('customizeModal').classList.remove('open'); }
+document.getElementById('customizeModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCustomizePanel(); });
+
+function toggleKpi(id, show) {
+  const card = document.getElementById('kpi-' + id);
+  if (card) card.style.display = show ? '' : 'none';
+}
+
+function toggleChart(id, show) {
+  const card = document.getElementById(id);
+  if (card) card.style.display = show ? '' : 'none';
+}
+
+function resetDashboard() {
+  kpiConfig.forEach(k => toggleKpi(k.id, true));
+  chartConfig.forEach(c => toggleChart(c.id, true));
+  // Remove any custom charts
+  document.querySelectorAll('.custom-chart-card').forEach(el => el.remove());
+  closeCustomizePanel();
+}
+
+function buildCustomChart() {
+  const colSelect = document.getElementById('customChartCol');
+  const chartType = document.getElementById('customChartType').value;
+  const val = colSelect.value;
+  if (!val) return;
+
+  const [type, col] = val.split(':');
+  const data = uploadedData[type];
+  if (!data) return;
+
+  const rows = data.rows;
+  const keys = Object.keys(rows[0]);
+  const locationCol = keys.find(k => ['location','store','site'].includes(k));
+  const dateCol = keys.find(k => ['date','week','period'].includes(k));
+
+  let chartData;
+  if (locationCol) {
+    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].slice(0,4);
+    const labels = rows.filter(r => r[locationCol]===locs[0]).map((_,i)=>'W'+(i+1));
+    const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981'];
+    const datasets = locs.map((loc,i) => ({
+      label: loc,
+      data: rows.filter(r=>r[locationCol]===loc).map(r=>parseFloat(r[col])||0),
+      backgroundColor: chartType==='bar' ? colors[i] : undefined,
+      borderColor: colors[i], borderWidth: 2, tension: 0.4,
+      fill: false, pointRadius: 3
+    }));
+    chartData = { labels, datasets };
+  } else {
+    const labels = rows.map((_,i)=>'W'+(i+1));
+    chartData = { labels, datasets: [{ label: col, data: rows.map(r=>parseFloat(r[col])||0), backgroundColor:'#3b82f6', borderColor:'#3b82f6', borderWidth:2, tension:0.4 }] };
+  }
+
+  // Add chart card to chart section
+  const chartSection = document.querySelector('.chart-section');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chart-row custom-chart-card';
+  wrapper.style.cssText = 'flex:0 0 180px;';
+  wrapper.innerHTML = `
+    <div class="chart-card" style="flex:1;position:relative;">
+      <div class="chart-title">${col} <button onclick="this.closest('.custom-chart-card').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 4px;" title="Remove">✕</button></div>
+      <div class="chart-wrap"><canvas id="custom-chart-${Date.now()}"></canvas></div>
+    </div>`;
+  chartSection.appendChild(wrapper);
+
+  const canvas = wrapper.querySelector('canvas');
+  new Chart(canvas, {
+    type: chartType,
+    data: chartData,
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: locationCol ? true : false, labels: { color:'#8b909e', font:{size:11} } } },
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#555b6a',font:{size:10}} },
+        y: { grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#555b6a',font:{size:10}} }
+      }
+    }
+  });
+
+  closeCustomizePanel();
+  appendMsg('ai', `Custom chart added for "${col}" from your ${type} data. You can see it at the bottom of the dashboard. Remove it anytime using the ✕ button.`);
+}
+
 initCharts();
+
+// Show mobile nav bar on small screens
+function handleResize() {
+  const mobileBar = document.querySelector('.mobile-bar');
+  if (mobileBar) {
+    mobileBar.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+  }
+}
+handleResize();
+window.addEventListener('resize', handleResize);
 </script>
 </body>
 </html>
