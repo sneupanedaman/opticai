@@ -393,7 +393,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
             <i class="ti ti-file-analytics" style="font-size:15px"></i> Generate Weekly Ops Briefing
           </button>
         </div>
-        <div class="suggested-qs">
+        <div class="suggested-qs" id="suggestedQs">
           <div class="sq-label">Try asking</div>
           <button class="sq-btn" onclick="sendSuggested(this.textContent)">Why was labor high at Midtown last week?</button>
           <button class="sq-btn" onclick="sendSuggested(this.textContent)">Which menu items are hurting margin?</button>
@@ -1123,6 +1123,7 @@ function updateDashboard(type, summary, filename) {
   }
 
   updateStatusBar();
+  refreshSuggestedQuestions();
 }
 
 function recalcPrimeCost() {
@@ -1577,6 +1578,178 @@ function buildCustomChart() {
 
   closeCustomizePanel();
   appendMsg('ai', `Custom chart added for "${col}" from your ${type} data. You can see it at the bottom of the dashboard. Remove it anytime using the ✕ button.`);
+}
+
+// ── DYNAMIC SUGGESTED QUESTIONS ──
+function generateSuggestedQuestions() {
+  const qs = [];
+  const locs = [...discoveredLocations];
+  const locCount = locs.length;
+  const locList = locCount > 0 ? locs.join(', ') : null;
+
+  // ── Sales questions ──
+  if (uploadedData.sales) {
+    if (locCount >= 2) {
+      qs.push(`Compare sales performance across all ${locCount} locations`);
+    }
+    qs.push('Which day of the week has the lowest sales and why?');
+    qs.push('What is the sales trend over the last 4 weeks?');
+    if (locCount > 0) {
+      const worstLoc = findWorstSalesLocation();
+      if (worstLoc) qs.push(`Why is ${worstLoc} underperforming the other locations?`);
+    }
+  }
+
+  // ── Labor questions ──
+  if (uploadedData.labor) {
+    const laborKpi = document.getElementById('val-labor')?.textContent;
+    const laborIsHigh = laborKpi && parseFloat(laborKpi) > 32;
+    if (laborIsHigh && locCount > 0) {
+      const highLaborLoc = findHighLaborLocation();
+      qs.push(`Why is labor running high${highLaborLoc ? ' at ' + highLaborLoc : ''}?`);
+    } else {
+      qs.push('Which location has the highest labor cost as a percentage of sales?');
+    }
+    qs.push('Where can we reduce labor hours without impacting service?');
+  }
+
+  // ── Food cost questions ──
+  if (uploadedData.foodcost) {
+    const fcKpi = document.getElementById('val-foodcost')?.textContent;
+    const fcIsHigh = fcKpi && parseFloat(fcKpi) > 30;
+    if (fcIsHigh) {
+      qs.push('Food cost is above 30% — what is driving it up?');
+    } else {
+      qs.push('Which categories are contributing most to food cost?');
+    }
+    qs.push('Which location has the best food cost control?');
+  }
+
+  // ── PMIX questions ──
+  if (uploadedData.pmix) {
+    qs.push('Which menu items are hurting our margin the most?');
+    qs.push('What are our top 5 items by revenue and how is their margin?');
+    qs.push('Which category should we promote more to improve profitability?');
+  }
+
+  // ── Prime cost questions ──
+  if (uploadedData.labor && uploadedData.foodcost) {
+    const primeKpi = document.getElementById('val-prime')?.textContent;
+    const primeIsHigh = primeKpi && parseFloat(primeKpi) > 62;
+    if (primeIsHigh) {
+      qs.push(`Prime cost is at ${primeKpi} — what is the fastest way to bring it down?`);
+    }
+  }
+
+  // ── Inventory questions ──
+  if (uploadedData.inventory) {
+    qs.push('Which inventory items have the highest waste variance?');
+    qs.push('Where are we over-ordering and what is the cost impact?');
+  }
+
+  // ── Custom dataset questions ──
+  if (uploadedData.custom) {
+    const customData = uploadedData.custom;
+    const metricCols = customData.summary?.metricCols || [];
+    const filename = customData.filename?.replace('.csv','').replace(/_/g,' ') || 'custom data';
+
+    // Generate smart questions based on detected metric columns
+    metricCols.forEach(col => {
+      const norm = col.toLowerCase();
+      if (norm.includes('satisfaction') || norm.includes('score')) {
+        const liveLocList = locs.length > 0 ? ` across ${locs.join(', ')}` : '';
+        qs.push(`Which location has the lowest guest satisfaction score${liveLocList}?`);
+        qs.push('Is there a correlation between guest satisfaction and sales performance?');
+      }
+      if (norm.includes('nps')) {
+        qs.push('What is driving NPS differences between locations?');
+        qs.push('Which location has improved NPS the most over time?');
+      }
+      if (norm.includes('complaint') || norm.includes('complaint_count')) {
+        qs.push('Which location has the most complaints and what categories are they in?');
+      }
+      if (norm.includes('wait') || norm.includes('wait_time')) {
+        qs.push('Is there a relationship between wait time and guest satisfaction scores?');
+      }
+      if (norm.includes('review')) {
+        qs.push('Which location has the best positive review rate and what can others learn from it?');
+      }
+    });
+
+    // Generic fallback for any custom dataset
+    if (metricCols.length > 0 && qs.filter(q => q.toLowerCase().includes(filename.toLowerCase().split(' ')[0])).length === 0) {
+      qs.push(`Summarize the key insights from the ${filename} data`);
+      qs.push(`Which location is performing best in the ${filename} data?`);
+    }
+  }
+
+  // ── Cross-dataset questions (only when multiple datasets loaded) ──
+  const loadedCount = Object.values(uploadedData).filter(Boolean).length;
+  if (loadedCount >= 2) {
+    if (uploadedData.sales && uploadedData.labor) {
+      qs.push('Give me a full weekly ops briefing across all loaded data');
+    }
+    if (uploadedData.custom && uploadedData.sales) {
+      qs.push('Is there a correlation between guest satisfaction and revenue?');
+    }
+  }
+
+  // ── Demo fallbacks (no data uploaded yet) ──
+  if (loadedCount === 0) {
+    return [
+      'Why was labor high at Midtown last week?',
+      'Which menu items are hurting margin?',
+      'Why did sales dip on Tuesdays?',
+      'Compare all 3 locations',
+      'Give me a weekly ops briefing'
+    ];
+  }
+
+  // Deduplicate and limit to 5
+  const unique = [...new Set(qs)].slice(0, 5);
+  return unique;
+}
+
+function findWorstSalesLocation() {
+  if (!uploadedData.sales?.rows) return null;
+  const rows = uploadedData.sales.rows;
+  const keys = Object.keys(rows[0]);
+  const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
+  const locationCol = findCol(keys, ['location','store','site','restaurant']);
+  if (!salesCol || !locationCol) return null;
+  const totals = {};
+  rows.forEach(r => {
+    const loc = r[locationCol];
+    totals[loc] = (totals[loc]||0) + (parseFloat(r[salesCol])||0);
+  });
+  return Object.entries(totals).sort((a,b)=>a[1]-b[1])[0]?.[0] || null;
+}
+
+function findHighLaborLocation() {
+  if (!uploadedData.labor?.rows) return null;
+  const rows = uploadedData.labor.rows;
+  const keys = Object.keys(rows[0]);
+  const laborPctCol = findCol(keys, ['labor pct','labor_pct','labor percent','labor %']);
+  const locationCol = findCol(keys, ['location','store','site']);
+  if (!laborPctCol || !locationCol) return null;
+  const fmt = detectPercentFormat(rows.map(r=>parseFloat(r[laborPctCol])).filter(v=>!isNaN(v)));
+  const totals = {};
+  const counts = {};
+  rows.forEach(r => {
+    const loc = r[locationCol];
+    const val = normalizePct(r[laborPctCol], fmt);
+    if (val !== null) { totals[loc] = (totals[loc]||0) + val; counts[loc] = (counts[loc]||0) + 1; }
+  });
+  const avgs = Object.entries(totals).map(([loc, sum]) => [loc, sum/counts[loc]]);
+  return avgs.sort((a,b)=>b[1]-a[1])[0]?.[0] || null;
+}
+
+function refreshSuggestedQuestions() {
+  const container = document.getElementById('suggestedQs');
+  if (!container) return;
+  const questions = generateSuggestedQuestions();
+  container.innerHTML = `<div class="sq-label">Try asking</div>` +
+    questions.map(q => `<button class="sq-btn" onclick="sendSuggested(this.textContent)">${q}</button>`).join('');
 }
 
 initCharts();
