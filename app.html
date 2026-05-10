@@ -652,15 +652,9 @@ function formatDateRange(dates) {
 }
 
 function parseCSV(text) {
-  // Handle both 
- and 
- line endings
-  const lines = text.trim().split(/
-?
-/);
+  const lines = text.trim().split(/\r?\n/);
   const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
   return lines.slice(1).filter(l => l.trim()).map(line => {
-    // Handle quoted CSV values with commas inside
     const vals = [];
     let cur = '', inQuote = false;
     for (let i = 0; i < line.length; i++) {
