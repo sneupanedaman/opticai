@@ -847,9 +847,11 @@ function summarizeData(type, rows) {
   }
 
   if (type === 'custom') {
-    const dateCol = keys.find(k => ['date','week','period','day'].includes(k));
-    const locationCol = keys.find(k => ['location','store','site','restaurant'].includes(k));
-    const metricCols = keys.filter(k => !['date','week','period','day','location','store','site','restaurant'].includes(k));
+    const dateCol = findCol(keys, ['date','day','week','period','transaction_date','sale_date']);
+    const locationCol = findCol(keys, ['location','store','site','restaurant','unit','branch']);
+    // Exclude structural columns from metrics — normalize for comparison
+    const structuralNorms = ['date','day','week','period','transaction_date','sale_date','location','store','site','restaurant','unit','branch'];
+    const metricCols = keys.filter(k => !structuralNorms.some(s => normalizeCol(k) === normalizeCol(s)));
 
     if (!dateCol || !locationCol) {
       return {
