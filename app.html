@@ -135,6 +135,22 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .send-btn i { font-size: 16px; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)} 50%{box-shadow:0 0 0 6px rgba(239,68,68,0)} }
+
+/* Chart grid toggle */
+.chart-toggle-btn { background: none; border: 1px solid var(--border); border-radius: 5px; color: var(--text3); cursor: pointer; font-size: 11px; padding: 2px 7px; display: flex; align-items: center; gap: 4px; transition: all 0.15s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+.chart-toggle-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.07); }
+.chart-toggle-btn i { font-size: 12px; }
+.chart-grid-wrap { flex: 1; overflow: auto; display: none; min-height: 0; }
+.chart-grid-wrap.visible { display: block; }
+.chart-grid-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.chart-grid-table th { background: var(--bg3); color: var(--text3); font-weight: 500; padding: 5px 8px; text-align: left; border-bottom: 1px solid var(--border); position: sticky; top: 0; white-space: nowrap; }
+.chart-grid-table td { padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text2); white-space: nowrap; }
+.chart-grid-table tr:hover td { background: var(--bg3); color: var(--text); }
+.chart-grid-table td:first-child { color: var(--text3); }
+.voice-btn { width: 40px; height: 40px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+.voice-btn:hover { background: var(--bg2); color: var(--text); border-color: var(--accent); }
+.voice-btn.recording { background: rgba(239,68,68,0.15); border-color: var(--red); color: var(--red); animation: pulse 1.5s infinite; }
 
 /* UPLOAD MODAL */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
@@ -248,8 +264,10 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
       <div id="locationsList">
         <div class="location-pill active"><div class="location-dot"></div> All Locations</div>
         <div class="location-pill"><div class="location-dot"></div> Downtown</div>
-        <div class="location-pill"><div class="location-dot amber"></div> Midtown</div>
-        <div class="location-pill"><div class="location-dot purple"></div> Westside</div>
+        <div class="location-pill"><div class="location-dot" style="background:#f59e0b"></div> Freedom Square</div>
+        <div class="location-pill"><div class="location-dot" style="background:#8b5cf6"></div> Government Square</div>
+        <div class="location-pill"><div class="location-dot" style="background:#10b981"></div> Midtown</div>
+        <div class="location-pill"><div class="location-dot" style="background:#ef4444"></div> Westside</div>
       </div>
     </div>
 
@@ -299,7 +317,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     <div class="topbar">
       <span class="topbar-title">Operations Dashboard</span>
       <span class="topbar-sep">·</span>
-      <span class="date-range" id="dateRangeLabel">Demo Data · 12 weeks</span>
+      <span class="date-range" id="dateRangeLabel">Feb 2 – Jun 22, 2026 · 21 weeks · 5 Locations</span>
       <div class="topbar-right">
         <button class="btn-sm" onclick="openCustomizePanel()"><i class="ti ti-layout-dashboard"></i> Customize</button>
         <button class="btn-sm btn-primary" onclick="openUploadModal()"><i class="ti ti-upload"></i> Upload CSV</button>
@@ -309,7 +327,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     <!-- DATA STATUS BANNER -->
     <div class="data-status-bar demo-mode" id="statusBar">
       <i class="ti ti-info-circle"></i>
-      <span id="statusText">Running on <strong>demo data</strong>. Click any dataset in the sidebar or use the Upload button to analyze your real restaurant data. Uploaded datasets will update the dashboard and AI analysis automatically.</span>
+      <span id="statusText">Running on <strong>demo data</strong> — 5 locations, 21 weeks (Feb–Jun 2026). Upload your own CSVs to analyze your real restaurant data.</span>
     </div>
 
     <div class="content">
@@ -319,63 +337,90 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           <div class="kpi-card demo-card" id="kpi-sales">
             <span class="kpi-source demo-src" id="src-sales">Demo</span>
             <div class="kpi-label">Total Sales</div>
-            <div class="kpi-value" id="val-sales">$1.24M</div>
-            <div class="kpi-delta delta-up" id="delta-sales">↑ 4.2% vs prior period</div>
+            <div class="kpi-value" id="val-sales">$9.53M</div>
+            <div class="kpi-delta delta-up" id="delta-sales">Feb 2 – Jun 22, 2026</div>
           </div>
           <div class="kpi-card demo-card" id="kpi-labor">
             <span class="kpi-source demo-src" id="src-labor">Demo</span>
             <div class="kpi-label">Labor %</div>
-            <div class="kpi-value" id="val-labor">31.8%</div>
-            <div class="kpi-delta delta-warn" id="delta-labor">↑ 2.1pts — above target</div>
+            <div class="kpi-value" id="val-labor">39.7%</div>
+            <div class="kpi-delta delta-warn" id="delta-labor">↑ above 30% target</div>
           </div>
           <div class="kpi-card demo-card" id="kpi-foodcost">
             <span class="kpi-source demo-src" id="src-foodcost">Demo</span>
             <div class="kpi-label">Food Cost %</div>
-            <div class="kpi-value" id="val-foodcost">28.4%</div>
-            <div class="kpi-delta delta-up" id="delta-foodcost">↓ 0.6pts vs prior</div>
+            <div class="kpi-value" id="val-foodcost">30.4%</div>
+            <div class="kpi-delta delta-warn" id="delta-foodcost">↑ above 28% target</div>
           </div>
           <div class="kpi-card demo-card" id="kpi-prime">
             <span class="kpi-source demo-src" id="src-prime">Demo</span>
             <div class="kpi-label">Prime Cost</div>
-            <div class="kpi-value" id="val-prime">60.2%</div>
-            <div class="kpi-delta delta-warn" id="delta-prime">↑ 1.5pts — watch closely</div>
+            <div class="kpi-value" id="val-prime">70.1%</div>
+            <div class="kpi-delta delta-down" id="delta-prime">↑ above 65% benchmark</div>
           </div>
           <div class="kpi-card demo-card" id="kpi-check">
             <span class="kpi-source demo-src" id="src-check">Demo</span>
             <div class="kpi-label">Avg Check</div>
-            <div class="kpi-value" id="val-check">$18.40</div>
-            <div class="kpi-delta delta-up" id="delta-check">↑ $0.80 vs prior</div>
+            <div class="kpi-value" id="val-check">$27.60</div>
+            <div class="kpi-delta delta-up" id="delta-check">5 locations · 21 weeks</div>
           </div>
         </div>
 
         <!-- CHARTS -->
         <div class="chart-section">
           <div class="chart-row">
-            <div class="chart-card wide">
+            <div class="chart-card wide" id="card-salesChart">
               <div class="chart-title">
                 Weekly sales by location
-                <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace" id="salesChartSrc">demo data</span>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace" id="salesChartSrc">demo data</span>
+                  <button class="chart-toggle-btn" onclick="toggleChartGrid('salesChart')" id="toggle-salesChart"><i class="ti ti-table"></i> Grid</button>
+                </div>
               </div>
               <div class="chart-legend" id="salesLegend">
                 <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> <span>Downtown</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> <span>Midtown</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> <span>Westside</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> <span>Freedom Square</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> <span>Government Square</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> <span>Midtown</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> <span>Westside</span></div>
               </div>
-              <div class="chart-wrap"><canvas id="salesChart"></canvas></div>
+              <div class="chart-wrap" id="wrap-salesChart"><canvas id="salesChart"></canvas></div>
+              <div class="chart-grid-wrap" id="grid-salesChart"></div>
             </div>
-            <div class="chart-card narrow">
-              <div class="chart-title">PMIX — margin by category <span style="font-size:10px;color:var(--text3)" id="pmixSrc">demo</span></div>
-              <div class="chart-wrap"><canvas id="pmixChart"></canvas></div>
+            <div class="chart-card narrow" id="card-pmixChart">
+              <div class="chart-title">
+                PMIX — margin by category
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:10px;color:var(--text3)" id="pmixSrc">demo</span>
+                  <button class="chart-toggle-btn" onclick="toggleChartGrid('pmixChart')" id="toggle-pmixChart"><i class="ti ti-table"></i> Grid</button>
+                </div>
+              </div>
+              <div class="chart-wrap" id="wrap-pmixChart"><canvas id="pmixChart"></canvas></div>
+              <div class="chart-grid-wrap" id="grid-pmixChart"></div>
             </div>
           </div>
           <div class="chart-row">
-            <div class="chart-card" style="flex:1">
-              <div class="chart-title">Labor % by location <span style="font-size:10px;color:var(--text3)" id="laborSrc">demo · 30% target</span></div>
-              <div class="chart-wrap"><canvas id="laborChart"></canvas></div>
+            <div class="chart-card" style="flex:1" id="card-laborChart">
+              <div class="chart-title">
+                Labor % by location
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:10px;color:var(--text3)" id="laborSrc">demo · 30% target</span>
+                  <button class="chart-toggle-btn" onclick="toggleChartGrid('laborChart')" id="toggle-laborChart"><i class="ti ti-table"></i> Grid</button>
+                </div>
+              </div>
+              <div class="chart-wrap" id="wrap-laborChart"><canvas id="laborChart"></canvas></div>
+              <div class="chart-grid-wrap" id="grid-laborChart"></div>
             </div>
-            <div class="chart-card" style="flex:1">
-              <div class="chart-title">Avg daily sales by day of week <span style="font-size:10px;color:var(--text3)" id="dowSrc">demo</span></div>
-              <div class="chart-wrap"><canvas id="dowChart"></canvas></div>
+            <div class="chart-card" style="flex:1" id="card-dowChart">
+              <div class="chart-title">
+                Avg daily sales by day of week
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:10px;color:var(--text3)" id="dowSrc">demo</span>
+                  <button class="chart-toggle-btn" onclick="toggleChartGrid('dowChart')" id="toggle-dowChart"><i class="ti ti-table"></i> Grid</button>
+                </div>
+              </div>
+              <div class="chart-wrap" id="wrap-dowChart"><canvas id="dowChart"></canvas></div>
+              <div class="chart-grid-wrap" id="grid-dowChart"></div>
             </div>
           </div>
         </div>
@@ -387,6 +432,9 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           <i class="ti ti-message-bolt"></i>
           <span class="chat-header-text">AI Analyst</span>
           <span class="chat-header-badge">● Live</span>
+          <button onclick="clearChat()" title="Clear chat" style="margin-left:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:color 0.15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">
+            <i class="ti ti-trash"></i>
+          </button>
         </div>
         <div style="padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0;">
           <button id="briefingBtn" onclick="generateBriefing()" style="width:100%;padding:9px 14px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:8px;color:#93c5fd;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;transition:all 0.15s;">
@@ -403,10 +451,13 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
         <div class="messages" id="messages">
           <div class="msg msg-ai" id="welcomeMsg">
             <div class="msg-label">OpticAI</div>
-            <div class="msg-bubble">Hey! I've analyzed your last 12 weeks across all 3 locations. Labor is running hot at Midtown and Tuesday sales are consistently 18% below average. You can also upload your own CSV data — I'll analyze your real numbers. Ask me anything!</div>
+            <div class="msg-bubble">Hey! I've loaded 5 locations across 21 weeks of data (Feb–Jun 2026) — sales, labor, food cost, PMIX, inventory, and guest satisfaction. A few things stand out immediately: labor is running ~10pts above target at all locations, and Westside needs attention. Ask me anything, or try one of the suggested questions.</div>
           </div>
         </div>
         <div class="chat-input-row">
+          <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Voice input">
+            <i class="ti ti-microphone" id="voiceIcon"></i>
+          </button>
           <textarea class="chat-input" id="chatInput" placeholder="Ask about your operations..." rows="1" onkeydown="handleKey(event)"></textarea>
           <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="ti ti-send"></i></button>
         </div>
@@ -522,17 +573,21 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 // ---- STATE ----
 const uploadedData = { sales: null, labor: null, foodcost: null, pmix: null, inventory: null, custom: null };
 
-// ---- DEMO DATA ----
+// ---- DEMO DATA (5 locations, 21 weeks, Feb–Jun 2026) ----
 const DEMO = {
-  weeks: ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'],
-  salesDowntown: [42,45,43,48,50,47,52,49,51,46,53,55],
-  salesMidtown:  [38,36,39,35,33,37,34,36,35,38,36,34],
-  salesWestside: [28,30,29,32,31,33,30,34,32,31,35,36],
-  laborDowntown: [29,30,28,29,30,28,29,31,30,29,30,29],
-  laborMidtown:  [30,31,32,33,36,34,35,38,37,38,37,38],
-  laborWestside: [28,27,29,28,30,29,28,30,29,30,29,31],
-  dow: [8200,6700,8100,9100,12400,15200,11800],
-  pmix: { labels: ['Entrees 38%','Beverages 22%','Apps 18%','Desserts 10%','Alcohol 12%'], data: [38,22,18,10,12] }
+  weeks: ["Feb 2","Feb 9","Feb 16","Feb 23","Mar 2","Mar 9","Mar 16","Mar 23","Mar 30","Apr 6","Apr 13","Apr 20","Apr 27","May 4","May 11","May 18","May 25","Jun 1","Jun 8","Jun 15","Jun 22"],
+  salesDowntown:       [79.6,94.8,97.8,86.0,86.9,97.0,88.1,92.0,90.9,95.4,96.1,97.0,95.9,88.5,106.4,92.6,110.9,117.0,103.3,122.7,99.4],
+  salesFreedomSq:      [80.6,84.2,80.5,92.2,89.1,85.2,92.7,94.9,94.3,88.9,90.9,93.2,94.3,84.6,100.1,94.6,87.1,91.3,94.8,92.8,94.2],
+  salesGovernmentSq:   [78.7,97.2,104.8,106.1,96.3,107.2,92.0,96.7,95.7,112.1,100.0,108.7,99.0,98.0,107.8,103.0,107.0,108.6,111.8,115.4,87.6],
+  salesMidtown:        [81.9,84.3,79.2,94.2,87.5,94.5,85.3,75.8,99.5,85.1,90.3,85.3,93.0,81.1,85.5,88.3,94.6,95.1,87.3,100.3,83.7],
+  salesWestside:       [58.8,74.6,71.3,74.9,74.2,78.9,77.4,70.0,75.3,72.4,69.9,78.6,78.9,80.1,85.0,83.1,80.2,83.9,78.1,84.2,74.7],
+  laborDowntown:       [39.6,35.7,39.8,42.8,45.2,37.9,40.5,40.6,41.9,38.7,36.3,41.1,37.6,49.4,38.4,38.0,32.1,37.4,32.5,29.7,37.4],
+  laborFreedomSq:      [37.8,45.0,44.3,41.7,39.2,42.1,40.9,38.1,36.7,42.8,39.0,42.8,39.0,40.0,36.9,39.0,45.4,40.0,39.6,40.1,35.4],
+  laborGovernmentSq:   [42.7,40.9,36.6,38.3,44.8,39.9,42.8,42.3,39.2,35.5,41.9,36.3,40.4,39.1,40.5,39.8,36.3,35.8,39.4,39.5,45.3],
+  laborMidtown:        [33.1,42.3,43.4,40.5,37.1,38.0,39.7,47.6,35.2,40.8,35.6,47.9,36.0,41.1,43.9,43.0,37.8,38.1,40.7,36.1,36.8],
+  laborWestside:       [42.1,38.9,40.1,34.4,40.5,40.3,39.7,47.2,39.2,44.4,45.4,43.3,41.4,39.4,39.9,42.9,39.6,38.3,42.8,39.8,37.4],
+  dow: [12543,12470,12739,12670,15422,15461,10546],
+  pmix: { labels: ['Entree 79.5%','Beverage 10.5%','Appetizer 5.6%','Side 4.5%'], data: [79.5,10.5,5.6,4.5] }
 };
 
 // ---- CHARTS ----
@@ -542,9 +597,11 @@ function initCharts() {
   salesChart = new Chart(document.getElementById('salesChart'), {
     type: 'line',
     data: { labels: DEMO.weeks, datasets: [
-      { label: 'Downtown', data: DEMO.salesDowntown, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 },
-      { label: 'Midtown',  data: DEMO.salesMidtown,  borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.06)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 },
-      { label: 'Westside', data: DEMO.salesWestside, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.06)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 },
+      { label: 'Downtown',         data: DEMO.salesDowntown,    borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.07)', tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2 },
+      { label: 'Freedom Square',   data: DEMO.salesFreedomSq,   borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.06)', tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2 },
+      { label: 'Government Square',data: DEMO.salesGovernmentSq,borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.06)', tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2 },
+      { label: 'Midtown',          data: DEMO.salesMidtown,     borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.05)', tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2 },
+      { label: 'Westside',         data: DEMO.salesWestside,    borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.05)',  tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2 },
     ]},
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
       scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555b6a', font: { size: 11 } } },
@@ -553,7 +610,7 @@ function initCharts() {
 
   pmixChart = new Chart(document.getElementById('pmixChart'), {
     type: 'doughnut',
-    data: { labels: DEMO.pmix.labels, datasets: [{ data: DEMO.pmix.data, backgroundColor: ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444'], borderWidth: 0, hoverOffset: 6 }] },
+    data: { labels: DEMO.pmix.labels, datasets: [{ data: DEMO.pmix.data, backgroundColor: ['#3b82f6','#10b981','#f59e0b','#8b5cf6'], borderWidth: 0, hoverOffset: 6 }] },
     options: { responsive: true, maintainAspectRatio: false, cutout: '62%',
       plugins: { legend: { position: 'bottom', labels: { color: '#8b909e', font: { size: 11 }, boxWidth: 10, padding: 8 } } } }
   });
@@ -561,9 +618,11 @@ function initCharts() {
   laborChart = new Chart(document.getElementById('laborChart'), {
     type: 'line',
     data: { labels: DEMO.weeks, datasets: [
-      { label: 'Downtown', data: DEMO.laborDowntown, borderColor: '#3b82f6', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
-      { label: 'Midtown',  data: DEMO.laborMidtown,  borderColor: '#f59e0b', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
-      { label: 'Westside', data: DEMO.laborWestside, borderColor: '#8b5cf6', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
+      { label: 'Downtown',         data: DEMO.laborDowntown,     borderColor: '#3b82f6', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
+      { label: 'Freedom Square',   data: DEMO.laborFreedomSq,    borderColor: '#f59e0b', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
+      { label: 'Government Square',data: DEMO.laborGovernmentSq, borderColor: '#8b5cf6', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
+      { label: 'Midtown',          data: DEMO.laborMidtown,      borderColor: '#10b981', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
+      { label: 'Westside',         data: DEMO.laborWestside,     borderColor: '#ef4444', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
     ]},
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
       scales: { x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 } } },
@@ -573,7 +632,7 @@ function initCharts() {
   dowChart = new Chart(document.getElementById('dowChart'), {
     type: 'bar',
     data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-      datasets: [{ data: DEMO.dow, backgroundColor: ['#3b82f6','#ef4444','#3b82f6','#3b82f6','#10b981','#10b981','#3b82f6'], borderRadius: 5, borderWidth: 0 }] },
+      datasets: [{ data: DEMO.dow, backgroundColor: ['#3b82f6','#3b82f6','#3b82f6','#3b82f6','#10b981','#10b981','#ef4444'], borderRadius: 5, borderWidth: 0 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
       scales: { x: { grid: { display: false }, ticks: { color: '#555b6a', font: { size: 11 } } },
                 y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 }, callback: v => '$' + (v/1000).toFixed(0) + 'K' } } } }
@@ -1264,19 +1323,19 @@ document.getElementById('uploadModal').addEventListener('click', e => { if (e.ta
 // ---- AI CHAT ----
 const DEMO_CONTEXT = `You are OpticAI, an expert restaurant operations analyst AI. You have access to 12 weeks of operational data (Feb 3 – Apr 27, 2025) for a 3-location casual dining restaurant group.
 
-LOCATIONS: Downtown, Midtown, Westside
+LOCATIONS: Downtown, Freedom Square, Government Square, Midtown, Westside (5 locations)
 
-SALES: Downtown $42K–$55K/wk trending up. Midtown $33K–$39K/wk trending DOWN. Westside $28K–$36K/wk growing. Total 12-week: $1.24M.
+SALES: 21 weeks (Feb 2–Jun 22 2026), $9.53M total across 5 locations. Downtown $79K–$123K/wk trending up strongly. Government Square $78K–$115K/wk strong performer. Freedom Square $80K–$100K/wk consistent. Midtown $75K–$100K/wk. Westside $58K–$85K/wk lowest volume. Fri-Sat peak days ($15.4K avg); Sunday weakest ($10.5K avg).
 
-LABOR: Blended 31.8% (target 30%). Downtown stable 29–31%. Midtown SPIKING to 38% W8–W12 on Tue-Wed — root cause is new kitchen manager overscheduling since W6. Westside stable 27–31%.
+LABOR: Blended 39.7% (target 30%) — significantly above target across all 5 locations. Downtown avg 39.0% (spikes to 49.4% in May 4 week — anomaly). Freedom Square avg 40.3%. Government Square avg 39.9%. Midtown avg 39.8%. Westside avg 40.7% (highest). All locations running ~10pts above 30% target — systemic overstaffing issue.
 
-FOOD COST: 28.4% blended, down 0.6pts. Chicken over-ordered 12% across all locations ($2,800–$3,500/mo savings opportunity). Salmon 38% FC but strong dollar margin. Kids meals low FC but suppressed price.
+FOOD COST: 30.4% blended average, above 28% target. Actual food cost tracked via Opening Inventory + Purchases + Transfers In/Out - Ending Inventory formula. Above-target food cost combined with above-target labor makes prime cost a critical issue.
 
-PMIX: Entrees 38%, Beverages 22%, Apps 18%, Desserts 10%, Alcohol 12%. Margin killers: Classic Burger (34% FC, low attach). Margin heroes: cocktails (18% FC), Salmon, Flatbreads. Dessert attach only 14%.
+PMIX: Entree 79.9% of sales mix, Beverage 10.1%, Appetizer 5.5%, Side 4.4%. Heavy entree concentration — beverage and appetizer attach rates are opportunities to improve check average and margin.
 
-SALES BY DOW: Sat $15.2K peak, Fri $12.4K. Tuesday 18% below avg — structural post-COVID office density loss, permanent shift.
+SALES BY DAY: Saturday $15,434 peak, Friday $15,021 strong. Sunday $10,770 is the weakest day (30% below Saturday). Mon–Thu fairly consistent at $12,400–$12,672. No single day dramatically underperforms — pattern is weekend-strong, Sunday-soft.
 
-PRIME COST: 60.2% (industry benchmark 55–60%, at high end). Fixing Midtown labor saves ~1.5pts, chicken waste ~0.4pts → could reach ~58.3%.
+PRIME COST: 70.1% (labor 39.7% + food cost 30.4%). Industry benchmark 55–65% for full-service. This group is ~5–15pts above benchmark. Industry benchmark 55–65% for full-service. This group is significantly above benchmark — labor is the primary driver.
 
 ANOMALIES: 1) Midtown Tue-Wed labor spike 3 consecutive weeks. 2) Tuesday structural dip. 3) Chicken over-ordering all 3 locations.
 
@@ -1750,6 +1809,175 @@ function refreshSuggestedQuestions() {
   const questions = generateSuggestedQuestions();
   container.innerHTML = `<div class="sq-label">Try asking</div>` +
     questions.map(q => `<button class="sq-btn" onclick="sendSuggested(this.textContent)">${q}</button>`).join('');
+}
+
+// ── VOICE INPUT ──
+let recognition = null;
+let isRecording = false;
+
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    appendMsg('ai', "Voice input isn't supported in this browser. Try Chrome on desktop.");
+    return;
+  }
+
+  if (isRecording) {
+    recognition?.stop();
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  const voiceBtn = document.getElementById('voiceBtn');
+  const voiceIcon = document.getElementById('voiceIcon');
+  const input = document.getElementById('chatInput');
+
+  recognition.onstart = () => {
+    isRecording = true;
+    voiceBtn.classList.add('recording');
+    voiceIcon.className = 'ti ti-microphone-off';
+    input.placeholder = 'Listening...';
+  };
+
+  recognition.onresult = (e) => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+    input.value = transcript;
+    // Auto-send if final result
+    if (e.results[e.results.length - 1].isFinal) {
+      setTimeout(() => sendMessage(), 400);
+    }
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error !== 'aborted') appendMsg('ai', `Voice error: ${e.error}. Please try again.`);
+    stopRecording();
+  };
+
+  recognition.onend = () => stopRecording();
+
+  recognition.start();
+}
+
+function stopRecording() {
+  isRecording = false;
+  const voiceBtn = document.getElementById('voiceBtn');
+  const voiceIcon = document.getElementById('voiceIcon');
+  const input = document.getElementById('chatInput');
+  if (voiceBtn) voiceBtn.classList.remove('recording');
+  if (voiceIcon) voiceIcon.className = 'ti ti-microphone';
+  if (input) input.placeholder = 'Ask about your operations...';
+}
+
+// ── CLEAR CHAT ──
+function clearChat() {
+  conversationHistory = [];
+  const messagesEl = document.getElementById('messages');
+  if (messagesEl) {
+    messagesEl.innerHTML = `
+      <div class="msg msg-ai" id="welcomeMsg">
+        <div class="msg-label">OpticAI</div>
+        <div class="msg-bubble">Chat cleared. Ask me anything about your operations data.</div>
+      </div>`;
+  }
+}
+
+// ── CHART ↔ GRID TOGGLE ──
+const chartGridState = {};
+
+function toggleChartGrid(chartId) {
+  const wrap    = document.getElementById('wrap-' + chartId);
+  const grid    = document.getElementById('grid-' + chartId);
+  const btn     = document.getElementById('toggle-' + chartId);
+  const legend  = document.getElementById('salesLegend'); // only for sales
+
+  if (!wrap || !grid || !btn) return;
+
+  const isGrid = chartGridState[chartId];
+  chartGridState[chartId] = !isGrid;
+
+  if (!isGrid) {
+    // Switch to grid
+    wrap.style.display = 'none';
+    if (chartId === 'salesChart' && legend) legend.style.display = 'none';
+    grid.classList.add('visible');
+    btn.innerHTML = '<i class="ti ti-chart-line"></i> Chart';
+    grid.innerHTML = buildGridHTML(chartId);
+  } else {
+    // Switch back to chart
+    wrap.style.display = '';
+    if (chartId === 'salesChart' && legend) legend.style.display = '';
+    grid.classList.remove('visible');
+    btn.innerHTML = '<i class="ti ti-table"></i> Grid';
+  }
+}
+
+function buildGridHTML(chartId) {
+  const chartObj = { salesChart, pmixChart, laborChart, dowChart }[chartId];
+  if (!chartObj) return '<div style="padding:12px;color:var(--text3);font-size:12px">No data available</div>';
+
+  const { labels, datasets } = chartObj.data;
+
+  if (chartId === 'pmixChart') {
+    // Doughnut — single dataset, show label + value + % 
+    const total = datasets[0].data.reduce((a,b)=>a+b,0);
+    let html = '<table class="chart-grid-table"><thead><tr><th>Category</th><th>% of Mix</th></tr></thead><tbody>';
+    labels.forEach((lbl, i) => {
+      const val = datasets[0].data[i];
+      html += `<tr><td>${lbl.replace(/ [\d.]+%$/, '')}</td><td>${typeof val === 'number' ? val.toFixed(1)+'%' : val}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    return html;
+  }
+
+  if (chartId === 'dowChart') {
+    // Bar — days of week
+    const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    let html = '<table class="chart-grid-table"><thead><tr><th>Day</th><th>Avg Sales</th></tr></thead><tbody>';
+    labels.forEach((lbl, i) => {
+      const val = datasets[0].data[i];
+      const fmt = typeof val === 'number' ? '$' + val.toLocaleString() : val;
+      html += `<tr><td>${days[i] || lbl}</td><td>${fmt}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    return html;
+  }
+
+  // Multi-line charts (sales, labor)
+  const isLabor = chartId === 'laborChart';
+  const isSales = chartId === 'salesChart';
+
+  let html = '<table class="chart-grid-table"><thead><tr><th>Week</th>';
+  datasets.forEach(ds => { html += `<th>${ds.label}</th>`; });
+  if (datasets.length > 1) html += '<th>Total / Avg</th>';
+  html += '</tr></thead><tbody>';
+
+  labels.forEach((lbl, i) => {
+    html += `<tr><td>${lbl}</td>`;
+    const rowVals = datasets.map(ds => ds.data[i]);
+    rowVals.forEach(val => {
+      const fmt = val === null || val === undefined ? '—'
+        : isSales ? '$' + (val).toFixed(1) + 'K'
+        : isLabor ? val.toFixed(1) + '%'
+        : val;
+      html += `<td>${fmt}</td>`;
+    });
+    if (datasets.length > 1) {
+      const nums = rowVals.filter(v => v !== null && v !== undefined);
+      const agg = nums.length ? (isSales
+        ? '$' + nums.reduce((a,b)=>a+b,0).toFixed(1) + 'K'
+        : (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1) + '%')
+        : '—';
+      html += `<td style="color:var(--text);font-weight:500">${agg}</td>`;
+    }
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  return html;
 }
 
 initCharts();
