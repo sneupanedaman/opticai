@@ -245,10 +245,12 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 
     <div class="sidebar-section">
       <div class="sidebar-label">Locations</div>
-      <div class="location-pill active"><div class="location-dot"></div> All Locations</div>
-      <div class="location-pill"><div class="location-dot"></div> Downtown</div>
-      <div class="location-pill"><div class="location-dot amber"></div> Midtown</div>
-      <div class="location-pill"><div class="location-dot purple"></div> Westside</div>
+      <div id="locationsList">
+        <div class="location-pill active"><div class="location-dot"></div> All Locations</div>
+        <div class="location-pill"><div class="location-dot"></div> Downtown</div>
+        <div class="location-pill"><div class="location-dot amber"></div> Midtown</div>
+        <div class="location-pill"><div class="location-dot purple"></div> Westside</div>
+      </div>
     </div>
 
     <div class="dataset-list">
@@ -297,7 +299,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     <div class="topbar">
       <span class="topbar-title">Operations Dashboard</span>
       <span class="topbar-sep">·</span>
-      <span class="date-range" id="dateRangeLabel">Feb 3 – Apr 27, 2025 · 12 weeks · Demo Data</span>
+      <span class="date-range" id="dateRangeLabel">Demo Data · 12 weeks</span>
       <div class="topbar-right">
         <button class="btn-sm" onclick="openCustomizePanel()"><i class="ti ti-layout-dashboard"></i> Customize</button>
         <button class="btn-sm btn-primary" onclick="openUploadModal()"><i class="ti ti-upload"></i> Upload CSV</button>
@@ -354,10 +356,10 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
                 Weekly sales by location
                 <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace" id="salesChartSrc">demo data</span>
               </div>
-              <div class="chart-legend">
-                <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> <span id="leg1">Downtown</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> <span id="leg2">Midtown</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> <span id="leg3">Westside</span></div>
+              <div class="chart-legend" id="salesLegend">
+                <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> <span>Downtown</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> <span>Midtown</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> <span>Westside</span></div>
               </div>
               <div class="chart-wrap"><canvas id="salesChart"></canvas></div>
             </div>
@@ -578,16 +580,126 @@ function initCharts() {
   });
 }
 
-// ---- CSV PARSING ----
+// ---- CSV PARSING ENGINE (self-learning, schema-agnostic) ----
+
+// Normalize a column name to a canonical key
+function normalizeCol(name) {
+  return name.trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')  // spaces, %, /, special chars → underscore
+    .replace(/^_|_$/g, '');        // trim leading/trailing underscores
+}
+
+// Find a column from a set of aliases (all normalized)
+function findCol(keys, aliases) {
+  const norm = keys.map(k => ({ orig: k, norm: normalizeCol(k) }));
+  for (const alias of aliases) {
+    const hit = norm.find(k => k.norm === normalizeCol(alias) || k.norm.includes(normalizeCol(alias)));
+    if (hit) return hit.orig;
+  }
+  return null;
+}
+
+// Detect if numeric values are stored as decimals (0.30) vs percentages (30)
+function detectPercentFormat(vals) {
+  const nums = vals.filter(v => !isNaN(v));
+  if (nums.length === 0) return 'unknown';
+  const allBelow2 = nums.every(v => v < 2.0);
+  return allBelow2 ? 'decimal' : 'percent';
+}
+
+// Normalize a percent value to display format
+function normalizePct(val, format) {
+  const n = parseFloat(val);
+  if (isNaN(n)) return null;
+  return format === 'decimal' ? n * 100 : n;
+}
+
+// Aggregate daily rows to weekly for cleaner charts
+function aggregateToWeekly(rows, dateCol, locationCol, valueCol, method = 'sum') {
+  const weekMap = {};
+  rows.forEach(r => {
+    const d = new Date(r[dateCol]);
+    if (isNaN(d)) return;
+    // Get week start (Monday)
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    const weekStart = new Date(d.setDate(diff));
+    const weekKey = weekStart.toISOString().slice(0, 10);
+    const loc = locationCol ? r[locationCol] : 'All';
+    const key = `${weekKey}__${loc}`;
+    if (!weekMap[key]) weekMap[key] = { week: weekKey, location: loc, values: [], count: 0 };
+    const val = parseFloat(r[valueCol]);
+    if (!isNaN(val)) { weekMap[key].values.push(val); weekMap[key].count++; }
+  });
+  return Object.values(weekMap).map(w => ({
+    week: w.week,
+    location: w.location,
+    value: method === 'avg' ? w.values.reduce((a,b)=>a+b,0)/w.values.length : w.values.reduce((a,b)=>a+b,0),
+    count: w.count
+  })).sort((a,b) => a.week.localeCompare(b.week) || a.location.localeCompare(b.location));
+}
+
+// Format date range string from array of date strings
+function formatDateRange(dates) {
+  if (!dates.length) return '';
+  const sorted = dates.filter(Boolean).sort();
+  const fmt = d => { const dt = new Date(d); return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); };
+  const start = fmt(sorted[0]);
+  const end = fmt(sorted[sorted.length - 1]);
+  // Count unique weeks
+  const weeks = new Set(sorted.map(d => { const dt = new Date(d); const day = dt.getDay(); dt.setDate(dt.getDate() - day + (day===0?-6:1)); return dt.toISOString().slice(0,10); }));
+  return `${start} – ${end} · ${weeks.size} weeks`;
+}
+
 function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
+  // Handle both 
+ and 
+ line endings
+  const lines = text.trim().split(/
+?
+/);
+  const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
   return lines.slice(1).filter(l => l.trim()).map(line => {
-    const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+    // Handle quoted CSV values with commas inside
+    const vals = [];
+    let cur = '', inQuote = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQuote = !inQuote; }
+      else if (line[i] === ',' && !inQuote) { vals.push(cur.trim()); cur = ''; }
+      else { cur += line[i]; }
+    }
+    vals.push(cur.trim());
     const obj = {};
-    headers.forEach((h, i) => obj[h] = vals[i] || '');
+    rawHeaders.forEach((h, i) => obj[h] = (vals[i] || '').replace(/^"|"$/g, ''));
     return obj;
   });
+}
+
+// Global state for discovered locations and date range
+let discoveredLocations = new Set();
+let discoveredDates = [];
+
+function updateGlobalMetadata(rows, locationCol, dateCol) {
+  if (locationCol) rows.forEach(r => { if (r[locationCol]) discoveredLocations.add(r[locationCol]); });
+  if (dateCol) rows.forEach(r => { if (r[dateCol]) discoveredDates.push(r[dateCol]); });
+  renderDynamicLocations();
+  updateDateRangeLabel();
+}
+
+function renderDynamicLocations() {
+  const locs = [...discoveredLocations].sort();
+  if (locs.length === 0) return;
+  const colors = ['#10b981','#f59e0b','#8b5cf6','#3b82f6','#ef4444','#06b6d4','#f97316'];
+  const container = document.getElementById('locationsList');
+  if (!container) return;
+  container.innerHTML = `<div class="location-pill active"><div class="location-dot"></div> All Locations</div>` +
+    locs.map((loc, i) => `<div class="location-pill"><div class="location-dot" style="background:${colors[i % colors.length]}"></div> ${loc}</div>`).join('');
+}
+
+function updateDateRangeLabel() {
+  if (discoveredDates.length === 0) return;
+  const label = document.getElementById('dateRangeLabel');
+  if (label) label.textContent = formatDateRange(discoveredDates) + ' · Live Data';
 }
 
 function summarizeData(type, rows) {
@@ -595,14 +707,29 @@ function summarizeData(type, rows) {
   const keys = Object.keys(rows[0]);
 
   if (type === 'sales') {
-    const salesCol = keys.find(k => ['sales','revenue','net_sales','total_sales','amount'].includes(k));
-    const locationCol = keys.find(k => ['location','store','site','restaurant'].includes(k));
-    const dateCol = keys.find(k => ['date','week','period'].includes(k));
-    const checksCol = keys.find(k => ['checks','covers','transactions','count'].includes(k));
+    const salesCol = findCol(keys, ['net sales','net_sales','revenue','gross sales','gross_sales','sales','amount','total sales','total_sales']);
+    const locationCol = findCol(keys, ['location','store','site','restaurant','unit','branch']);
+    const dateCol = findCol(keys, ['date','day','week','period','transaction_date','sale_date']);
+    const checkCountCol = findCol(keys, ['check count','check_count','checks','ticket count','ticket_count','transactions','transaction count']);
+    const avgCheckCol = findCol(keys, ['average check','average_check','avg check','avg_check','check average','per check','check_avg']);
+
+    if (!salesCol) return { summary: `Could not detect a sales/revenue column. Found: ${keys.join(', ')}`, kpis: {}, error: 'no_sales_col' };
+
+    updateGlobalMetadata(rows, locationCol, dateCol);
 
     const totalSales = rows.reduce((s, r) => s + (parseFloat(r[salesCol]) || 0), 0);
-    const locations = locationCol ? [...new Set(rows.map(r => r[locationCol]).filter(Boolean))] : ['All locations'];
-    const avgCheck = checksCol ? totalSales / rows.reduce((s,r) => s + (parseFloat(r[checksCol])||0), 0) : null;
+    const locations = locationCol ? [...new Set(rows.map(r => r[locationCol]).filter(Boolean))] : ['All'];
+    
+    // Avg check: prefer calculation from totals, fall back to column average
+    let avgCheck = null;
+    if (checkCountCol) {
+      const totalChecks = rows.reduce((s,r) => s + (parseFloat(r[checkCountCol])||0), 0);
+      if (totalChecks > 0) avgCheck = totalSales / totalChecks;
+    } else if (avgCheckCol) {
+      // Weighted average using sales as weight
+      const weighted = rows.reduce((s,r) => s + (parseFloat(r[avgCheckCol])||0) * (parseFloat(r[salesCol])||0), 0);
+      avgCheck = weighted / totalSales;
+    }
 
     const locSummary = locations.map(loc => {
       const locRows = locationCol ? rows.filter(r => r[locationCol] === loc) : rows;
@@ -610,79 +737,117 @@ function summarizeData(type, rows) {
       return `${loc}: $${(locTotal/1000).toFixed(1)}K total`;
     }).join(', ');
 
+    // Determine if daily data (aggregate to weekly for chart)
+    const uniqueDates = dateCol ? [...new Set(rows.map(r => r[dateCol]))] : [];
+    const shouldAggregate = locationCol && uniqueDates.length > (locations.length * 14);
+
     return {
-      summary: `Total sales: $${(totalSales/1000).toFixed(1)}K across ${rows.length} periods. Locations: ${locSummary}.${avgCheck ? ` Avg check: $${avgCheck.toFixed(2)}.` : ''}`,
-      kpis: { 
+      summary: `Total net sales: $${(totalSales/1000).toFixed(1)}K. ${locations.length} location(s): ${locSummary}. Date range: ${dateCol ? formatDateRange(uniqueDates) : 'unknown'}.${avgCheck ? ` Avg check: $${avgCheck.toFixed(2)}.` : ''}`,
+      kpis: {
         sales: `$${totalSales >= 1000000 ? (totalSales/1000000).toFixed(2)+'M' : (totalSales/1000).toFixed(0)+'K'}`,
         check: avgCheck ? `$${avgCheck.toFixed(2)}` : null
       },
-      chartData: buildSalesChart(rows, salesCol, locationCol, dateCol),
-      locations
+      chartData: buildSalesChart(rows, salesCol, locationCol, dateCol, shouldAggregate),
+      locations,
+      rawSalesByDateLoc: buildSalesLookup(rows, salesCol, locationCol, dateCol)
     };
   }
 
   if (type === 'labor') {
-    const laborPctCol = keys.find(k => ['labor_pct','labor_percent','labor_%','labor_percentage'].includes(k));
-    const laborCostCol = keys.find(k => ['labor_cost','labor','wages','total_labor'].includes(k));
-    const locationCol = keys.find(k => ['location','store','site'].includes(k));
-    const dateCol = keys.find(k => ['date','week','period'].includes(k));
+    const locationCol = findCol(keys, ['location','store','site','restaurant','unit','branch']);
+    const dateCol = findCol(keys, ['date','day','week','period']);
+    const laborPctCol = findCol(keys, ['labor pct','labor_pct','labor percent','labor_percent','labor %','labor_%','labor cost %','labor_cost_pct']);
+    const laborCostCol = findCol(keys, ['labor cost','labor_cost','total labor','wages','wage cost','labor dollars']);
+
+    updateGlobalMetadata(rows, locationCol, dateCol);
 
     let avgLabor = null;
+    let laborPctFormat = 'percent';
+
     if (laborPctCol) {
       const vals = rows.map(r => parseFloat(r[laborPctCol])).filter(v => !isNaN(v));
-      avgLabor = vals.reduce((a,b) => a+b, 0) / vals.length;
+      laborPctFormat = detectPercentFormat(vals);
+      const normalized = vals.map(v => normalizePct(v, laborPctFormat));
+      avgLabor = normalized.reduce((a,b)=>a+b,0) / normalized.length;
+    } else if (laborCostCol) {
+      // No pct column — store cost for cross-calculation with sales later
+      avgLabor = null; // will be calculated in recalcPrimeCost
     }
 
+    const locations = locationCol ? [...new Set(rows.map(r => r[locationCol]).filter(Boolean))] : ['All'];
+    const totalCost = laborCostCol ? rows.reduce((s,r)=>s+(parseFloat(r[laborCostCol])||0),0) : null;
+
     return {
-      summary: `Labor data: ${rows.length} records.${avgLabor ? ` Avg labor %: ${avgLabor.toFixed(1)}%.` : ''} Columns detected: ${keys.join(', ')}.`,
-      kpis: { labor: avgLabor ? `${avgLabor.toFixed(1)}%` : null },
-      chartData: buildLaborChart(rows, laborPctCol, locationCol, dateCol)
+      summary: `Labor data: ${rows.length} records, ${locations.length} location(s).${avgLabor !== null ? ` Avg labor %: ${avgLabor.toFixed(1)}%.` : totalCost ? ` Total labor cost: $${(totalCost/1000).toFixed(1)}K (% will calculate when sales data is available).` : ''} Columns: ${keys.join(', ')}.`,
+      kpis: { labor: avgLabor !== null ? `${avgLabor.toFixed(1)}%` : null },
+      chartData: laborPctCol ? buildLaborChart(rows, laborPctCol, locationCol, dateCol, laborPctFormat) : null,
+      laborCostCol,
+      locationCol,
+      dateCol,
+      totalLaborCost: totalCost
     };
   }
 
   if (type === 'foodcost') {
-    const fcPctCol = keys.find(k => ['food_cost_pct','food_cost_percent','fc_pct','food_%','cogs_pct'].includes(k));
-    const fcCostCol = keys.find(k => ['food_cost','cogs','food_costs'].includes(k));
+    const locationCol = findCol(keys, ['location','store','site','restaurant','unit']);
+    const dateCol = findCol(keys, ['date','day','week','period']);
+    const fcPctCol = findCol(keys, ['food cost %','food_cost_pct','food cost percent','food cost percentage','fc pct','fc_pct','cogs pct','cogs_pct','food %']);
+    const fcCostCol = findCol(keys, ['actual food cost','food cost','food_cost','cogs','actual cost','food costs']);
+
+    updateGlobalMetadata(rows, locationCol, dateCol);
+
     let avgFC = null;
     if (fcPctCol) {
       const vals = rows.map(r => parseFloat(r[fcPctCol])).filter(v => !isNaN(v));
-      avgFC = vals.reduce((a,b) => a+b, 0) / vals.length;
+      const fmt = detectPercentFormat(vals);
+      const normalized = vals.map(v => normalizePct(v, fmt));
+      avgFC = normalized.reduce((a,b)=>a+b,0) / normalized.length;
     }
+
     return {
-      summary: `Food cost data: ${rows.length} records.${avgFC ? ` Avg food cost %: ${avgFC.toFixed(1)}%.` : ''} Columns: ${keys.join(', ')}.`,
-      kpis: { foodcost: avgFC ? `${avgFC.toFixed(1)}%` : null }
+      summary: `Food cost data: ${rows.length} records.${avgFC !== null ? ` Avg food cost %: ${avgFC.toFixed(1)}%.` : ''} Columns: ${keys.join(', ')}.`,
+      kpis: { foodcost: avgFC !== null ? `${avgFC.toFixed(1)}%` : null }
     };
   }
 
   if (type === 'pmix') {
-    const itemCol = keys.find(k => ['item','item_name','menu_item','name','product'].includes(k));
-    const catCol = keys.find(k => ['category','cat','group','type'].includes(k));
-    const qtyCol = keys.find(k => ['quantity','qty','count','sold','units'].includes(k));
-    const revCol = keys.find(k => ['revenue','sales','amount','total'].includes(k));
-    const fcCol = keys.find(k => ['food_cost_pct','fc_pct','cost_pct'].includes(k));
+    const itemCol = findCol(keys, ['menu item','menu_item','item name','item_name','item','product','dish','name']);
+    const catCol = findCol(keys, ['category','cat','group','type','section','menu section']);
+    const qtyCol = findCol(keys, ['quantity sold','quantity_sold','qty sold','qty_sold','quantity','qty','count','sold','units']);
+    const revCol = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount','total','item sales']);
+    const marginCol = findCol(keys, ['margin','profit','contribution']);
 
-    const totalItems = rows.length;
     const categories = catCol ? [...new Set(rows.map(r => r[catCol]).filter(Boolean))] : [];
-    const topItems = itemCol ? rows
-      .map(r => ({ name: r[itemCol], rev: parseFloat(r[revCol])||0 }))
-      .sort((a,b) => b.rev - a.rev).slice(0, 5)
-      .map(r => r.name).join(', ') : '';
+    const topItems = itemCol && revCol ? rows
+      .reduce((acc, r) => {
+        const name = r[itemCol];
+        acc[name] = (acc[name]||0) + (parseFloat(r[revCol])||0);
+        return acc;
+      }, {}) : {};
+    const top5 = Object.entries(topItems).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k])=>k).join(', ');
 
     const catData = buildPmixChart(rows, catCol, revCol);
     return {
-      summary: `PMIX data: ${totalItems} menu items.${categories.length ? ` Categories: ${categories.join(', ')}.` : ''}${topItems ? ` Top items by revenue: ${topItems}.` : ''}`,
+      summary: `PMIX: ${rows.length} line items, ${[...new Set(rows.map(r=>itemCol?r[itemCol]:null).filter(Boolean))].length} unique items.${categories.length ? ` Categories: ${categories.join(', ')}.` : ''}${top5 ? ` Top items by revenue: ${top5}.` : ''}`,
       kpis: {},
-      chartData: catData
+      chartData: catData,
+      metricCols: [qtyCol, revCol, marginCol].filter(Boolean)
     };
   }
 
   if (type === 'inventory') {
-    const itemCol = keys.find(k => ['item','name','product'].includes(k));
-    const varianceCol = keys.find(k => ['variance','variance_pct','overage','underage'].includes(k));
-    const totalItems = rows.length;
-    const highVariance = varianceCol ? rows.filter(r => Math.abs(parseFloat(r[varianceCol])||0) > 10).length : null;
+    const itemCol = findCol(keys, ['inventory item','item name','item','product','ingredient']);
+    const locationCol = findCol(keys, ['location','store','site']);
+    const wasteCol = findCol(keys, ['waste qty','waste_qty','waste','spoilage']);
+    const varianceCol = findCol(keys, ['variance','variance_pct','overage','underage','usage variance']);
+
+    updateGlobalMetadata(rows, locationCol, null);
+
+    const uniqueItems = itemCol ? [...new Set(rows.map(r=>r[itemCol]).filter(Boolean))].length : rows.length;
+    const totalWaste = wasteCol ? rows.reduce((s,r)=>s+(parseFloat(r[wasteCol])||0),0) : null;
+
     return {
-      summary: `Inventory data: ${totalItems} items.${highVariance !== null ? ` ${highVariance} items with >10% variance.` : ''} Columns: ${keys.join(', ')}.`,
+      summary: `Inventory: ${uniqueItems} unique items across ${rows.length} records.${totalWaste !== null ? ` Total waste qty: ${totalWaste.toFixed(1)} units.` : ''} Columns: ${keys.join(', ')}.`,
       kpis: {}
     };
   }
@@ -726,41 +891,111 @@ function summarizeData(type, rows) {
   return { summary: `${rows.length} rows, columns: ${keys.join(', ')}`, kpis: {} };
 }
 
-function buildSalesChart(rows, salesCol, locationCol, dateCol) {
-  if (!salesCol) return null;
-  if (locationCol) {
-    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].slice(0, 4);
-    const dates = dateCol ? [...new Set(rows.map(r => r[dateCol]))].slice(0, 20) : null;
-    const labels = dates || rows.filter(r => r[locationCol] === locs[0]).map((_, i) => 'W' + (i+1));
-    const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981'];
-    const datasets = locs.map((loc, i) => {
-      const locRows = rows.filter(r => r[locationCol] === loc);
-      return {
-        label: loc, data: locRows.map(r => parseFloat(r[salesCol])||0),
-        borderColor: colors[i], backgroundColor: colors[i].replace(')', ',0.08)').replace('rgb','rgba'),
-        tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2
-      };
-    });
-    return { labels, datasets, locations: locs };
-  }
-  const labels = dateCol ? rows.map(r => r[dateCol]) : rows.map((_,i) => 'W'+(i+1));
-  return { labels, datasets: [{ label: 'Sales', data: rows.map(r => (parseFloat(r[salesCol])||0)/1000), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.4, fill: true, pointRadius: 3, borderWidth: 2 }], locations: ['All'] };
+function buildSalesLookup(rows, salesCol, locationCol, dateCol) {
+  const lookup = {};
+  rows.forEach(r => {
+    const key = `${r[dateCol]||'all'}__${locationCol ? r[locationCol] : 'All'}`;
+    lookup[key] = (lookup[key]||0) + (parseFloat(r[salesCol])||0);
+  });
+  return lookup;
 }
 
-function buildLaborChart(rows, laborPctCol, locationCol, dateCol) {
-  if (!laborPctCol) return null;
+function buildSalesChart(rows, salesCol, locationCol, dateCol, shouldAggregate) {
+  if (!salesCol) return null;
+  const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
+
   if (locationCol) {
-    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].slice(0, 4);
-    const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981'];
-    const datasets = locs.map((loc, i) => {
-      const locRows = rows.filter(r => r[locationCol] === loc);
-      return { label: loc, data: locRows.map(r => parseFloat(r[laborPctCol])||0), borderColor: colors[i], tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false };
-    });
-    const labels = rows.filter(r => r[locationCol] === locs[0]).map((_, i) => 'W'+(i+1));
+    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].sort();
+    let labels, datasets;
+
+    if (shouldAggregate && dateCol) {
+      // Aggregate daily data to weekly buckets
+      const weeklyData = {};
+      const weekMeta = {};
+      rows.forEach(r => {
+        const d = new Date(r[dateCol]);
+        if (isNaN(d)) return;
+        const day = d.getDay();
+        const ws = new Date(r[dateCol]);
+        ws.setDate(ws.getDate() - day + (day === 0 ? -6 : 1));
+        const wk = ws.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        const wsIso = ws.toISOString();
+        const loc = r[locationCol];
+        if (!weekMeta[wk]) weekMeta[wk] = wsIso;
+        const key = wk + '__' + loc;
+        weeklyData[key] = (weeklyData[key]||0) + (parseFloat(r[salesCol])||0);
+      });
+      const sortedWeeks = Object.entries(weekMeta).sort((a,b)=>a[1].localeCompare(b[1])).map(([w])=>w);
+      labels = sortedWeeks;
+      datasets = locs.map((loc,i) => ({
+        label: loc,
+        data: sortedWeeks.map(w => (weeklyData[w+'__'+loc]||0)/1000),
+        borderColor: colors[i % colors.length],
+        backgroundColor: colors[i % colors.length] + '14',
+        tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2
+      }));
+    } else {
+      const uniqueDates = [...new Set(rows.map(r => r[dateCol]||''))].sort().slice(0,60);
+      labels = uniqueDates.map(d => { try { return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e) { return d; } });
+      datasets = locs.map((loc,i) => {
+        const byDate = {};
+        rows.filter(r=>r[locationCol]===loc).forEach(r=>{ byDate[r[dateCol]] = (byDate[r[dateCol]]||0)+(parseFloat(r[salesCol])||0); });
+        return { label: loc, data: uniqueDates.map(d=>(byDate[d]||0)/1000), borderColor: colors[i%colors.length], tension:0.4, fill:false, pointRadius:2, borderWidth:2 };
+      });
+    }
+    return { labels, datasets, locations: locs };
+  }
+
+  const labels = dateCol ? rows.map(r=>r[dateCol]) : rows.map((_,i)=>'W'+(i+1));
+  return { labels, datasets: [{ label:'Sales', data:rows.map(r=>(parseFloat(r[salesCol])||0)/1000), borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', tension:0.4, fill:true, pointRadius:2, borderWidth:2 }], locations:['All'] };
+}
+
+function buildLaborChart(rows, laborPctCol, locationCol, dateCol, fmt) {
+  if (!laborPctCol) return null;
+  const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
+  const getValue = r => normalizePct(r[laborPctCol], fmt || 'percent');
+
+  if (locationCol) {
+    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].sort();
+    // Aggregate to weekly if daily
+    const uniqueDates = dateCol ? [...new Set(rows.map(r=>r[dateCol]))].sort() : [];
+    const shouldAgg = uniqueDates.length > locs.length * 14;
+    let labels, datasets;
+
+    if (shouldAgg && dateCol) {
+      const weeklyData = {};
+      const weekOrder = [];
+      rows.forEach(r => {
+        const d = new Date(r[dateCol]);
+        if (isNaN(d)) return;
+        const day = d.getDay();
+        const ws = new Date(r[dateCol]); ws.setDate(ws.getDate() - day + (day===0?-6:1));
+        const wk = ws.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        const loc = r[locationCol];
+        if (!weeklyData[wk]) { weeklyData[wk] = {}; weekOrder.push({label:wk,date:ws.toISOString()}); }
+        if (!weeklyData[wk][loc]) weeklyData[wk][loc] = [];
+        const v = getValue(r);
+        if (v !== null) weeklyData[wk][loc].push(v);
+      });
+      weekOrder.sort((a,b)=>a.date.localeCompare(b.date));
+      const uniqueWeeks = [...new Map(weekOrder.map(w=>[w.label,w])).values()];
+      labels = uniqueWeeks.map(w=>w.label);
+      datasets = locs.map((loc,i) => ({
+        label: loc,
+        data: uniqueWeeks.map(w => { const vals = (weeklyData[w.label]||{})[loc]||[]; return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null; }),
+        borderColor: colors[i%colors.length], tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false, spanGaps: true
+      }));
+    } else {
+      labels = uniqueDates.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+      datasets = locs.map((loc,i) => {
+        const locRows = rows.filter(r=>r[locationCol]===loc);
+        return { label: loc, data: locRows.map(r=>getValue(r)), borderColor: colors[i%colors.length], tension:0.4, pointRadius:2, borderWidth:1.5, fill:false };
+      });
+    }
     return { labels, datasets };
   }
-  const labels = rows.map((_,i) => 'W'+(i+1));
-  return { labels, datasets: [{ label: 'Labor %', data: rows.map(r => parseFloat(r[laborPctCol])||0), borderColor: '#3b82f6', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false }] };
+  const labels = rows.map((_,i)=>'W'+(i+1));
+  return { labels, datasets: [{ label:'Labor %', data:rows.map(r=>getValue(r)), borderColor:'#3b82f6', tension:0.4, pointRadius:2, borderWidth:1.5, fill:false }] };
 }
 
 function buildPmixChart(rows, catCol, revCol) {
@@ -786,12 +1021,27 @@ function handleFileUpload(event, type) {
   reader.onload = e => {
     try {
       const rows = parseCSV(e.target.result);
+      if (rows.length === 0) { appendMsg('ai', `The file ${file.name} appears to be empty or has no data rows.`); return; }
       const summary = summarizeData(type, rows);
+      if (!summary) { appendMsg('ai', `Could not parse ${file.name}. Please check the file format.`); return; }
       uploadedData[type] = { rows, summary, filename: file.name };
+
+      // Notify if missing required columns
+      if (summary.error === 'no_sales_col') {
+        appendMsg('ai', `⚠️ ${file.name} loaded but I couldn't detect a sales/revenue column.\n\n${summary.summary}\n\nCould you tell me which column contains your sales figures?`);
+      } else {
+        let msg = `✓ ${file.name} loaded — ${rows.length} records parsed.\n\n${summary.summary}`;
+        // Warn about columns that stayed on demo
+        const missingKpis = [];
+        if (type === 'sales' && !summary.kpis.check) missingKpis.push('Avg Check (no check count or average check column found)');
+        if (type === 'labor' && !summary.kpis.labor) missingKpis.push('Labor % (no direct % column — will calculate once sales data is also uploaded)');
+        if (type === 'foodcost' && !summary.kpis.foodcost) missingKpis.push('Food Cost % (no percentage column found)');
+        if (missingKpis.length) msg += `\n\n⚠️ These KPIs could not update from this file: ${missingKpis.join('; ')}`;
+        appendMsg('ai', msg);
+      }
       updateDashboard(type, summary, file.name);
-      appendMsg('ai', `✓ ${file.name} uploaded successfully!\n\n${summary.summary}\n\nThe dashboard has been updated with your real data. Ask me anything about it.`);
     } catch(err) {
-      appendMsg('ai', `Hmm, I had trouble parsing ${file.name}. Make sure it's a valid CSV with headers. Error: ${err.message}`);
+      appendMsg('ai', `Hmm, I had trouble parsing ${file.name}. Error: ${err.message}. Make sure it's a valid CSV with a header row.`);
     }
   };
   reader.readAsText(file);
@@ -831,10 +1081,13 @@ function updateDashboard(type, summary, filename) {
     salesChart.update();
     document.getElementById('salesChartSrc').textContent = 'live data — ' + filename;
     if (cd.locations) {
-      cd.locations.forEach((loc, i) => {
-        const el = document.getElementById('leg' + (i+1));
-        if (el) el.textContent = loc;
-      });
+      const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
+      const legend = document.getElementById('salesLegend');
+      if (legend) {
+        legend.innerHTML = cd.locations.map((loc,i) =>
+          `<div class="legend-item"><div class="legend-dot" style="background:${colors[i%colors.length]}"></div> <span>${loc}</span></div>`
+        ).join('');
+      }
     }
   }
   if (type === 'labor' && summary.chartData) {
@@ -879,12 +1132,62 @@ function updateDashboard(type, summary, filename) {
 function recalcPrimeCost() {
   const laborData = uploadedData['labor'];
   const fcData = uploadedData['foodcost'];
-  if (!laborData || !fcData) return;
-  const laborVal = parseFloat(laborData.summary?.kpis?.labor);
-  const fcVal = parseFloat(fcData.summary?.kpis?.foodcost);
-  if (!isNaN(laborVal) && !isNaN(fcVal)) {
-    const prime = (laborVal + fcVal).toFixed(1) + '%';
+  const salesData = uploadedData['sales'];
+  if (!fcData) return;
+
+  let laborPct = null;
+
+  // Try direct labor % KPI first
+  if (laborData?.summary?.kpis?.labor) {
+    laborPct = parseFloat(laborData.summary.kpis.labor);
+  }
+  // Cross-calculate: labor cost / sales when no labor_pct column but both datasets exist
+  else if (laborData?.summary?.totalLaborCost && salesData) {
+    const totalSales = Object.values(salesData.summary?.rawSalesByDateLoc || {}).reduce((a,b)=>a+b,0);
+    if (totalSales > 0) {
+      laborPct = (laborData.summary.totalLaborCost / totalSales) * 100;
+      // Update labor KPI too since we now have it
+      updateKpi('labor', laborPct.toFixed(1)+'%', 'Live', true);
+      // Rebuild labor chart using cross-calc if no direct pct chart
+      if (!laborData.summary.chartData && laborData.summary.laborCostCol && salesData) {
+        rebuildLaborChartFromCost(laborData, salesData);
+      }
+    }
+  }
+
+  const fcVal = parseFloat(fcData?.summary?.kpis?.foodcost);
+  if (laborPct !== null && !isNaN(fcVal)) {
+    const prime = (laborPct + fcVal).toFixed(1) + '%';
     updateKpi('prime', prime, 'Live', true);
+  }
+}
+
+function rebuildLaborChartFromCost(laborData, salesData) {
+  // Build labor % chart from cost/sales cross-calculation
+  const rows = laborData.rows;
+  const keys = Object.keys(rows[0]);
+  const locationCol = laborData.summary.locationCol;
+  const dateCol = laborData.summary.dateCol;
+  const costCol = laborData.summary.laborCostCol;
+  if (!costCol || !locationCol || !dateCol) return;
+
+  const salesLookup = salesData.summary?.rawSalesByDateLoc || {};
+  const enrichedRows = rows.map(r => {
+    const key = `${r[dateCol]}__${r[locationCol]}`;
+    const sales = salesLookup[key] || 0;
+    const cost = parseFloat(r[costCol]) || 0;
+    return { ...r, _labor_pct_calc: sales > 0 ? (cost / sales) * 100 : null };
+  }).filter(r => r._labor_pct_calc !== null);
+
+  if (enrichedRows.length === 0) return;
+
+  // Create a synthetic col reference
+  const chartData = buildLaborChart(enrichedRows, '_labor_pct_calc', locationCol, dateCol, 'percent');
+  if (chartData && laborChart) {
+    laborChart.data.labels = chartData.labels;
+    laborChart.data.datasets = chartData.datasets;
+    laborChart.update();
+    document.getElementById('laborSrc').textContent = 'live — calculated from cost/sales';
   }
 }
 
