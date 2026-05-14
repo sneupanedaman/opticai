@@ -2227,32 +2227,61 @@ function updateDowChart(loc) {
 
 function updatePmixChart(loc) {
   if (!pmixChart) return;
+  const COLORS = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4'];
 
   if (uploadedData.pmix?.rows) {
     const rows = uploadedData.pmix.rows;
     const keys = Object.keys(rows[0]);
-    const catCol = findCol(keys, ['category','cat','group','type','section']);
-    const revCol = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount']);
-    const locationCol = findCol(keys, ['location','store','site','restaurant']);
-    if (!catCol || !revCol) return;
+    const catCol = findCol(keys, ['category','cat','group','type','section','menu category']);
+    const revCol = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount','total sales','item sales']);
+    const locationCol = findCol(keys, ['location','store','site','restaurant','unit']);
+    
+    if (!catCol || !revCol) {
+      console.warn('PMIX: could not find category or revenue column. Keys:', keys);
+      return;
+    }
 
     const locRows = (loc && locationCol) ? rows.filter(r => r[locationCol] === loc) : rows;
+    
+    if (locRows.length === 0) {
+      console.warn('PMIX: no rows for location', loc);
+      return;
+    }
+
     const catTotals = {};
     let total = 0;
     locRows.forEach(r => {
       const cat = r[catCol] || 'Other';
-      catTotals[cat] = (catTotals[cat]||0) + (parseFloat(r[revCol])||0);
-      total += parseFloat(r[revCol])||0;
+      const val = parseFloat(r[revCol]) || 0;
+      catTotals[cat] = (catTotals[cat] || 0) + val;
+      total += val;
     });
-    const sorted = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).slice(0,6);
+
+    if (total === 0) return;
+
+    const sorted = Object.entries(catTotals).sort((a,b) => b[1] - a[1]).slice(0, 6);
+    
+    // Update labels, data, AND colors together to keep them in sync
     pmixChart.data.labels = sorted.map(([k,v]) => `${k} ${(v/total*100).toFixed(1)}%`);
     pmixChart.data.datasets[0].data = sorted.map(([,v]) => v/total*100);
+    pmixChart.data.datasets[0].backgroundColor = sorted.map((_, i) => COLORS[i % COLORS.length]);
+    
   } else {
-    // DEMO PMIX — same across locations (no location breakdown in demo)
-    pmixChart.data.labels = DEMO.pmix.labels;
-    pmixChart.data.datasets[0].data = DEMO.pmix.data;
+    // Demo data — add per-location variation to make filter feel useful
+    const demoByLoc = {
+      'Downtown':          { labels: ['Entree 81.2%','Beverage 9.8%','Appetizer 5.1%','Side 3.9%'], data: [81.2,9.8,5.1,3.9] },
+      'Freedom Square':    { labels: ['Entree 78.3%','Beverage 11.4%','Appetizer 5.9%','Side 4.4%'], data: [78.3,11.4,5.9,4.4] },
+      'Government Square': { labels: ['Entree 80.1%','Beverage 10.2%','Appetizer 5.6%','Side 4.1%'], data: [80.1,10.2,5.6,4.1] },
+      'Midtown':           { labels: ['Entree 79.0%','Beverage 10.8%','Appetizer 5.4%','Side 4.8%'], data: [79.0,10.8,5.4,4.8] },
+      'Westside':          { labels: ['Entree 80.5%','Beverage 9.5%','Appetizer 5.7%','Side 4.3%'], data: [80.5,9.5,5.7,4.3] },
+    };
+    const locData = (loc && demoByLoc[loc]) ? demoByLoc[loc] : { labels: DEMO.pmix.labels, data: DEMO.pmix.data };
+    pmixChart.data.labels = locData.labels;
+    pmixChart.data.datasets[0].data = locData.data;
+    pmixChart.data.datasets[0].backgroundColor = COLORS.slice(0, locData.data.length);
   }
-  pmixChart.update();
+
+  pmixChart.update('active');
 }
 
 function updateFilteredKPIs(loc) {
