@@ -1246,6 +1246,7 @@ function updateDashboard(type, summary, filename) {
   }
 
   updateStatusBar();
+  questionPoolIndex = 0; // reset to start of pool when new data loaded
   refreshSuggestedQuestions();
 }
 
@@ -1705,140 +1706,137 @@ function buildCustomChart() {
   appendMsg('ai', `Custom chart added for "${col}" from your ${type} data. You can see it at the bottom of the dashboard. Remove it anytime using the ✕ button.`);
 }
 
-// ── DYNAMIC SUGGESTED QUESTIONS ──
-function generateSuggestedQuestions() {
-  const qs = [];
-  const locs = [...discoveredLocations];
-  const locCount = locs.length;
-  const locList = locCount > 0 ? locs.join(', ') : null;
+// ── DYNAMIC SUGGESTED QUESTIONS — pool-based rotating system ──
+let questionPoolIndex = 0;
 
-  // ── Sales questions ──
-  if (uploadedData.sales) {
-    if (locCount >= 2) {
-      qs.push(`Compare sales performance across all ${locCount} locations`);
-    }
-    qs.push('Which day of the week has the lowest sales and why?');
-    qs.push('What is the sales trend over the last 4 weeks?');
-    if (locCount > 0) {
-      const worstLoc = findWorstSalesLocation();
-      if (worstLoc) qs.push(`Why is ${worstLoc} underperforming the other locations?`);
-    }
-  }
+function buildQuestionPool() {
+  const pool = [];
+  const locs = [...discoveredLocations].sort();
+  const locCount = locs.length || 5;
+  const locNames = locs.length ? locs : ['Downtown','Freedom Square','Government Square','Midtown','Westside'];
+  const worstSales = findWorstSalesLocation() || locNames[locNames.length - 1];
+  const highLabor = findHighLaborLocation() || locNames[0];
+  const laborKpi = parseFloat(document.getElementById('val-labor')?.textContent) || 39.7;
+  const primeKpi = parseFloat(document.getElementById('val-prime')?.textContent) || 70.1;
+  const fcKpi = parseFloat(document.getElementById('val-foodcost')?.textContent) || 30.4;
+  const activeLoc = activeLocation;
+  const locContext = activeLoc ? ` at ${activeLoc}` : ` across all ${locCount} locations`;
 
-  // ── Labor questions ──
-  if (uploadedData.labor) {
-    const laborKpi = document.getElementById('val-labor')?.textContent;
-    const laborIsHigh = laborKpi && parseFloat(laborKpi) > 32;
-    if (laborIsHigh && locCount > 0) {
-      const highLaborLoc = findHighLaborLocation();
-      qs.push(`Why is labor running high${highLaborLoc ? ' at ' + highLaborLoc : ''}?`);
-    } else {
-      qs.push('Which location has the highest labor cost as a percentage of sales?');
-    }
-    qs.push('Where can we reduce labor hours without impacting service?');
-  }
-
-  // ── Food cost questions ──
-  if (uploadedData.foodcost) {
-    const fcKpi = document.getElementById('val-foodcost')?.textContent;
-    const fcIsHigh = fcKpi && parseFloat(fcKpi) > 30;
-    if (fcIsHigh) {
-      qs.push('Food cost is above 30% — what is driving it up?');
-    } else {
-      qs.push('Which categories are contributing most to food cost?');
-    }
-    qs.push('Which location has the best food cost control?');
-  }
-
-  // ── PMIX questions ──
-  if (uploadedData.pmix) {
-    qs.push('Which menu items are hurting our margin the most?');
-    qs.push('What are our top 5 items by revenue and how is their margin?');
-    qs.push('Which category should we promote more to improve profitability?');
-  }
-
-  // ── Prime cost questions ──
-  if (uploadedData.labor && uploadedData.foodcost) {
-    const primeKpi = document.getElementById('val-prime')?.textContent;
-    const primeIsHigh = primeKpi && parseFloat(primeKpi) > 62;
-    if (primeIsHigh) {
-      qs.push(`Prime cost is at ${primeKpi} — what is the fastest way to bring it down?`);
-    }
-  }
-
-  // ── Inventory questions ──
-  if (uploadedData.inventory) {
-    qs.push('Which inventory items have the highest waste variance?');
-    qs.push('Where are we over-ordering and what is the cost impact?');
-  }
-
-  // ── Custom dataset questions ──
-  if (uploadedData.custom) {
-    const customData = uploadedData.custom;
-    const metricCols = customData.summary?.metricCols || [];
-    const filename = customData.filename?.replace('.csv','').replace(/_/g,' ') || 'custom data';
-
-    // Generate smart questions based on detected metric columns
-    metricCols.forEach(col => {
-      const norm = col.toLowerCase();
-      if (norm.includes('satisfaction') || norm.includes('score')) {
-        const liveLocList = locs.length > 0 ? ` across ${locs.join(', ')}` : '';
-        qs.push(`Which location has the lowest guest satisfaction score${liveLocList}?`);
-        qs.push('Is there a correlation between guest satisfaction and sales performance?');
-      }
-      if (norm.includes('nps')) {
-        qs.push('What is driving NPS differences between locations?');
-        qs.push('Which location has improved NPS the most over time?');
-      }
-      if (norm.includes('complaint') || norm.includes('complaint_count')) {
-        qs.push('Which location has the most complaints and what categories are they in?');
-      }
-      if (norm.includes('wait') || norm.includes('wait_time')) {
-        qs.push('Is there a relationship between wait time and guest satisfaction scores?');
-      }
-      if (norm.includes('review')) {
-        qs.push('Which location has the best positive review rate and what can others learn from it?');
-      }
-    });
-
-    // Generic fallback for any custom dataset
-    if (metricCols.length > 0 && qs.filter(q => q.toLowerCase().includes(filename.toLowerCase().split(' ')[0])).length === 0) {
-      qs.push(`Summarize the key insights from the ${filename} data`);
-      qs.push(`Which location is performing best in the ${filename} data?`);
-    }
-  }
-
-  // ── Cross-dataset questions (only when multiple datasets loaded) ──
   const loadedCount = Object.values(uploadedData).filter(Boolean).length;
-  if (loadedCount >= 2) {
-    if (uploadedData.sales && uploadedData.labor) {
-      qs.push('Give me a full weekly ops briefing across all loaded data');
-    }
-    if (uploadedData.custom && uploadedData.sales) {
-      qs.push('Is there a correlation between guest satisfaction and revenue?');
-    }
+
+  // ── SALES pool ──
+  if (uploadedData.sales || loadedCount === 0) {
+    pool.push(`Compare sales performance${locContext}`);
+    pool.push(`What is the sales trend over the last 4 weeks${locContext}?`);
+    pool.push(`Which day of the week generates the most revenue${locContext}?`);
+    pool.push(`Why is ${worstSales} the lowest-revenue location?`);
+    pool.push(`What would it take to grow sales by 10%${locContext}?`);
+    pool.push(`How does weekend performance compare to weekday${locContext}?`);
+    pool.push(`What is the revenue gap between the best and worst location?`);
+    if (!activeLoc) pool.push(`Which location is growing fastest over the last 4 weeks?`);
   }
 
-  // ── Demo fallbacks (no data uploaded yet) — use real DEMO location names ──
-  if (loadedCount === 0) {
-    const demoLocs = Object.keys({
-      Downtown: 1, 'Freedom Square': 1, 'Government Square': 1, Midtown: 1, Westside: 1
+  // ── LABOR pool ──
+  if (uploadedData.labor || loadedCount === 0) {
+    pool.push(`Why is labor running at ${laborKpi.toFixed(1)}%${locContext} — above the 30% target?`);
+    pool.push(`Which location has the best labor efficiency?`);
+    pool.push(`Where can we cut labor hours without impacting service${locContext}?`);
+    pool.push(`What does the labor trend look like over the last 8 weeks${locContext}?`);
+    pool.push(`How much would prime cost improve if labor dropped to 32%${locContext}?`);
+    pool.push(`Is ${highLabor} consistently the highest-labor location?`);
+    if (!activeLoc) pool.push(`Which location has improved labor % the most recently?`);
+  }
+
+  // ── FOOD COST pool ──
+  if (uploadedData.foodcost || loadedCount === 0) {
+    pool.push(`Food cost is at ${fcKpi.toFixed(1)}% — what is driving it above target?`);
+    pool.push(`Which location has the best food cost control${locContext}?`);
+    pool.push(`What is the relationship between food cost and prime cost${locContext}?`);
+    pool.push(`Where is the biggest food cost variance week over week${locContext}?`);
+  }
+
+  // ── PMIX pool ──
+  if (uploadedData.pmix || loadedCount === 0) {
+    pool.push(`Which menu items are hurting our margin the most${locContext}?`);
+    pool.push(`What are our top 5 revenue-driving menu items?`);
+    pool.push(`Which category should we promote to improve profitability?`);
+    pool.push(`How does our beverage attach rate compare to industry benchmarks?`);
+    pool.push(`Which menu items have the best margin${locContext}?`);
+  }
+
+  // ── PRIME COST pool ──
+  if (primeKpi > 62) {
+    pool.push(`Prime cost is ${primeKpi.toFixed(1)}% — what is the fastest lever to bring it down?`);
+    pool.push(`If we fixed labor alone, where would prime cost land${locContext}?`);
+    pool.push(`What is a realistic prime cost target for this group and how do we get there?`);
+  }
+
+  // ── INVENTORY pool ──
+  if (uploadedData.inventory) {
+    pool.push(`Which inventory items have the highest waste variance${locContext}?`);
+    pool.push(`Where are we over-ordering and what is the dollar impact?`);
+    pool.push(`What are the top 5 items by variance that we should address first?`);
+  }
+
+  // ── CUSTOM / GUEST SATISFACTION pool ──
+  if (uploadedData.custom) {
+    const metricCols = uploadedData.custom.summary?.metricCols || [];
+    metricCols.forEach(col => {
+      const n = col.toLowerCase();
+      if (n.includes('satisfaction') || n.includes('score')) {
+        pool.push(`Which location has the lowest guest satisfaction score?`);
+        pool.push(`Is there a correlation between guest satisfaction and sales?`);
+        pool.push(`Has guest satisfaction improved or declined over the period?`);
+      }
+      if (n.includes('nps')) {
+        pool.push(`What is driving NPS differences between locations?`);
+        pool.push(`Which location has the best NPS and what are they doing right?`);
+        pool.push(`What NPS score should we be targeting and how far are we?`);
+      }
+      if (n.includes('complaint')) {
+        pool.push(`Which location generates the most complaints${locContext}?`);
+        pool.push(`Is there a pattern to when complaints spike?`);
+      }
+      if (n.includes('wait')) {
+        pool.push(`Does longer wait time correlate with lower guest satisfaction?`);
+        pool.push(`Which location has the longest avg wait time and why?`);
+      }
+      if (n.includes('review')) {
+        pool.push(`Which location has the best review rate and what can others learn?`);
+      }
     });
-    const locCount = demoLocs.length;
-    const highLaborLoc = 'Downtown'; // from demo data analysis
-    const lowSalesLoc = 'Westside';  // from demo data analysis
-    return [
-      `Why is labor running above target at ${highLaborLoc}?`,
-      'Which menu items are hurting our margin the most?',
-      `Why is ${lowSalesLoc} the lowest revenue location?`,
-      `Compare sales performance across all ${locCount} locations`,
-      'Give me a weekly ops briefing'
-    ];
   }
 
-  // Deduplicate and limit to 5
-  const unique = [...new Set(qs)].slice(0, 5);
-  return unique;
+  // ── CROSS-DATASET pool ──
+  if (loadedCount >= 2) {
+    pool.push(`Give me a full weekly ops briefing across all loaded data`);
+    pool.push(`What are the top 3 things I should focus on this week?`);
+    pool.push(`Which location needs the most attention right now and why?`);
+  }
+
+  // ── DEMO fallback pool ──
+  if (loadedCount === 0) {
+    pool.push(`Give me a weekly ops briefing`);
+    pool.push(`What are the top 3 priorities for this group right now?`);
+    pool.push(`Which location needs the most attention?`);
+    pool.push(`What would you focus on if you were the VP of Ops this week?`);
+  }
+
+  // Deduplicate
+  return [...new Set(pool)];
+}
+
+function generateSuggestedQuestions() {
+  const pool = buildQuestionPool();
+  if (pool.length === 0) return ['Give me a weekly ops briefing'];
+
+  // Pick 4 questions starting at current index, cycling through pool
+  const selected = [];
+  const startIdx = questionPoolIndex % pool.length;
+  for (let i = 0; i < Math.min(4, pool.length); i++) {
+    selected.push(pool[(startIdx + i) % pool.length]);
+  }
+  return selected;
 }
 
 function findWorstSalesLocation() {
@@ -1876,6 +1874,7 @@ function findHighLaborLocation() {
 }
 
 function refreshSuggestedQuestions() {
+  questionPoolIndex += 4; // advance by 4 so next refresh shows next batch
   const container = document.getElementById('suggestedQs');
   if (!container) return;
   const questions = generateSuggestedQuestions();
@@ -2157,36 +2156,117 @@ function applyLocationFilter() {
 
   // ── Sales chart ──
   if (salesChart) {
-    if (!loc) {
-      // Restore all datasets
-      salesChart.data.datasets.forEach(ds => { ds.hidden = false; });
-    } else {
-      salesChart.data.datasets.forEach(ds => {
-        ds.hidden = ds.label !== loc;
-      });
-    }
+    salesChart.data.datasets.forEach(ds => { ds.hidden = loc ? ds.label !== loc : false; });
     salesChart.update();
   }
 
   // ── Labor chart ──
   if (laborChart) {
-    if (!loc) {
-      laborChart.data.datasets.forEach(ds => { ds.hidden = false; });
-    } else {
-      laborChart.data.datasets.forEach(ds => {
-        ds.hidden = ds.label !== loc;
-      });
-    }
+    laborChart.data.datasets.forEach(ds => { ds.hidden = loc ? ds.label !== loc : false; });
     laborChart.update();
   }
 
-  // ── KPIs — filter from uploaded data or DEMO ──
+  // ── DOW chart — filter from uploaded sales or DEMO data ──
+  updateDowChart(loc);
+
+  // ── PMIX chart — filter from uploaded pmix or DEMO ──
+  updatePmixChart(loc);
+
+  // ── KPIs ──
   updateFilteredKPIs(loc);
+}
+
+function updateDowChart(loc) {
+  if (!dowChart) return;
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  if (uploadedData.sales?.rows) {
+    const rows = uploadedData.sales.rows;
+    const keys = Object.keys(rows[0]);
+    const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
+    const locationCol = findCol(keys, ['location','store','site','restaurant']);
+    const dateCol = findCol(keys, ['date','day','week','period']);
+    if (!salesCol || !dateCol) return;
+
+    const locRows = (loc && locationCol) ? rows.filter(r => r[locationCol] === loc) : rows;
+    const dow = {0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
+    locRows.forEach(r => {
+      const d = new Date(r[dateCol]);
+      if (!isNaN(d)) dow[d.getDay()].push(parseFloat(r[salesCol])||0);
+    });
+    // Reorder Mon=0 to Sun=6 (JS getDay: 0=Sun)
+    const ordered = [1,2,3,4,5,6,0].map(i => dow[i].length ? dow[i].reduce((a,b)=>a+b,0)/dow[i].length : 0);
+    dowChart.data.datasets[0].data = ordered;
+    const peak = Math.max(...ordered);
+    dowChart.data.datasets[0].backgroundColor = ordered.map(v =>
+      v === peak ? '#10b981' : v === Math.min(...ordered) ? '#ef4444' : '#3b82f6'
+    );
+  } else {
+    // Use DEMO data — filter by location index
+    const locMap = {
+      'Downtown':         [1467,1456,1423,1532,1821,1940,1298],
+      'Freedom Square':   [1245,1212,1267,1298,1489,1523,1034],
+      'Government Square':[1523,1534,1578,1612,1934,1998,1312],
+      'Midtown':          [1198,1189,1198,1245,1512,1567,978],
+      'Westside':         [1110,1109,1075,1083,1265,1367,704],
+    };
+    if (loc && locMap[loc]) {
+      dowChart.data.datasets[0].data = locMap[loc];
+      const peak = Math.max(...locMap[loc]);
+      const min = Math.min(...locMap[loc]);
+      dowChart.data.datasets[0].backgroundColor = locMap[loc].map(v =>
+        v === peak ? '#10b981' : v === min ? '#ef4444' : '#3b82f6'
+      );
+    } else {
+      dowChart.data.datasets[0].data = DEMO.dow;
+      dowChart.data.datasets[0].backgroundColor = ['#3b82f6','#3b82f6','#3b82f6','#3b82f6','#10b981','#10b981','#ef4444'];
+    }
+  }
+  dowChart.update();
+}
+
+function updatePmixChart(loc) {
+  if (!pmixChart) return;
+
+  if (uploadedData.pmix?.rows) {
+    const rows = uploadedData.pmix.rows;
+    const keys = Object.keys(rows[0]);
+    const catCol = findCol(keys, ['category','cat','group','type','section']);
+    const revCol = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount']);
+    const locationCol = findCol(keys, ['location','store','site','restaurant']);
+    if (!catCol || !revCol) return;
+
+    const locRows = (loc && locationCol) ? rows.filter(r => r[locationCol] === loc) : rows;
+    const catTotals = {};
+    let total = 0;
+    locRows.forEach(r => {
+      const cat = r[catCol] || 'Other';
+      catTotals[cat] = (catTotals[cat]||0) + (parseFloat(r[revCol])||0);
+      total += parseFloat(r[revCol])||0;
+    });
+    const sorted = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    pmixChart.data.labels = sorted.map(([k,v]) => `${k} ${(v/total*100).toFixed(1)}%`);
+    pmixChart.data.datasets[0].data = sorted.map(([,v]) => v/total*100);
+  } else {
+    // DEMO PMIX — same across locations (no location breakdown in demo)
+    pmixChart.data.labels = DEMO.pmix.labels;
+    pmixChart.data.datasets[0].data = DEMO.pmix.data;
+  }
+  pmixChart.update();
 }
 
 function updateFilteredKPIs(loc) {
   if (!loc) {
-    // Restore full KPIs — re-run recalcPrimeCost and restore from uploaded or demo
+    // Restore full KPIs
+    if (!uploadedData.sales) {
+      // Restore demo KPIs
+      updateKpi('sales', '$9.53M', 'Demo', false);
+      updateKpi('labor', '39.7%', 'Demo', false);
+      updateKpi('foodcost', '30.4%', 'Demo', false);
+      updateKpi('prime', '70.1%', 'Demo', false);
+      updateKpi('check', '$27.60', 'Demo', false);
+      return;
+    }
     if (uploadedData.sales) {
       const rows = uploadedData.sales.rows;
       const keys = Object.keys(rows[0]);
@@ -2204,6 +2284,25 @@ function updateFilteredKPIs(loc) {
   }
 
   // Filter to single location
+  if (!uploadedData.sales) {
+    // Use DEMO per-location KPIs
+    const demoKpis = {
+      'Downtown':          { sales: '$1.99M', labor: '39.0%', foodcost: '30.4%', prime: '69.4%', check: '$27.80' },
+      'Freedom Square':    { sales: '$1.84M', labor: '40.3%', foodcost: '30.4%', prime: '70.7%', check: '$27.45' },
+      'Government Square': { sales: '$2.10M', labor: '39.9%', foodcost: '30.4%', prime: '70.3%', check: '$27.60' },
+      'Midtown':           { sales: '$1.86M', labor: '39.8%', foodcost: '30.4%', prime: '70.2%', check: '$27.55' },
+      'Westside':          { sales: '$1.57M', labor: '40.7%', foodcost: '30.4%', prime: '71.1%', check: '$27.10' },
+    };
+    const kpis = demoKpis[loc];
+    if (kpis) {
+      updateKpi('sales', kpis.sales, loc, true);
+      updateKpi('labor', kpis.labor, loc, true);
+      updateKpi('foodcost', kpis.foodcost, loc, true);
+      updateKpi('prime', kpis.prime, loc, true);
+      updateKpi('check', kpis.check, loc, true);
+    }
+    return;
+  }
   if (uploadedData.sales) {
     const rows = uploadedData.sales.rows;
     const keys = Object.keys(rows[0]);
