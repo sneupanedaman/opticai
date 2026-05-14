@@ -286,12 +286,12 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     <div class="sidebar-section">
       <div class="sidebar-label">Locations</div>
       <div id="locationsList">
-        <div class="location-pill active"><div class="location-dot"></div> All Locations</div>
-        <div class="location-pill"><div class="location-dot"></div> Downtown</div>
-        <div class="location-pill"><div class="location-dot" style="background:#f59e0b"></div> Freedom Square</div>
-        <div class="location-pill"><div class="location-dot" style="background:#8b5cf6"></div> Government Square</div>
-        <div class="location-pill"><div class="location-dot" style="background:#10b981"></div> Midtown</div>
-        <div class="location-pill"><div class="location-dot" style="background:#ef4444"></div> Westside</div>
+        <div class="location-pill active" onclick="filterByLocation(null, this)"><div class="location-dot"></div> All Locations</div>
+        <div class="location-pill" onclick="filterByLocation('Downtown', this)"><div class="location-dot"></div> Downtown</div>
+        <div class="location-pill" onclick="filterByLocation('Freedom Square', this)"><div class="location-dot" style="background:#f59e0b"></div> Freedom Square</div>
+        <div class="location-pill" onclick="filterByLocation('Government Square', this)"><div class="location-dot" style="background:#8b5cf6"></div> Government Square</div>
+        <div class="location-pill" onclick="filterByLocation('Midtown', this)"><div class="location-dot" style="background:#10b981"></div> Midtown</div>
+        <div class="location-pill" onclick="filterByLocation('Westside', this)"><div class="location-dot" style="background:#ef4444"></div> Westside</div>
       </div>
     </div>
 
@@ -466,11 +466,13 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           </button>
         </div>
         <div class="suggested-qs" id="suggestedQs">
-          <div class="sq-label">Try asking</div>
-          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Why was labor high at Midtown last week?</button>
-          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Which menu items are hurting margin?</button>
-          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Why did sales dip on Tuesdays?</button>
-          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Compare all 3 locations</button>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div class="sq-label" style="margin-bottom:0">Try asking</div>
+            <button onclick="refreshSuggestedQuestions()" title="Refresh questions" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:color 0.15s;display:flex;align-items:center;gap:3px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">
+              <i class="ti ti-refresh" style="font-size:13px"></i>
+            </button>
+          </div>
+          <button class="sq-btn" onclick="sendSuggested(this.textContent)">Loading...</button>
         </div>
         <div class="messages" id="messages">
           <div class="msg msg-ai" id="welcomeMsg">
@@ -794,12 +796,21 @@ function updateGlobalMetadata(rows, locationCol, dateCol) {
 
 function renderDynamicLocations() {
   const locs = [...discoveredLocations].sort();
-  if (locs.length === 0) return;
-  const colors = ['#10b981','#f59e0b','#8b5cf6','#3b82f6','#ef4444','#06b6d4','#f97316'];
+  const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4','#f97316'];
   const container = document.getElementById('locationsList');
   if (!container) return;
-  container.innerHTML = `<div class="location-pill active"><div class="location-dot"></div> All Locations</div>` +
-    locs.map((loc, i) => `<div class="location-pill"><div class="location-dot" style="background:${colors[i % colors.length]}"></div> ${loc}</div>`).join('');
+
+  // Use demo locations if none discovered yet
+  const displayLocs = locs.length > 0 ? locs :
+    ['Downtown','Freedom Square','Government Square','Midtown','Westside'];
+  const displayColors = locs.length > 0 ? colors :
+    ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444'];
+
+  container.innerHTML =
+    `<div class="location-pill active" onclick="filterByLocation(null, this)"><div class="location-dot"></div> All Locations</div>` +
+    displayLocs.map((loc, i) =>
+      `<div class="location-pill" onclick="filterByLocation('${loc}', this)"><div class="location-dot" style="background:${displayColors[i % displayColors.length]}"></div> ${loc}</div>`
+    ).join('');
 }
 
 function updateDateRangeLabel() {
@@ -1808,13 +1819,19 @@ function generateSuggestedQuestions() {
     }
   }
 
-  // ── Demo fallbacks (no data uploaded yet) ──
+  // ── Demo fallbacks (no data uploaded yet) — use real DEMO location names ──
   if (loadedCount === 0) {
+    const demoLocs = Object.keys({
+      Downtown: 1, 'Freedom Square': 1, 'Government Square': 1, Midtown: 1, Westside: 1
+    });
+    const locCount = demoLocs.length;
+    const highLaborLoc = 'Downtown'; // from demo data analysis
+    const lowSalesLoc = 'Westside';  // from demo data analysis
     return [
-      'Why was labor high at Midtown last week?',
-      'Which menu items are hurting margin?',
-      'Why did sales dip on Tuesdays?',
-      'Compare all 3 locations',
+      `Why is labor running above target at ${highLaborLoc}?`,
+      'Which menu items are hurting our margin the most?',
+      `Why is ${lowSalesLoc} the lowest revenue location?`,
+      `Compare sales performance across all ${locCount} locations`,
       'Give me a weekly ops briefing'
     ];
   }
@@ -1862,7 +1879,14 @@ function refreshSuggestedQuestions() {
   const container = document.getElementById('suggestedQs');
   if (!container) return;
   const questions = generateSuggestedQuestions();
-  container.innerHTML = `<div class="sq-label">Try asking</div>` +
+  const refreshBtn = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div class="sq-label" style="margin-bottom:0">Try asking</div>
+      <button onclick="refreshSuggestedQuestions()" title="Refresh questions" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:color 0.15s;display:flex;align-items:center;gap:3px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">
+        <i class="ti ti-refresh" style="font-size:13px"></i>
+      </button>
+    </div>`;
+  container.innerHTML = refreshBtn +
     questions.map(q => `<button class="sq-btn" onclick="sendSuggested(this.textContent)">${q}</button>`).join('');
 }
 
@@ -2107,7 +2131,143 @@ async function submitFeedback() {
   }
 }
 
+// ── LOCATION FILTER ENGINE ──
+let activeLocation = null; // null = All Locations
+
+function filterByLocation(loc, el) {
+  activeLocation = loc;
+
+  // Update active pill styling
+  document.querySelectorAll('.location-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  // Update topbar label
+  const label = document.getElementById('dateRangeLabel');
+  if (label) {
+    const base = label.textContent.replace(/ · .*$/, '').replace(/ — .*$/, '');
+    label.textContent = loc ? `${label.textContent.split('·')[0].trim()} · ${loc}` : label.textContent.replace(/ · [^·]+$/, '');
+  }
+
+  applyLocationFilter();
+  refreshSuggestedQuestions();
+}
+
+function applyLocationFilter() {
+  const loc = activeLocation;
+
+  // ── Sales chart ──
+  if (salesChart) {
+    if (!loc) {
+      // Restore all datasets
+      salesChart.data.datasets.forEach(ds => { ds.hidden = false; });
+    } else {
+      salesChart.data.datasets.forEach(ds => {
+        ds.hidden = ds.label !== loc;
+      });
+    }
+    salesChart.update();
+  }
+
+  // ── Labor chart ──
+  if (laborChart) {
+    if (!loc) {
+      laborChart.data.datasets.forEach(ds => { ds.hidden = false; });
+    } else {
+      laborChart.data.datasets.forEach(ds => {
+        ds.hidden = ds.label !== loc;
+      });
+    }
+    laborChart.update();
+  }
+
+  // ── KPIs — filter from uploaded data or DEMO ──
+  updateFilteredKPIs(loc);
+}
+
+function updateFilteredKPIs(loc) {
+  if (!loc) {
+    // Restore full KPIs — re-run recalcPrimeCost and restore from uploaded or demo
+    if (uploadedData.sales) {
+      const rows = uploadedData.sales.rows;
+      const keys = Object.keys(rows[0]);
+      const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
+      const checkCountCol = findCol(keys, ['check count','check_count','checks','transactions']);
+      const avgCheckCol = findCol(keys, ['average check','avg check','avg_check']);
+      const total = rows.reduce((s,r) => s+(parseFloat(r[salesCol])||0), 0);
+      const totalChecks = checkCountCol ? rows.reduce((s,r)=>s+(parseFloat(r[checkCountCol])||0),0) : 0;
+      const avgCheck = totalChecks > 0 ? total/totalChecks : (avgCheckCol ? rows.reduce((s,r)=>s+(parseFloat(r[avgCheckCol])||0),0)/rows.length : null);
+      updateKpi('sales', '$'+(total>=1000000?(total/1000000).toFixed(2)+'M':(total/1000).toFixed(0)+'K'), 'Live', true);
+      if (avgCheck) updateKpi('check', '$'+avgCheck.toFixed(2), 'Live', true);
+    }
+    recalcPrimeCost();
+    return;
+  }
+
+  // Filter to single location
+  if (uploadedData.sales) {
+    const rows = uploadedData.sales.rows;
+    const keys = Object.keys(rows[0]);
+    const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
+    const locationCol = findCol(keys, ['location','store','site','restaurant']);
+    const checkCountCol = findCol(keys, ['check count','check_count','checks','transactions']);
+    const avgCheckCol = findCol(keys, ['average check','avg check','avg_check']);
+
+    const locRows = locationCol ? rows.filter(r => r[locationCol] === loc) : rows;
+    const total = locRows.reduce((s,r) => s+(parseFloat(r[salesCol])||0), 0);
+    const totalChecks = checkCountCol ? locRows.reduce((s,r)=>s+(parseFloat(r[checkCountCol])||0),0) : 0;
+    const avgCheck = totalChecks > 0 ? total/totalChecks : (avgCheckCol ? locRows.reduce((s,r)=>s+(parseFloat(r[avgCheckCol])||0),0)/locRows.length : null);
+    updateKpi('sales', '$'+(total>=1000000?(total/1000000).toFixed(2)+'M':(total/1000).toFixed(0)+'K'), loc, true);
+    if (avgCheck) updateKpi('check', '$'+avgCheck.toFixed(2), loc, true);
+  }
+
+  if (uploadedData.labor) {
+    const rows = uploadedData.labor.rows;
+    const keys = Object.keys(rows[0]);
+    const locationCol = findCol(keys, ['location','store','site']);
+    const laborCostCol = findCol(keys, ['labor cost','labor_cost','wages']);
+    const laborPctCol = findCol(keys, ['labor pct','labor_pct','labor percent','labor %']);
+    const locRows = locationCol ? rows.filter(r => r[locationCol] === loc) : rows;
+
+    if (laborPctCol) {
+      const vals = locRows.map(r=>parseFloat(r[laborPctCol])).filter(v=>!isNaN(v));
+      const fmt = detectPercentFormat(vals);
+      const avg = vals.map(v=>normalizePct(v,fmt)).reduce((a,b)=>a+b,0)/vals.length;
+      updateKpi('labor', avg.toFixed(1)+'%', loc, true);
+    } else if (laborCostCol && uploadedData.sales) {
+      // Cross-calculate for this location
+      const sRows = uploadedData.sales.rows;
+      const sKeys = Object.keys(sRows[0]);
+      const sCol = findCol(sKeys, ['net sales','net_sales','revenue','sales']);
+      const sLocCol = findCol(sKeys, ['location','store','site','restaurant']);
+      const locSales = sLocCol ? sRows.filter(r=>r[sLocCol]===loc).reduce((s,r)=>s+(parseFloat(r[sCol])||0),0) : 0;
+      const locLabor = locRows.reduce((s,r)=>s+(parseFloat(r[laborCostCol])||0),0);
+      if (locSales > 0) updateKpi('labor', (locLabor/locSales*100).toFixed(1)+'%', loc, true);
+    }
+  }
+
+  if (uploadedData.foodcost) {
+    const rows = uploadedData.foodcost.rows;
+    const keys = Object.keys(rows[0]);
+    const locationCol = findCol(keys, ['location','store','site']);
+    const fcPctCol = findCol(keys, ['food cost %','food_cost_pct','food cost percent','fc pct']);
+    const locRows = locationCol ? rows.filter(r=>r[locationCol]===loc) : rows;
+    if (fcPctCol && locRows.length) {
+      const vals = locRows.map(r=>parseFloat(r[fcPctCol])).filter(v=>!isNaN(v));
+      const fmt = detectPercentFormat(vals);
+      const avg = vals.map(v=>normalizePct(v,fmt)).reduce((a,b)=>a+b,0)/vals.length;
+      updateKpi('foodcost', avg.toFixed(1)+'%', loc, true);
+      // Recalc prime for this location
+      const laborKpi = document.getElementById('val-labor')?.textContent;
+      if (laborKpi) {
+        const laborVal = parseFloat(laborKpi);
+        if (!isNaN(laborVal)) updateKpi('prime', (laborVal+avg).toFixed(1)+'%', loc, true);
+      }
+    }
+  }
+}
+
 initCharts();
+refreshSuggestedQuestions();
 
 // Show mobile nav bar on small screens
 function handleResize() {
