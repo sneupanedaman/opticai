@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script defer src="/_vercel/insights/script.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OpticAI — Restaurant Intelligence</title>
@@ -130,6 +129,36 @@ footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex;
 .hero-h1 { animation-delay: 0.12s; }
 .hero-sub { animation-delay: 0.2s; }
 .hero-actions { animation-delay: 0.28s; }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  nav { padding: 14px 20px; }
+  .nav-link { display: none; }
+  .hero { padding: 60px 24px 50px; }
+  .hero-h1 { font-size: 32px; }
+  .hero-sub { font-size: 15px; }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+  .btn-hero { justify-content: center; }
+  .preview-wrap { padding: 0 16px; margin-bottom: 60px; }
+  .preview-content { grid-template-columns: repeat(2, 1fr); }
+  .preview-charts { grid-template-columns: 1fr; }
+  .section { padding: 0 24px; margin-bottom: 60px; }
+  .section-h2 { font-size: 26px; }
+  .steps { grid-template-columns: 1fr; }
+  .datasets-grid { grid-template-columns: 1fr 1fr; }
+  .questions-grid { grid-template-columns: 1fr; }
+  .vs-grid { grid-template-columns: 1fr; }
+  .privacy-bar { padding: 0 24px; }
+  .cta-footer { padding: 0 24px; }
+  .cta-footer-inner { padding: 36px 24px; }
+  .cta-footer h2 { font-size: 26px; }
+  footer { padding: 20px 24px; flex-direction: column; gap: 8px; text-align: center; }
+}
+@media (max-width: 480px) {
+  .hero-h1 { font-size: 28px; }
+  .datasets-grid { grid-template-columns: 1fr; }
+  .preview-content { grid-template-columns: 1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -143,7 +172,7 @@ footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex;
   <div class="nav-right">
     <span class="nav-link" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</span>
     <span class="nav-link" onclick="document.getElementById('compare').scrollIntoView({behavior:'smooth'})">vs. alternatives</span>
-    <button class="nav-cta" onclick="window.location.href='app.html'">Open dashboard <i class="ti ti-arrow-right" style="font-size:13px"></i></button>
+    <button class="nav-cta" onclick="window.location.href='app.html'">Try the demo <i class="ti ti-arrow-right" style="font-size:13px"></i></button>
   </div>
 </nav>
 
@@ -153,9 +182,12 @@ footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex;
   <h1 class="hero-h1">Restaurant analytics<br><em>that answers real questions</em></h1>
   <p class="hero-sub">Upload your sales, labor, food cost, PMIX, and inventory data. Ask anything. Get instant, specific answers — across all your locations at once.</p>
   <div class="hero-actions">
-    <button class="btn-hero btn-hero-primary" onclick="window.location.href='app.html'">
-      <i class="ti ti-player-play"></i> Try the live demo
-    </button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <button class="btn-hero btn-hero-primary" onclick="window.location.href='app.html'">
+        <i class="ti ti-player-play"></i> Explore the demo — no signup needed
+      </button>
+      <span style="font-size:12px;color:var(--text3)">No account &nbsp;·&nbsp; No credit card &nbsp;·&nbsp; Demo data preloaded</span>
+    </div>
     <button class="btn-hero btn-hero-secondary" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">
       <i class="ti ti-info-circle"></i> How it works
     </button>
@@ -337,9 +369,12 @@ footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex;
   <div class="cta-footer-inner">
     <h2>See it with your own data</h2>
     <p>Upload a real export from your POS or scheduling system and ask the question you've been wanting answered.</p>
-    <button class="btn-hero btn-hero-primary" onclick="window.location.href='app.html'" style="margin:0 auto">
-      <i class="ti ti-player-play"></i> Open the live demo
-    </button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <button class="btn-hero btn-hero-primary" onclick="window.location.href='app.html'" style="margin:0 auto">
+        <i class="ti ti-player-play"></i> Explore the demo — no signup needed
+      </button>
+      <span style="font-size:12px;color:var(--text3)">No account &nbsp;·&nbsp; No credit card &nbsp;·&nbsp; Demo data preloaded</span>
+    </div>
   </div>
 </div>
 
