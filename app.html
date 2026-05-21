@@ -17,8 +17,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; overflow: hidden; }
 .app { display: flex; height: 100vh; }
-
-/* SIDEBAR */
 .sidebar { width: 240px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
 .sidebar-logo { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .logo-row { display: flex; align-items: center; gap: 10px; }
@@ -32,10 +30,6 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .location-pill:hover { background: var(--bg3); color: var(--text); }
 .location-pill.active { background: rgba(59,130,246,0.12); color: var(--accent); }
 .location-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-.location-dot.amber { background: var(--amber); }
-.location-dot.purple { background: var(--purple); }
-
-/* DATASET UPLOAD ITEMS */
 .dataset-list { padding: 14px 10px 4px; }
 .ds-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 7px; font-size: 12px; color: var(--text2); cursor: pointer; transition: all 0.15s; position: relative; }
 .ds-item:hover { background: var(--bg3); }
@@ -48,9 +42,6 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .ds-badge.demo-badge { background: rgba(245,158,11,0.12); color: var(--amber); }
 .ds-upload-btn { font-size: 10px; color: var(--accent); opacity: 0; transition: opacity 0.15s; white-space: nowrap; }
 .ds-item:hover .ds-upload-btn { opacity: 1; }
-input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
-
-/* MAIN */
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 .topbar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .topbar-title { font-size: 14px; font-weight: 500; color: var(--text); }
@@ -61,18 +52,14 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .btn-sm:hover { background: var(--bg3); color: var(--text); }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent2); }
-
-/* DATA STATUS BANNER */
 .data-status-bar { margin: 10px 16px 0; border-radius: 8px; padding: 8px 12px; display: flex; align-items: flex-start; gap: 8px; font-size: 12px; flex-shrink: 0; }
 .data-status-bar.demo-mode { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.22); color: var(--amber); }
 .data-status-bar.mixed-mode { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.22); color: #93c5fd; }
 .data-status-bar.live-mode { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.22); color: var(--green); }
+.data-status-bar.error-mode { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.22); color: var(--red); }
 .data-status-bar i { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
-
 .content { flex: 1; display: flex; overflow: hidden; min-height: 0; }
 .left-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-
-/* KPI ROW */
 .kpi-row { display: flex; gap: 10px; padding: 10px 16px 0; flex-shrink: 0; }
 .kpi-card { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; position: relative; transition: border-color 0.3s; }
 .kpi-card.live { border-color: rgba(16,185,129,0.3); }
@@ -86,8 +73,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .delta-up { color: var(--green); }
 .delta-down { color: var(--red); }
 .delta-warn { color: var(--amber); }
-
-/* CHARTS */
 .chart-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 10px 16px 14px; gap: 10px; min-height: 0; }
 .chart-row { display: flex; gap: 10px; flex: 1; min-height: 0; }
 .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; min-width: 0; }
@@ -99,8 +84,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .chart-legend { display: flex; gap: 12px; margin-bottom: 6px; flex-shrink: 0; flex-wrap: wrap; }
 .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
 .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-
-/* CHAT PANEL */
 .chat-panel { width: 340px; flex-shrink: 0; background: var(--bg2); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
 .chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .chat-header i { color: var(--accent); font-size: 16px; }
@@ -121,6 +104,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .msg-ai .msg-bubble { background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 3px; }
 .msg-label { font-size: 10px; color: var(--text3); margin-bottom: 3px; padding: 0 2px; }
 .msg-user .msg-label { text-align: right; }
+.msg-citation { font-size: 10px; color: var(--text3); margin-top: 4px; padding: 4px 8px; background: var(--bg3); border-radius: 5px; border-left: 2px solid var(--accent); }
 .typing { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
 .typing-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); animation: blink 1.2s infinite; }
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
@@ -136,8 +120,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .send-btn i { font-size: 16px; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)} 50%{box-shadow:0 0 0 6px rgba(239,68,68,0)} }
-
-/* Feedback */
 .feedback-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:200; }
 .feedback-overlay.open { display:flex; }
 .feedback-modal { background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px;width:360px;max-width:95vw; }
@@ -160,8 +142,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .fb-success i { font-size:38px;color:var(--green);display:block;margin-bottom:10px; }
 .floating-fb { position:fixed;bottom:80px;right:20px;z-index:50;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:8px 16px;color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:all 0.15s; }
 .floating-fb:hover { border-color:var(--accent);color:var(--text); }
-
-/* Chart grid toggle */
 .chart-toggle-btn { background: none; border: 1px solid var(--border); border-radius: 5px; color: var(--text3); cursor: pointer; font-size: 11px; padding: 2px 7px; display: flex; align-items: center; gap: 4px; transition: all 0.15s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
 .chart-toggle-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.07); }
 .chart-toggle-btn i { font-size: 12px; }
@@ -175,8 +155,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .voice-btn { width: 40px; height: 40px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
 .voice-btn:hover { background: var(--bg2); color: var(--text); border-color: var(--accent); }
 .voice-btn.recording { background: rgba(239,68,68,0.15); border-color: var(--red); color: var(--red); animation: pulse 1.5s infinite; }
-
-/* UPLOAD MODAL */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
 .modal-overlay.open { display: flex; }
 .modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 14px; padding: 24px; width: 480px; max-width: 95vw; }
@@ -186,72 +164,53 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .upload-tile { border: 1px dashed var(--border2); border-radius: 10px; padding: 16px 12px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
 .upload-tile:hover { border-color: var(--accent); background: rgba(59,130,246,0.05); }
 .upload-tile.has-file { border-color: var(--green); border-style: solid; background: rgba(16,185,129,0.05); }
+.upload-tile.has-error { border-color: var(--red); border-style: solid; background: rgba(239,68,68,0.05); }
 .upload-tile i { display: block; font-size: 24px; color: var(--text3); margin-bottom: 6px; }
 .upload-tile.has-file i { color: var(--green); }
+.upload-tile.has-error i { color: var(--red); }
 .upload-tile-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
 .upload-tile-sub { font-size: 11px; color: var(--text3); }
 .upload-tile.has-file .upload-tile-sub { color: var(--green); }
+.upload-tile.has-error .upload-tile-sub { color: var(--red); }
 .upload-tile input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 .modal-cols-hint { font-size: 11px; color: var(--text3); margin-bottom: 16px; line-height: 1.6; background: var(--bg3); padding: 10px 12px; border-radius: 7px; }
 .modal-cols-hint strong { color: var(--text2); }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-
-/* ── MOBILE RESPONSIVE ── */
 @media (max-width: 768px) {
   html, body { overflow: auto; height: auto; }
   .app { flex-direction: column; height: auto; min-height: 100vh; }
-
-  /* Hide sidebar on mobile */
   .sidebar { display: none; }
-
-  /* Mobile topbar */
   .topbar { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
   .topbar-title { font-size: 13px; }
   .date-range { display: none; }
   .topbar-sep { display: none; }
   .btn-sm:not(.btn-primary) { display: none; }
-
-  /* Mobile menu bar above topbar */
   .mobile-bar { display: flex; align-items: center; justify-content: space-between; background: var(--bg2); border-bottom: 1px solid var(--border); padding: 10px 14px; }
   .mobile-logo { display: flex; align-items: center; gap: 8px; }
   .mobile-logo-icon { width: 26px; height: 26px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
   .mobile-logo-icon i { color: #fff; font-size: 14px; }
   .mobile-logo-name { font-size: 14px; font-weight: 600; color: var(--text); }
   .mobile-upload-btn { padding: 6px 12px; background: var(--accent); border: none; border-radius: 6px; color: #fff; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-
-  /* Main panel full width */
   .main { overflow: visible; }
   .content { flex-direction: column; overflow: visible; height: auto; }
   .left-panel { overflow: visible; min-height: 0; }
-
-  /* Status bar */
   .data-status-bar { margin: 8px 12px 0; font-size: 11px; }
-
-  /* KPI cards — 2 per row on mobile */
   .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 12px 0; flex-shrink: 0; }
   .kpi-card { padding: 10px 12px; }
   .kpi-value { font-size: 18px; }
   .kpi-delta { white-space: normal; font-size: 10px; }
-
-  /* Charts — stack vertically */
   .chart-section { flex: none; overflow: visible; padding: 8px 12px 12px; gap: 8px; }
   .chart-row { flex-direction: column; flex: none; min-height: 0; gap: 8px; }
   .chart-card { height: 200px; }
-  .chart-card.wide { flex: none; }
-  .chart-card.narrow { flex: none; }
+  .chart-card.wide, .chart-card.narrow { flex: none; }
   .chart-wrap { height: 140px; position: relative; }
   .chart-wrap canvas { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
-
-  /* Chat panel — full width below dashboard */
   .chat-panel { width: 100%; border-left: none; border-top: 1px solid var(--border); height: auto; min-height: 500px; flex-shrink: 0; }
   .messages { min-height: 200px; max-height: 400px; }
-
-  /* Modal full screen on mobile */
   .modal { width: 95vw; max-height: 90vh; overflow-y: auto; padding: 16px; }
   .upload-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
   .modal-cols-hint { display: none; }
 }
-
 @media (max-width: 480px) {
   .kpi-row { grid-template-columns: 1fr 1fr; }
   .kpi-value { font-size: 16px; }
@@ -260,7 +219,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 </style>
 </head>
 <body>
-
 <div class="mobile-bar" style="display:none">
   <div class="mobile-logo">
     <div class="mobile-logo-icon"><i class="ti ti-chart-dots-3"></i></div>
@@ -270,6 +228,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     <i class="ti ti-upload" style="font-size:13px"></i> Upload Data
   </button>
 </div>
+
 <div class="app">
   <!-- SIDEBAR -->
   <div class="sidebar">
@@ -282,7 +241,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
         </div>
       </div>
     </div>
-
     <div class="sidebar-section">
       <div class="sidebar-label">Locations</div>
       <div id="locationsList">
@@ -294,7 +252,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
         <div class="location-pill" onclick="filterByLocation('Westside', this)"><div class="location-dot" style="background:#ef4444"></div> Westside</div>
       </div>
     </div>
-
     <div class="dataset-list">
       <div class="sidebar-label">Datasets</div>
       <div class="ds-item" id="ds-sales" onclick="openUploadModal()">
@@ -328,7 +285,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
         <span class="ds-upload-btn">Upload ↑</span>
       </div>
     </div>
-
     <div style="padding: 12px 10px; margin-top: auto; border-top: 1px solid var(--border);">
       <button class="btn-sm btn-primary" style="width:100%; justify-content:center;" onclick="openUploadModal()">
         <i class="ti ti-upload"></i> Upload Data
@@ -348,7 +304,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
       </div>
     </div>
 
-    <!-- DATA STATUS BANNER -->
     <div class="data-status-bar demo-mode" id="statusBar">
       <i class="ti ti-info-circle"></i>
       <span id="statusText">Running on <strong>demo data</strong> — 5 locations, 21 weeks (Feb–Jun 2026). Upload your own CSVs to analyze your real restaurant data.</span>
@@ -477,7 +432,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
         <div class="messages" id="messages">
           <div class="msg msg-ai" id="welcomeMsg">
             <div class="msg-label">OpticAI</div>
-            <div class="msg-bubble">Hey! I've loaded 5 locations across 21 weeks of data (Feb–Jun 2026) — sales, labor, food cost, PMIX, inventory, and guest satisfaction. A few things stand out immediately: labor is running ~10pts above target at all locations, and Westside needs attention. Ask me anything, or try one of the suggested questions.</div>
+            <div class="msg-bubble">Hey! I've loaded 5 locations across 21 weeks of data (Feb–Jun 2026) — sales, labor, food cost, PMIX, and more. A few things stand out: labor is running ~10pts above target at all locations, and Westside needs attention. Ask me anything, or try one of the suggested questions.</div>
           </div>
         </div>
         <div class="chat-input-row">
@@ -516,7 +471,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
   </div>
 </div>
 
-<!-- FLOATING FEEDBACK BUTTON -->
 <button class="floating-fb" onclick="openFeedback('floating button')">
   <i class="ti ti-thumb-up" style="font-size:14px"></i> Share feedback
 </button>
@@ -526,17 +480,14 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
   <div class="modal" style="width:540px;max-height:85vh;overflow-y:auto;">
     <div class="modal-title">Customize Dashboard</div>
     <div class="modal-sub">Show, hide, or reorder your KPI tiles and charts.</div>
-
     <div style="margin-bottom:16px;">
       <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">KPI Tiles</div>
       <div id="kpiToggles" style="display:flex;flex-direction:column;gap:6px;"></div>
     </div>
-
     <div style="margin-bottom:20px;">
       <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Charts</div>
       <div id="chartToggles" style="display:flex;flex-direction:column;gap:6px;"></div>
     </div>
-
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;">
       <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">Build a custom chart from your uploaded columns</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -550,7 +501,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
         <button onclick="buildCustomChart()" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">Add Chart</button>
       </div>
     </div>
-
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeCustomizePanel()">Close</button>
       <button class="btn-sm btn-primary" onclick="resetDashboard()"><i class="ti ti-refresh"></i> Reset to Default</button>
@@ -562,17 +512,11 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 <div class="modal-overlay" id="uploadModal">
   <div class="modal">
     <div class="modal-title">Upload your restaurant data</div>
-    <div class="modal-sub">Upload any combination of datasets. Uploaded data updates the dashboard and AI analysis instantly. Demo data stays for anything not yet uploaded.</div>
-
+    <div class="modal-sub">Upload any combination of datasets. Mixed files (e.g. Sales + Labor together) are automatically detected and split. Extra columns beyond the dashboard are available to the AI analyst.</div>
     <div class="modal-cols-hint">
-      <strong>Accepted columns (flexible):</strong><br>
-      Sales: <code>date, location, sales, revenue, net_sales, covers, checks</code><br>
-      Labor: <code>date, location, labor_cost, labor_pct, hours, wages</code><br>
-      Food Cost: <code>date, location, food_cost, food_cost_pct, cogs</code><br>
-      PMIX: <code>item, category, quantity, revenue, food_cost_pct</code><br>
-      Inventory: <code>item, category, on_hand, par, variance, cost</code>
+      <strong>Any column names work.</strong> OpticAI auto-detects your columns regardless of what they're called.
+      Common formats supported: Toast, Aloha, R365, Revel, Square, and custom exports.
     </div>
-
     <div class="upload-grid">
       <div class="upload-tile" id="tile-sales">
         <i class="ti ti-chart-line"></i>
@@ -606,15 +550,14 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
       </div>
       <div class="upload-tile" id="tile-custom" style="grid-column:1/-1;background:rgba(59,130,246,0.04);border-color:rgba(59,130,246,0.25);border-style:dashed;">
         <i class="ti ti-table-plus" style="color:var(--accent)"></i>
-        <div class="upload-tile-name">Custom CSV</div>
-        <div class="upload-tile-sub" id="tile-custom-sub">Any data · requires Date + Location columns</div>
+        <div class="upload-tile-name">Custom / Mixed CSV</div>
+        <div class="upload-tile-sub" id="tile-custom-sub">Any data — we'll figure out what's in it</div>
         <input type="file" accept=".csv" onchange="handleFileUpload(event, 'custom')">
       </div>
     </div>
-
     <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;margin-bottom:14px;">
       <i class="ti ti-shield-check" style="color:#10b981;font-size:15px;flex-shrink:0"></i>
-      <span style="font-size:12px;color:#8b909e;line-height:1.5"><strong style="color:#e8eaf0">Your data never leaves your browser.</strong> Uploaded files are processed locally in your session only. Nothing is stored on our servers or retained after you close the tab.</span>
+      <span style="font-size:12px;color:#8b909e;line-height:1.5"><strong style="color:#e8eaf0">Your data never leaves your browser.</strong> Files are processed locally. Nothing is stored on our servers.</span>
     </div>
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeUploadModal()">Close</button>
@@ -623,1789 +566,1442 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-// ---- STATE ----
-const uploadedData = { sales: null, labor: null, foodcost: null, pmix: null, inventory: null, custom: null };
 
-// ---- DEMO DATA (5 locations, 21 weeks, Feb–Jun 2026) ----
-const DEMO = {
-  weeks: ["Feb 2","Feb 9","Feb 16","Feb 23","Mar 2","Mar 9","Mar 16","Mar 23","Mar 30","Apr 6","Apr 13","Apr 20","Apr 27","May 4","May 11","May 18","May 25","Jun 1","Jun 8","Jun 15","Jun 22"],
-  salesDowntown:       [79.6,94.8,97.8,86.0,86.9,97.0,88.1,92.0,90.9,95.4,96.1,97.0,95.9,88.5,106.4,92.6,110.9,117.0,103.3,122.7,99.4],
-  salesFreedomSq:      [80.6,84.2,80.5,92.2,89.1,85.2,92.7,94.9,94.3,88.9,90.9,93.2,94.3,84.6,100.1,94.6,87.1,91.3,94.8,92.8,94.2],
-  salesGovernmentSq:   [78.7,97.2,104.8,106.1,96.3,107.2,92.0,96.7,95.7,112.1,100.0,108.7,99.0,98.0,107.8,103.0,107.0,108.6,111.8,115.4,87.6],
-  salesMidtown:        [81.9,84.3,79.2,94.2,87.5,94.5,85.3,75.8,99.5,85.1,90.3,85.3,93.0,81.1,85.5,88.3,94.6,95.1,87.3,100.3,83.7],
-  salesWestside:       [58.8,74.6,71.3,74.9,74.2,78.9,77.4,70.0,75.3,72.4,69.9,78.6,78.9,80.1,85.0,83.1,80.2,83.9,78.1,84.2,74.7],
-  laborDowntown:       [39.6,35.7,39.8,42.8,45.2,37.9,40.5,40.6,41.9,38.7,36.3,41.1,37.6,49.4,38.4,38.0,32.1,37.4,32.5,29.7,37.4],
-  laborFreedomSq:      [37.8,45.0,44.3,41.7,39.2,42.1,40.9,38.1,36.7,42.8,39.0,42.8,39.0,40.0,36.9,39.0,45.4,40.0,39.6,40.1,35.4],
-  laborGovernmentSq:   [42.7,40.9,36.6,38.3,44.8,39.9,42.8,42.3,39.2,35.5,41.9,36.3,40.4,39.1,40.5,39.8,36.3,35.8,39.4,39.5,45.3],
-  laborMidtown:        [33.1,42.3,43.4,40.5,37.1,38.0,39.7,47.6,35.2,40.8,35.6,47.9,36.0,41.1,43.9,43.0,37.8,38.1,40.7,36.1,36.8],
-  laborWestside:       [42.1,38.9,40.1,34.4,40.5,40.3,39.7,47.2,39.2,44.4,45.4,43.3,41.4,39.4,39.9,42.9,39.6,38.3,42.8,39.8,37.4],
-  dow: [12543,12470,12739,12670,15422,15461,10546],
-  pmix: { labels: ['Entree 79.5%','Beverage 10.5%','Appetizer 5.6%','Side 4.5%'], data: [79.5,10.5,5.6,4.5] }
+// ═══════════════════════════════════════════════════════════════
+// SECTION 1: COLUMN ALIAS MAP
+// Add new POS/system column names here as you discover them.
+// ═══════════════════════════════════════════════════════════════
+const COL_ALIASES = {
+  date:          ['date','week','week end','week ending','period','business date','trans date',
+                  'week_end','business_date','trans_date','report date','report_date'],
+  location:      ['location','store','site','unit','restaurant','loc','property','store name',
+                  'location name','store_name','location_name'],
+  netSales:      ['net sales','netsales','sales','revenue','net_sales','total sales','gross sales',
+                  'net_amt','total_collected','sales_amount','check sales','total revenue',
+                  'net revenue','food sales','beverage sales','total_sales'],
+  guestCount:    ['guest count','guests','covers','transactions','check count','guest_count',
+                  'checks','num checks','num_checks','covers count'],
+  avgCheck:      ['avg check','average check','check average','per person','avg_check',
+                  'average_check','check avg'],
+  laborCost:     ['labor cost','labor_cost','total labor','wages','labor $','labor dollars',
+                  'total_labor','labor amount','total wages','reg pay','total pay'],
+  laborPct:      ['labor %','labor pct','labor_pct','labor percent','labor%',
+                  'labor cost %','labor cost pct','labor cost percent'],
+  regularHours:  ['regular hours','reg hours','hours','reg_hours','scheduled hours',
+                  'total hours','hrs worked'],
+  overtimeHours: ['overtime','ot hours','overtime hours','ot_hours','ot pay'],
+  foodCostAmt:   ['food cost','food cost $','food_cost','cost of goods','cogs',
+                  'food & bev cost','f&b cost','food cost amount','total cogs',
+                  'food and bev','food & beverage cost'],
+  foodCostPct:   ['food cost %','food cost pct','food%','food_pct','cogs %','cogs pct',
+                  'food cost percent','f&b %','food & bev %'],
+  itemName:      ['item','item name','menu item','item_name','product','description',
+                  'menu_item','item description'],
+  category:      ['category','cat','menu category','item category','group','menu group',
+                  'item_category','menu_category'],
+  quantity:      ['qty','quantity','count','sold','units sold','quantity sold','qty sold',
+                  'item count','covers'],
+  itemSales:     ['item sales','net sales','revenue','item revenue','sales amount',
+                  'gross sales','menu item sales'],
+  itemCost:      ['item cost','unit cost','cogs','food cost','cost per item','item_cost'],
+  onHand:        ['on hand','on_hand','current qty','qty on hand','inventory','stock'],
+  par:           ['par','par level','target qty','par_level'],
+  variance:      ['variance','var','over/short','+/-'],
 };
 
-// ---- CHARTS ----
-let salesChart, pmixChart, laborChart, dowChart;
+// ═══════════════════════════════════════════════════════════════
+// SECTION 2: CORE UTILITIES
+// ═══════════════════════════════════════════════════════════════
 
-function initCharts() {
-  salesChart = new Chart(document.getElementById('salesChart'), {
-    type: 'line',
-    data: { labels: DEMO.weeks, datasets: [
-      { label: 'Downtown',         data: DEMO.salesDowntown,    borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.07)', tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2 },
-      { label: 'Freedom Square',   data: DEMO.salesFreedomSq,   borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.06)', tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2 },
-      { label: 'Government Square',data: DEMO.salesGovernmentSq,borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.06)', tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2 },
-      { label: 'Midtown',          data: DEMO.salesMidtown,     borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.05)', tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2 },
-      { label: 'Westside',         data: DEMO.salesWestside,    borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.05)',  tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2 },
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-      scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555b6a', font: { size: 11 } } },
-                y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555b6a', font: { size: 11 }, callback: v => '$' + v + 'K' } } } }
-  });
+// Finds the actual column name in headers that matches a concept key.
+// Returns null if not found — never silently falls back.
+function findCol(headers, conceptKey) {
+  const aliases = COL_ALIASES[conceptKey] || [];
+  const norm = h => h.toLowerCase().replace(/[_\s]+/g,' ').trim();
+  const normHeaders = headers.map(norm);
 
-  pmixChart = new Chart(document.getElementById('pmixChart'), {
-    type: 'doughnut',
-    data: { labels: DEMO.pmix.labels, datasets: [{ data: DEMO.pmix.data, backgroundColor: ['#3b82f6','#10b981','#f59e0b','#8b5cf6'], borderWidth: 0, hoverOffset: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '62%',
-      plugins: { legend: { position: 'bottom', labels: { color: '#8b909e', font: { size: 11 }, boxWidth: 10, padding: 8 } } } }
-  });
-
-  laborChart = new Chart(document.getElementById('laborChart'), {
-    type: 'line',
-    data: { labels: DEMO.weeks, datasets: [
-      { label: 'Downtown',         data: DEMO.laborDowntown,     borderColor: '#3b82f6', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
-      { label: 'Freedom Square',   data: DEMO.laborFreedomSq,    borderColor: '#f59e0b', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
-      { label: 'Government Square',data: DEMO.laborGovernmentSq, borderColor: '#8b5cf6', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
-      { label: 'Midtown',          data: DEMO.laborMidtown,      borderColor: '#10b981', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
-      { label: 'Westside',         data: DEMO.laborWestside,     borderColor: '#ef4444', tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false },
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-      scales: { x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 } } },
-                y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 }, callback: v => v + '%' } } } }
-  });
-
-  dowChart = new Chart(document.getElementById('dowChart'), {
-    type: 'bar',
-    data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-      datasets: [{ data: DEMO.dow, backgroundColor: ['#3b82f6','#3b82f6','#3b82f6','#3b82f6','#10b981','#10b981','#ef4444'], borderRadius: 5, borderWidth: 0 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-      scales: { x: { grid: { display: false }, ticks: { color: '#555b6a', font: { size: 11 } } },
-                y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555b6a', font: { size: 10 }, callback: v => '$' + (v/1000).toFixed(0) + 'K' } } } }
-  });
-}
-
-// ---- CSV PARSING ENGINE (self-learning, schema-agnostic) ----
-
-// Normalize a column name to a canonical key
-function normalizeCol(name) {
-  return name.trim().toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')  // spaces, %, /, special chars → underscore
-    .replace(/^_|_$/g, '');        // trim leading/trailing underscores
-}
-
-// Find a column from a set of aliases (all normalized)
-function findCol(keys, aliases) {
-  const norm = keys.map(k => ({ orig: k, norm: normalizeCol(k) }));
+  // Pass 1: exact match
   for (const alias of aliases) {
-    const hit = norm.find(k => k.norm === normalizeCol(alias) || k.norm.includes(normalizeCol(alias)));
-    if (hit) return hit.orig;
+    const idx = normHeaders.indexOf(norm(alias));
+    if (idx !== -1) return headers[idx];
+  }
+  // Pass 2: header contains alias OR alias contains header
+  for (const alias of aliases) {
+    const a = norm(alias);
+    const idx = normHeaders.findIndex(h => h.includes(a) || a.includes(h));
+    if (idx !== -1) return headers[idx];
   }
   return null;
 }
 
-// Detect if numeric values are stored as decimals (0.30) vs percentages (30)
-function detectPercentFormat(vals) {
-  const nums = vals.filter(v => !isNaN(v));
-  if (nums.length === 0) return 'unknown';
-  const allBelow2 = nums.every(v => v < 2.0);
-  return allBelow2 ? 'decimal' : 'percent';
+function parseMoneyValue(raw) {
+  if (raw === null || raw === undefined || String(raw).trim() === '') return NaN;
+  const s = String(raw).replace(/[$,\s]/g,'').replace(/^\((.+)\)$/,'-$1');
+  return parseFloat(s);
 }
 
-// Normalize a percent value to display format
-function normalizePct(val, format) {
-  const n = parseFloat(val);
-  if (isNaN(n)) return null;
-  return format === 'decimal' ? n * 100 : n;
+function parsePercentValue(raw) {
+  if (raw === null || raw === undefined || String(raw).trim() === '') return NaN;
+  const s = String(raw).trim();
+  if (s.endsWith('%')) return parseFloat(s);
+  const n = parseFloat(s);
+  if (isNaN(n)) return NaN;
+  // If value < 1.5 assume it's a decimal (0.314 → 31.4%), otherwise already a percent
+  return n < 1.5 ? n * 100 : n;
 }
 
-// Aggregate daily rows to weekly for cleaner charts
-function aggregateToWeekly(rows, dateCol, locationCol, valueCol, method = 'sum') {
-  const weekMap = {};
-  rows.forEach(r => {
-    const d = new Date(r[dateCol]);
-    if (isNaN(d)) return;
-    // Get week start (Monday)
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    const weekStart = new Date(d.setDate(diff));
-    const weekKey = weekStart.toISOString().slice(0, 10);
-    const loc = locationCol ? r[locationCol] : 'All';
-    const key = `${weekKey}__${loc}`;
-    if (!weekMap[key]) weekMap[key] = { week: weekKey, location: loc, values: [], count: 0 };
-    const val = parseFloat(r[valueCol]);
-    if (!isNaN(val)) { weekMap[key].values.push(val); weekMap[key].count++; }
-  });
-  return Object.values(weekMap).map(w => ({
-    week: w.week,
-    location: w.location,
-    value: method === 'avg' ? w.values.reduce((a,b)=>a+b,0)/w.values.length : w.values.reduce((a,b)=>a+b,0),
-    count: w.count
-  })).sort((a,b) => a.week.localeCompare(b.week) || a.location.localeCompare(b.location));
+function normalizeDate(raw) {
+  if (!raw) return null;
+  const s = String(raw).trim();
+  // Try native parse first
+  let d = new Date(s);
+  if (!isNaN(d.getTime())) return d.toISOString().slice(0,10);
+  // Try M/D/YY or M/D/YYYY
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (mdy) {
+    let yr = parseInt(mdy[3]);
+    if (yr < 100) yr += 2000;
+    d = new Date(yr, parseInt(mdy[1])-1, parseInt(mdy[2]));
+    if (!isNaN(d.getTime())) return d.toISOString().slice(0,10);
+  }
+  return s; // return as-is if we can't parse — better than null
 }
 
-// Format date range string from array of date strings
-function formatDateRange(dates) {
-  if (!dates.length) return '';
-  const sorted = dates.filter(Boolean).sort();
-  const fmt = d => { const dt = new Date(d); return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); };
-  const start = fmt(sorted[0]);
-  const end = fmt(sorted[sorted.length - 1]);
-  // Count unique weeks
-  const weeks = new Set(sorted.map(d => { const dt = new Date(d); const day = dt.getDay(); dt.setDate(dt.getDate() - day + (day===0?-6:1)); return dt.toISOString().slice(0,10); }));
-  return `${start} – ${end} · ${weeks.size} weeks`;
+function sumField(rows, field) {
+  return rows.reduce((s,r) => s + (parseFloat(r[field]) || 0), 0);
 }
 
+function avgField(rows, field) {
+  const valid = rows.filter(r => r[field] !== null && !isNaN(parseFloat(r[field])));
+  if (!valid.length) return null;
+  return valid.reduce((s,r) => s + parseFloat(r[field]), 0) / valid.length;
+}
+
+function filterRowsByLocation(rows, location) {
+  if (!location || location === 'All Locations') return rows;
+  return rows.filter(r => r.location === location);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 3: CSV PARSER
+// ═══════════════════════════════════════════════════════════════
 function parseCSV(text) {
-  const lines = text.trim().split(/\r?\n/);
-  const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-  return lines.slice(1).filter(l => l.trim()).map(line => {
+  // Strip BOM
+  text = text.replace(/^\uFEFF/,'');
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return [];
+
+  function parseLine(line) {
     const vals = [];
-    let cur = '', inQuote = false;
+    let cur = '', inQ = false;
     for (let i = 0; i < line.length; i++) {
-      if (line[i] === '"') { inQuote = !inQuote; }
-      else if (line[i] === ',' && !inQuote) { vals.push(cur.trim()); cur = ''; }
-      else { cur += line[i]; }
+      const c = line[i];
+      if (c === '"') {
+        if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (c === ',' && !inQ) {
+        vals.push(cur.trim()); cur = '';
+      } else {
+        cur += c;
+      }
     }
     vals.push(cur.trim());
-    const obj = {};
-    rawHeaders.forEach((h, i) => obj[h] = (vals[i] || '').replace(/^"|"$/g, ''));
-    return obj;
+    return vals;
+  }
+
+  const headers = parseLine(lines[0]).map(h => h.replace(/"/g,'').trim());
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = parseLine(lines[i]);
+    const row = {};
+    headers.forEach((h,j) => { row[h] = vals[j] !== undefined ? vals[j].replace(/"/g,'').trim() : ''; });
+    rows.push(row);
+  }
+  return rows;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 4: SMART INGEST
+// Detects what's in a file dynamically — no column assumptions.
+// ═══════════════════════════════════════════════════════════════
+function smartIngest(csvText, userLabel) {
+  const rows = parseCSV(csvText);
+  if (!rows || rows.length === 0) return { error: 'File appears to be empty or unreadable.' };
+
+  const headers = Object.keys(rows[0]);
+  const result = {
+    userLabel,
+    detectedDatasets: [],
+    coreColumns: {},       // concept → actual column name in this file
+    extraColumns: [],      // columns we don't recognize for KPIs — still sent to Claude
+    rows,
+    rowCount: rows.length,
+    warnings: [],
+    errors: [],
+  };
+
+  // Detect dataset types by how many signature columns we find
+  const signatures = {
+    sales:     ['netSales'],
+    labor:     ['laborCost','laborPct','regularHours'],
+    foodcost:  ['foodCostAmt','foodCostPct'],
+    pmix:      ['itemName','quantity','itemSales'],
+    inventory: ['onHand','par'],
+  };
+  for (const [ds, concepts] of Object.entries(signatures)) {
+    const hits = concepts.filter(c => findCol(headers, c) !== null);
+    if (hits.length >= 1) result.detectedDatasets.push(ds);
+  }
+
+  if (result.detectedDatasets.length === 0) {
+    result.warnings.push(
+      `Could not identify a known dataset type. Columns in file: ${headers.join(', ')}. ` +
+      `The AI will still have access to all columns.`
+    );
+  } else if (!result.detectedDatasets.includes(userLabel) && userLabel !== 'custom') {
+    result.warnings.push(
+      `You uploaded this as "${userLabel}" but we detected: ${result.detectedDatasets.join(' + ')}. ` +
+      `All detected data will be used.`
+    );
+  } else if (result.detectedDatasets.length > 1) {
+    result.warnings.push(
+      `This file contains multiple dataset types: ${result.detectedDatasets.join(' + ')}. All will be used.`
+    );
+  }
+
+  // Map all known concept columns
+  const allConcepts = Object.keys(COL_ALIASES);
+  const mappedHeaders = new Set();
+  for (const concept of allConcepts) {
+    const col = findCol(headers, concept);
+    if (col) {
+      result.coreColumns[concept] = col;
+      mappedHeaders.add(col);
+    }
+  }
+
+  // Everything else → extraColumns (Claude will know about these)
+  for (const header of headers) {
+    if (mappedHeaders.has(header) || !header.trim()) continue;
+    const sampleValues = rows.slice(0,20)
+      .map(r => r[header])
+      .filter(v => v !== null && v !== undefined && v !== '');
+    const numeric = sampleValues
+      .map(v => parseFloat(String(v).replace(/[$,%\s]/g,'')))
+      .filter(v => !isNaN(v));
+    const colMeta = {
+      originalName: header,
+      sampleValues: sampleValues.slice(0,5),
+      isNumeric: numeric.length > sampleValues.length * 0.6,
+    };
+    if (colMeta.isNumeric && numeric.length > 0) {
+      colMeta.min = Math.min(...numeric);
+      colMeta.max = Math.max(...numeric);
+      colMeta.avg = +(numeric.reduce((a,b) => a+b,0) / numeric.length).toFixed(2);
+    }
+    result.extraColumns.push(colMeta);
+  }
+
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 5: DATASET PROCESSORS
+// These compute KPI values for the dashboard tiles + charts.
+// Dashborad stays fixed — only these 5 metrics shown there.
+// ═══════════════════════════════════════════════════════════════
+
+function processSalesForDashboard(ingest) {
+  const { rows, coreColumns: cols, warnings, errors } = ingest;
+  if (!cols.date)     errors.push('No date column found. Expected: date, week, period, business date');
+  if (!cols.location) errors.push('No location column found. Expected: location, store, site, unit');
+  if (!cols.netSales) errors.push('No sales column found. Expected: net sales, revenue, sales, total sales');
+  if (errors.length > 0) return null;
+
+  const byKey = {};
+  let skipCount = 0;
+  for (const row of rows) {
+    const loc  = (row[cols.location] || '').trim();
+    const date = normalizeDate(row[cols.date]);
+    const val  = parseMoneyValue(row[cols.netSales]);
+    if (!loc || !date || isNaN(val)) { skipCount++; continue; }
+    const key = `${loc}||${date}`;
+    if (!byKey[key]) byKey[key] = { location: loc, date, netSales: 0, guests: 0, checkCount: 0 };
+    byKey[key].netSales += val;
+    if (cols.guestCount) {
+      const g = parseFloat(row[cols.guestCount]);
+      if (!isNaN(g)) { byKey[key].guests += g; byKey[key].checkCount++; }
+    }
+  }
+  if (skipCount > rows.length * 0.2) {
+    warnings.push(`${skipCount} of ${rows.length} rows were skipped (missing or unparseable values).`);
+  }
+
+  const processed = Object.values(byKey);
+  const locations = [...new Set(processed.map(r => r.location))];
+  warnings.push(`Detected ${locations.length} location(s): ${locations.join(', ')}`);
+  return processed;
+}
+
+function processLaborForDashboard(ingest, salesProcessed) {
+  const { rows, coreColumns: cols, warnings, errors } = ingest;
+  if (!cols.date)     errors.push('No date column found in labor data.');
+  if (!cols.location) errors.push('No location column found in labor data.');
+  if (!cols.laborCost && !cols.laborPct) {
+    errors.push('No labor cost or labor % column found. Expected: labor cost, wages, labor %, labor pct');
+  }
+  if (errors.length > 0) return null;
+
+  let pctSource = 'direct';
+  if (!cols.laborPct) {
+    pctSource = salesProcessed && salesProcessed.length > 0 ? 'computed' : 'cost_only';
+    if (pctSource === 'computed') warnings.push('Computing labor % from labor cost ÷ net sales.');
+    else warnings.push('No labor % column and no sales data — showing labor cost only.');
+  }
+
+  const byKey = {};
+  for (const row of rows) {
+    const loc  = (row[cols.location] || '').trim();
+    const date = normalizeDate(row[cols.date]);
+    if (!loc || !date) continue;
+    const key = `${loc}||${date}`;
+    if (!byKey[key]) byKey[key] = { location: loc, date, laborCost: 0, laborPctSum: 0, laborPctN: 0 };
+    if (cols.laborCost) {
+      const c = parseMoneyValue(row[cols.laborCost]);
+      if (!isNaN(c)) byKey[key].laborCost += c;
+    }
+    if (cols.laborPct) {
+      const p = parsePercentValue(row[cols.laborPct]);
+      if (!isNaN(p)) { byKey[key].laborPctSum += p; byKey[key].laborPctN++; }
+    }
+  }
+
+  return Object.values(byKey).map(r => {
+    let laborPct = null;
+    if (r.laborPctN > 0) {
+      laborPct = r.laborPctSum / r.laborPctN;
+    } else if (pctSource === 'computed' && salesProcessed) {
+      const s = salesProcessed.find(sr => sr.location === r.location && sr.date === r.date);
+      if (s && s.netSales > 0) laborPct = (r.laborCost / s.netSales) * 100;
+    }
+    return { ...r, laborPct };
   });
 }
 
-// Global state for discovered locations and date range
-let discoveredLocations = new Set();
-let discoveredDates = [];
+function processFoodCostForDashboard(ingest, salesProcessed) {
+  const { rows, coreColumns: cols, warnings, errors } = ingest;
+  if (!cols.date)     errors.push('No date column found in food cost data.');
+  if (!cols.location) errors.push('No location column found in food cost data.');
+  if (!cols.foodCostAmt && !cols.foodCostPct) {
+    errors.push('No food cost column found. Expected: food cost, cogs, food cost %, cogs %');
+  }
+  if (errors.length > 0) return null;
 
-function updateGlobalMetadata(rows, locationCol, dateCol) {
-  if (locationCol) rows.forEach(r => { if (r[locationCol]) discoveredLocations.add(r[locationCol]); });
-  if (dateCol) rows.forEach(r => { if (r[dateCol]) discoveredDates.push(r[dateCol]); });
-  renderDynamicLocations();
-  updateDateRangeLabel();
+  const byKey = {};
+  for (const row of rows) {
+    const loc  = (row[cols.location] || '').trim();
+    const date = normalizeDate(row[cols.date]);
+    if (!loc || !date) continue;
+    const key = `${loc}||${date}`;
+    if (!byKey[key]) byKey[key] = { location: loc, date, foodCostAmt: 0, foodCostPctSum: 0, foodCostPctN: 0 };
+    if (cols.foodCostAmt) {
+      const v = parseMoneyValue(row[cols.foodCostAmt]);
+      if (!isNaN(v)) byKey[key].foodCostAmt += v;
+    }
+    if (cols.foodCostPct) {
+      const p = parsePercentValue(row[cols.foodCostPct]);
+      if (!isNaN(p)) { byKey[key].foodCostPctSum += p; byKey[key].foodCostPctN++; }
+    }
+  }
+
+  return Object.values(byKey).map(r => {
+    let foodCostPct = null;
+    if (r.foodCostPctN > 0) {
+      foodCostPct = r.foodCostPctSum / r.foodCostPctN;
+    } else if (salesProcessed) {
+      const s = salesProcessed.find(sr => sr.location === r.location && sr.date === r.date);
+      if (s && s.netSales > 0) foodCostPct = (r.foodCostAmt / s.netSales) * 100;
+    }
+    return { ...r, foodCostPct };
+  });
 }
 
-function renderDynamicLocations() {
-  const locs = [...discoveredLocations].sort();
-  const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4','#f97316'];
-  const container = document.getElementById('locationsList');
-  if (!container) return;
-
-  // Use demo locations if none discovered yet
-  const displayLocs = locs.length > 0 ? locs :
-    ['Downtown','Freedom Square','Government Square','Midtown','Westside'];
-  const displayColors = locs.length > 0 ? colors :
-    ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444'];
-
-  container.innerHTML =
-    `<div class="location-pill active" onclick="filterByLocation(null, this)"><div class="location-dot"></div> All Locations</div>` +
-    displayLocs.map((loc, i) =>
-      `<div class="location-pill" onclick="filterByLocation('${loc}', this)"><div class="location-dot" style="background:${displayColors[i % displayColors.length]}"></div> ${loc}</div>`
-    ).join('');
-}
-
-function updateDateRangeLabel() {
-  if (discoveredDates.length === 0) return;
-  const label = document.getElementById('dateRangeLabel');
-  if (label) label.textContent = formatDateRange(discoveredDates) + ' · Live Data';
-}
-
-function summarizeData(type, rows) {
-  if (!rows || rows.length === 0) return null;
-  const keys = Object.keys(rows[0]);
-
-  if (type === 'sales') {
-    const salesCol = findCol(keys, ['net sales','net_sales','revenue','gross sales','gross_sales','sales','amount','total sales','total_sales']);
-    const locationCol = findCol(keys, ['location','store','site','restaurant','unit','branch']);
-    const dateCol = findCol(keys, ['date','day','week','period','transaction_date','sale_date']);
-    const checkCountCol = findCol(keys, ['check count','check_count','checks','ticket count','ticket_count','transactions','transaction count']);
-    const avgCheckCol = findCol(keys, ['average check','average_check','avg check','avg_check','check average','per check','check_avg']);
-
-    if (!salesCol) return { summary: `Could not detect a sales/revenue column. Found: ${keys.join(', ')}`, kpis: {}, error: 'no_sales_col' };
-
-    updateGlobalMetadata(rows, locationCol, dateCol);
-
-    const totalSales = rows.reduce((s, r) => s + (parseFloat(r[salesCol]) || 0), 0);
-    const locations = locationCol ? [...new Set(rows.map(r => r[locationCol]).filter(Boolean))] : ['All'];
-    
-    // Avg check: prefer calculation from totals, fall back to column average
-    let avgCheck = null;
-    if (checkCountCol) {
-      const totalChecks = rows.reduce((s,r) => s + (parseFloat(r[checkCountCol])||0), 0);
-      if (totalChecks > 0) avgCheck = totalSales / totalChecks;
-    } else if (avgCheckCol) {
-      // Weighted average using sales as weight
-      const weighted = rows.reduce((s,r) => s + (parseFloat(r[avgCheckCol])||0) * (parseFloat(r[salesCol])||0), 0);
-      avgCheck = weighted / totalSales;
-    }
-
-    const locSummary = locations.map(loc => {
-      const locRows = locationCol ? rows.filter(r => r[locationCol] === loc) : rows;
-      const locTotal = locRows.reduce((s,r) => s+(parseFloat(r[salesCol])||0),0);
-      return `${loc}: $${(locTotal/1000).toFixed(1)}K total`;
-    }).join(', ');
-
-    // Determine if daily data (aggregate to weekly for chart)
-    const uniqueDates = dateCol ? [...new Set(rows.map(r => r[dateCol]))] : [];
-    const shouldAggregate = locationCol && uniqueDates.length > (locations.length * 14);
-
-    return {
-      summary: `Total net sales: $${(totalSales/1000).toFixed(1)}K. ${locations.length} location(s): ${locSummary}. Date range: ${dateCol ? formatDateRange(uniqueDates) : 'unknown'}.${avgCheck ? ` Avg check: $${avgCheck.toFixed(2)}.` : ''}`,
-      kpis: {
-        sales: `$${totalSales >= 1000000 ? (totalSales/1000000).toFixed(2)+'M' : (totalSales/1000).toFixed(0)+'K'}`,
-        check: avgCheck ? `$${avgCheck.toFixed(2)}` : null
-      },
-      chartData: buildSalesChart(rows, salesCol, locationCol, dateCol, shouldAggregate),
-      locations,
-      rawSalesByDateLoc: buildSalesLookup(rows, salesCol, locationCol, dateCol)
-    };
-  }
-
-  if (type === 'labor') {
-    const locationCol = findCol(keys, ['location','store','site','restaurant','unit','branch']);
-    const dateCol = findCol(keys, ['date','day','week','period']);
-    const laborPctCol = findCol(keys, ['labor pct','labor_pct','labor percent','labor_percent','labor %','labor_%','labor cost %','labor_cost_pct']);
-    const laborCostCol = findCol(keys, ['labor cost','labor_cost','total labor','wages','wage cost','labor dollars']);
-
-    updateGlobalMetadata(rows, locationCol, dateCol);
-
-    let avgLabor = null;
-    let laborPctFormat = 'percent';
-
-    if (laborPctCol) {
-      const vals = rows.map(r => parseFloat(r[laborPctCol])).filter(v => !isNaN(v));
-      laborPctFormat = detectPercentFormat(vals);
-      const normalized = vals.map(v => normalizePct(v, laborPctFormat));
-      avgLabor = normalized.reduce((a,b)=>a+b,0) / normalized.length;
-    } else if (laborCostCol) {
-      // No pct column — store cost for cross-calculation with sales later
-      avgLabor = null; // will be calculated in recalcPrimeCost
-    }
-
-    const locations = locationCol ? [...new Set(rows.map(r => r[locationCol]).filter(Boolean))] : ['All'];
-    const totalCost = laborCostCol ? rows.reduce((s,r)=>s+(parseFloat(r[laborCostCol])||0),0) : null;
-
-    return {
-      summary: `Labor data: ${rows.length} records, ${locations.length} location(s).${avgLabor !== null ? ` Avg labor %: ${avgLabor.toFixed(1)}%.` : totalCost ? ` Total labor cost: $${(totalCost/1000).toFixed(1)}K (% will calculate when sales data is available).` : ''} Columns: ${keys.join(', ')}.`,
-      kpis: { labor: avgLabor !== null ? `${avgLabor.toFixed(1)}%` : null },
-      chartData: laborPctCol ? buildLaborChart(rows, laborPctCol, locationCol, dateCol, laborPctFormat) : null,
-      laborCostCol,
-      locationCol,
-      dateCol,
-      totalLaborCost: totalCost
-    };
-  }
-
-  if (type === 'foodcost') {
-    const locationCol = findCol(keys, ['location','store','site','restaurant','unit']);
-    const dateCol = findCol(keys, ['date','day','week','period']);
-    const fcPctCol = findCol(keys, ['food cost %','food_cost_pct','food cost percent','food cost percentage','fc pct','fc_pct','cogs pct','cogs_pct','food %']);
-    const fcCostCol = findCol(keys, ['actual food cost','food cost','food_cost','cogs','actual cost','food costs']);
-
-    updateGlobalMetadata(rows, locationCol, dateCol);
-
-    let avgFC = null;
-    if (fcPctCol) {
-      const vals = rows.map(r => parseFloat(r[fcPctCol])).filter(v => !isNaN(v));
-      const fmt = detectPercentFormat(vals);
-      const normalized = vals.map(v => normalizePct(v, fmt));
-      avgFC = normalized.reduce((a,b)=>a+b,0) / normalized.length;
-    }
-
-    return {
-      summary: `Food cost data: ${rows.length} records.${avgFC !== null ? ` Avg food cost %: ${avgFC.toFixed(1)}%.` : ''} Columns: ${keys.join(', ')}.`,
-      kpis: { foodcost: avgFC !== null ? `${avgFC.toFixed(1)}%` : null }
-    };
-  }
-
-  if (type === 'pmix') {
-    const itemCol = findCol(keys, ['menu item','menu_item','item name','item_name','item','product','dish','name']);
-    const catCol = findCol(keys, ['category','cat','group','type','section','menu section']);
-    const qtyCol = findCol(keys, ['quantity sold','quantity_sold','qty sold','qty_sold','quantity','qty','count','sold','units']);
-    const revCol = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount','total','item sales']);
-    const marginCol = findCol(keys, ['margin','profit','contribution']);
-
-    const categories = catCol ? [...new Set(rows.map(r => r[catCol]).filter(Boolean))] : [];
-    const topItems = itemCol && revCol ? rows
-      .reduce((acc, r) => {
-        const name = r[itemCol];
-        acc[name] = (acc[name]||0) + (parseFloat(r[revCol])||0);
-        return acc;
-      }, {}) : {};
-    const top5 = Object.entries(topItems).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k])=>k).join(', ');
-
-    const catData = buildPmixChart(rows, catCol, revCol);
-    return {
-      summary: `PMIX: ${rows.length} line items, ${[...new Set(rows.map(r=>itemCol?r[itemCol]:null).filter(Boolean))].length} unique items.${categories.length ? ` Categories: ${categories.join(', ')}.` : ''}${top5 ? ` Top items by revenue: ${top5}.` : ''}`,
-      kpis: {},
-      chartData: catData,
-      metricCols: [qtyCol, revCol, marginCol].filter(Boolean)
-    };
-  }
-
-  if (type === 'inventory') {
-    const itemCol = findCol(keys, ['inventory item','item name','item','product','ingredient']);
-    const locationCol = findCol(keys, ['location','store','site']);
-    const wasteCol = findCol(keys, ['waste qty','waste_qty','waste','spoilage']);
-    const varianceCol = findCol(keys, ['variance','variance_pct','overage','underage','usage variance']);
-
-    updateGlobalMetadata(rows, locationCol, null);
-
-    const uniqueItems = itemCol ? [...new Set(rows.map(r=>r[itemCol]).filter(Boolean))].length : rows.length;
-    const totalWaste = wasteCol ? rows.reduce((s,r)=>s+(parseFloat(r[wasteCol])||0),0) : null;
-
-    return {
-      summary: `Inventory: ${uniqueItems} unique items across ${rows.length} records.${totalWaste !== null ? ` Total waste qty: ${totalWaste.toFixed(1)} units.` : ''} Columns: ${keys.join(', ')}.`,
-      kpis: {}
-    };
-  }
-
-  if (type === 'custom') {
-    const dateCol = findCol(keys, ['date','day','week','period','transaction_date','sale_date']);
-    const locationCol = findCol(keys, ['location','store','site','restaurant','unit','branch']);
-    // Exclude structural columns from metrics — normalize for comparison
-    const structuralNorms = ['date','day','week','period','transaction_date','sale_date','location','store','site','restaurant','unit','branch'];
-    const metricCols = keys.filter(k => !structuralNorms.some(s => normalizeCol(k) === normalizeCol(s)));
-
-    if (!dateCol || !locationCol) {
-      return {
-        summary: `Custom CSV requires at least "date" and "location" columns. Found: ${keys.join(', ')}. Please rename your columns and re-upload.`,
-        kpis: {},
-        error: 'missing_required_columns'
+function processPmixForDashboard(ingest) {
+  const { rows, coreColumns: cols, errors } = ingest;
+  if (!cols.itemName) errors.push('No item name column found. Expected: item, menu item, description');
+  if (errors.length > 0) return null;
+  const byItem = {};
+  for (const row of rows) {
+    const item = (row[cols.itemName] || '').trim();
+    if (!item) continue;
+    if (!byItem[item]) {
+      byItem[item] = {
+        item,
+        category: cols.category ? (row[cols.category] || 'Uncategorized').trim() : 'Uncategorized',
+        quantity: 0,
+        sales: 0,
+        cost: 0,
       };
     }
-
-    const locations = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))];
-    const periods = [...new Set(rows.map(r => r[dateCol]).filter(Boolean))];
-
-    // Check for ambiguous columns
-    const ambiguous = metricCols.filter(k => ambiguousColumns[k]);
-
-    const metricSummaries = metricCols.map(col => {
-      const vals = rows.map(r => parseFloat(r[col])).filter(v => !isNaN(v));
-      if (vals.length === 0) return `${col}: text data`;
-      const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
-      const min = Math.min(...vals); const max = Math.max(...vals);
-      return `${col}: avg=${avg.toFixed(2)}, range=${min.toFixed(1)}–${max.toFixed(1)}`;
-    }).join('; ');
-
-    return {
-      summary: `Custom dataset: ${rows.length} rows, ${locations.length} location(s) (${locations.join(', ')}), ${periods.length} time periods. Metrics detected: ${metricCols.join(', ')}. ${metricSummaries}`,
-      kpis: {},
-      ambiguousColumns: ambiguous,
-      metricCols,
-      locations
-    };
+    if (cols.quantity) { const q = parseFloat(row[cols.quantity]); if (!isNaN(q)) byItem[item].quantity += q; }
+    if (cols.itemSales) { const s = parseMoneyValue(row[cols.itemSales]); if (!isNaN(s)) byItem[item].sales += s; }
+    if (cols.itemCost)  { const c = parseMoneyValue(row[cols.itemCost]);  if (!isNaN(c)) byItem[item].cost  += c; }
   }
-
-  return { summary: `${rows.length} rows, columns: ${keys.join(', ')}`, kpis: {} };
+  return Object.values(byItem).map(r => ({
+    ...r,
+    margin: r.sales > 0 ? ((r.sales - r.cost) / r.sales * 100).toFixed(1) : null,
+  }));
 }
 
-function buildSalesLookup(rows, salesCol, locationCol, dateCol) {
-  const lookup = {};
-  rows.forEach(r => {
-    const key = `${r[dateCol]||'all'}__${locationCol ? r[locationCol] : 'All'}`;
-    lookup[key] = (lookup[key]||0) + (parseFloat(r[salesCol])||0);
-  });
-  return lookup;
-}
+// ═══════════════════════════════════════════════════════════════
+// SECTION 6: GLOBAL DATA STORE
+// ═══════════════════════════════════════════════════════════════
+window.opticData = {
+  files:     [],   // all raw ingest results
+  sales:     null, // processed rows for dashboard
+  labor:     null,
+  foodcost:  null,
+  pmix:      null,
+  inventory: null,
+};
 
-function buildSalesChart(rows, salesCol, locationCol, dateCol, shouldAggregate) {
-  if (!salesCol) return null;
-  const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
-
-  if (locationCol) {
-    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].sort();
-    let labels, datasets;
-
-    if (shouldAggregate && dateCol) {
-      // Aggregate daily data to weekly buckets
-      const weeklyData = {};
-      const weekMeta = {};
-      rows.forEach(r => {
-        const d = new Date(r[dateCol]);
-        if (isNaN(d)) return;
-        const day = d.getDay();
-        const ws = new Date(r[dateCol]);
-        ws.setDate(ws.getDate() - day + (day === 0 ? -6 : 1));
-        const wk = ws.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-        const wsIso = ws.toISOString();
-        const loc = r[locationCol];
-        if (!weekMeta[wk]) weekMeta[wk] = wsIso;
-        const key = wk + '__' + loc;
-        weeklyData[key] = (weeklyData[key]||0) + (parseFloat(r[salesCol])||0);
-      });
-      const sortedWeeks = Object.entries(weekMeta).sort((a,b)=>a[1].localeCompare(b[1])).map(([w])=>w);
-      labels = sortedWeeks;
-      datasets = locs.map((loc,i) => ({
-        label: loc,
-        data: sortedWeeks.map(w => (weeklyData[w+'__'+loc]||0)/1000),
-        borderColor: colors[i % colors.length],
-        backgroundColor: colors[i % colors.length] + '14',
-        tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2
-      }));
-    } else {
-      const uniqueDates = [...new Set(rows.map(r => r[dateCol]||''))].sort().slice(0,60);
-      labels = uniqueDates.map(d => { try { return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e) { return d; } });
-      datasets = locs.map((loc,i) => {
-        const byDate = {};
-        rows.filter(r=>r[locationCol]===loc).forEach(r=>{ byDate[r[dateCol]] = (byDate[r[dateCol]]||0)+(parseFloat(r[salesCol])||0); });
-        return { label: loc, data: uniqueDates.map(d=>(byDate[d]||0)/1000), borderColor: colors[i%colors.length], tension:0.4, fill:false, pointRadius:2, borderWidth:2 };
-      });
-    }
-    return { labels, datasets, locations: locs };
-  }
-
-  const labels = dateCol ? rows.map(r=>r[dateCol]) : rows.map((_,i)=>'W'+(i+1));
-  return { labels, datasets: [{ label:'Sales', data:rows.map(r=>(parseFloat(r[salesCol])||0)/1000), borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', tension:0.4, fill:true, pointRadius:2, borderWidth:2 }], locations:['All'] };
-}
-
-function buildLaborChart(rows, laborPctCol, locationCol, dateCol, fmt) {
-  if (!laborPctCol) return null;
-  const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
-  const getValue = r => normalizePct(r[laborPctCol], fmt || 'percent');
-
-  if (locationCol) {
-    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].sort();
-    // Aggregate to weekly if daily
-    const uniqueDates = dateCol ? [...new Set(rows.map(r=>r[dateCol]))].sort() : [];
-    const shouldAgg = uniqueDates.length > locs.length * 14;
-    let labels, datasets;
-
-    if (shouldAgg && dateCol) {
-      const weeklyData = {};
-      const weekOrder = [];
-      rows.forEach(r => {
-        const d = new Date(r[dateCol]);
-        if (isNaN(d)) return;
-        const day = d.getDay();
-        const ws = new Date(r[dateCol]); ws.setDate(ws.getDate() - day + (day===0?-6:1));
-        const wk = ws.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-        const loc = r[locationCol];
-        if (!weeklyData[wk]) { weeklyData[wk] = {}; weekOrder.push({label:wk,date:ws.toISOString()}); }
-        if (!weeklyData[wk][loc]) weeklyData[wk][loc] = [];
-        const v = getValue(r);
-        if (v !== null) weeklyData[wk][loc].push(v);
-      });
-      weekOrder.sort((a,b)=>a.date.localeCompare(b.date));
-      const uniqueWeeks = [...new Map(weekOrder.map(w=>[w.label,w])).values()];
-      labels = uniqueWeeks.map(w=>w.label);
-      datasets = locs.map((loc,i) => ({
-        label: loc,
-        data: uniqueWeeks.map(w => { const vals = (weeklyData[w.label]||{})[loc]||[]; return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null; }),
-        borderColor: colors[i%colors.length], tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false, spanGaps: true
-      }));
-    } else {
-      labels = uniqueDates.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-      datasets = locs.map((loc,i) => {
-        const locRows = rows.filter(r=>r[locationCol]===loc);
-        return { label: loc, data: locRows.map(r=>getValue(r)), borderColor: colors[i%colors.length], tension:0.4, pointRadius:2, borderWidth:1.5, fill:false };
-      });
-    }
-    return { labels, datasets };
-  }
-  const labels = rows.map((_,i)=>'W'+(i+1));
-  return { labels, datasets: [{ label:'Labor %', data:rows.map(r=>getValue(r)), borderColor:'#3b82f6', tension:0.4, pointRadius:2, borderWidth:1.5, fill:false }] };
-}
-
-function buildPmixChart(rows, catCol, revCol) {
-  if (!catCol || !revCol) return null;
-  const cats = {};
-  rows.forEach(r => {
-    const cat = r[catCol] || 'Other';
-    cats[cat] = (cats[cat] || 0) + (parseFloat(r[revCol]) || 0);
-  });
-  const total = Object.values(cats).reduce((a,b) => a+b, 0);
-  const sorted = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0, 6);
-  return {
-    labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
-    data: sorted.map(([,v]) => (v/total)*100)
-  };
-}
-
-// ---- FILE UPLOAD HANDLER ----
-function handleFileUpload(event, type) {
+// ═══════════════════════════════════════════════════════════════
+// SECTION 7: FILE UPLOAD HANDLER
+// ═══════════════════════════════════════════════════════════════
+function handleFileUpload(event, userLabel) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    try {
-      const rows = parseCSV(e.target.result);
-      if (rows.length === 0) { appendMsg('ai', `The file ${file.name} appears to be empty or has no data rows.`); return; }
-      const summary = summarizeData(type, rows);
-      if (!summary) { appendMsg('ai', `Could not parse ${file.name}. Please check the file format.`); return; }
-      uploadedData[type] = { rows, summary, filename: file.name };
+    const text = e.target.result;
+    const ingest = smartIngest(text, userLabel);
 
-      // Notify if missing required columns
-      if (summary.error === 'no_sales_col') {
-        appendMsg('ai', `⚠️ ${file.name} loaded but I couldn't detect a sales/revenue column.\n\n${summary.summary}\n\nCould you tell me which column contains your sales figures?`);
-      } else {
-        let msg = `✓ ${file.name} loaded — ${rows.length} records parsed.\n\n${summary.summary}`;
-        // Warn about columns that stayed on demo
-        const missingKpis = [];
-        if (type === 'sales' && !summary.kpis.check) missingKpis.push('Avg Check (no check count or average check column found)');
-        if (type === 'labor' && !summary.kpis.labor) missingKpis.push('Labor % (no direct % column — will calculate once sales data is also uploaded)');
-        if (type === 'foodcost' && !summary.kpis.foodcost) missingKpis.push('Food Cost % (no percentage column found)');
-        if (missingKpis.length) msg += `\n\n⚠️ These KPIs could not update from this file: ${missingKpis.join('; ')}`;
-        appendMsg('ai', msg);
-      }
-      updateDashboard(type, summary, file.name);
-    } catch(err) {
-      appendMsg('ai', `Hmm, I had trouble parsing ${file.name}. Error: ${err.message}. Make sure it's a valid CSV with a header row.`);
+    if (ingest.error) {
+      markUploadTile(userLabel, 'error', ingest.error);
+      showStatusBar('error', `Upload failed: ${ingest.error}`);
+      return;
     }
+
+    // Store full ingest (for Claude context)
+    window.opticData.files.push(ingest);
+
+    // Show warnings if any
+    if (ingest.warnings.length > 0) {
+      showStatusBar('warning', ingest.warnings.join(' · '));
+    }
+
+    // Process for dashboard KPIs for each detected type
+    let processed = false;
+    for (const dsType of ingest.detectedDatasets) {
+      let result = null;
+      if (dsType === 'sales') {
+        result = processSalesForDashboard(ingest);
+        if (result) { window.opticData.sales = result; updateSalesDashboard(result, ingest); processed = true; }
+      }
+      if (dsType === 'labor') {
+        result = processLaborForDashboard(ingest, window.opticData.sales);
+        if (result) { window.opticData.labor = result; updateLaborDashboard(result, ingest); processed = true; }
+      }
+      if (dsType === 'foodcost') {
+        result = processFoodCostForDashboard(ingest, window.opticData.sales);
+        if (result) { window.opticData.foodcost = result; updateFoodCostDashboard(result, ingest); processed = true; }
+      }
+      if (dsType === 'pmix') {
+        result = processPmixForDashboard(ingest);
+        if (result) { window.opticData.pmix = result; updatePmixDashboard(result, ingest); processed = true; }
+      }
+    }
+
+    // Check for errors in processing
+    if (ingest.errors.length > 0) {
+      markUploadTile(userLabel, 'error', ingest.errors.join(' | ') + ` · Columns in file: ${Object.keys(ingest.rows[0] || {}).join(', ')}`);
+      showStatusBar('error', ingest.errors.join(' | '));
+    } else {
+      markUploadTile(userLabel, 'success', `${ingest.rowCount} rows loaded`);
+      if (processed) updateGlobalStatusBar();
+    }
+
+    // If extra columns exist, update the custom chart dropdown
+    if (ingest.extraColumns.length > 0) {
+      updateCustomChartDropdown(ingest.extraColumns, userLabel);
+    }
+
+    // Update sidebar dataset badges
+    updateSidebarBadge(userLabel, 'Live');
+
+    // Rebuild AI context with new data
+    window.aiContext = buildAIContext();
+    refreshSuggestedQuestions();
   };
   reader.readAsText(file);
+}
 
-  // Update tile UI
-  const tile = document.getElementById('tile-' + type);
-  if (tile) {
-    tile.classList.add('has-file');
-    const sub = document.getElementById('tile-' + type + '-sub');
-    if (sub) sub.textContent = file.name;
+function markUploadTile(label, state, message) {
+  const tile = document.getElementById(`tile-${label}`);
+  const sub  = document.getElementById(`tile-${label}-sub`);
+  if (!tile || !sub) return;
+  tile.className = 'upload-tile' + (state === 'success' ? ' has-file' : state === 'error' ? ' has-error' : '');
+  sub.textContent = message || (state === 'success' ? 'Loaded' : 'Error');
+}
+
+function showStatusBar(type, message) {
+  const bar  = document.getElementById('statusBar');
+  const text = document.getElementById('statusText');
+  if (!bar || !text) return;
+  bar.className = 'data-status-bar ' + (type === 'error' ? 'error-mode' : type === 'warning' ? 'mixed-mode' : 'live-mode');
+  const icon = bar.querySelector('i');
+  if (icon) icon.className = 'ti ' + (type === 'error' ? 'ti-alert-circle' : type === 'warning' ? 'ti-info-circle' : 'ti-check');
+  text.innerHTML = message;
+}
+
+function updateGlobalStatusBar() {
+  const live = ['sales','labor','foodcost','pmix'].filter(k => window.opticData[k] !== null);
+  if (live.length === 0) return;
+  const mode = live.length === 4 ? 'live-mode' : 'mixed-mode';
+  const bar  = document.getElementById('statusBar');
+  const text = document.getElementById('statusText');
+  if (bar) bar.className = 'data-status-bar ' + mode;
+  if (text) text.innerHTML = `Live data loaded: <strong>${live.join(', ')}</strong>. ${4 - live.length > 0 ? 'Remaining tiles use demo data.' : 'All datasets live.'}`;
+}
+
+function updateSidebarBadge(label, badgeText) {
+  // Normalize label to sidebar ID
+  const idMap = { foodcost: 'foodcost', food_cost: 'foodcost' };
+  const id = idMap[label] || label;
+  const dot   = document.getElementById(`dot-${id}`);
+  const badge = document.getElementById(`badge-${id}`);
+  if (dot)   { dot.className = 'ds-dot'; }
+  if (badge) { badge.textContent = badgeText; badge.className = 'ds-badge'; }
+}
+
+function updateCustomChartDropdown(extraColumns, source) {
+  const sel = document.getElementById('customChartCol');
+  if (!sel) return;
+  extraColumns.filter(c => c.isNumeric).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = `${source}::${c.originalName}`;
+    opt.textContent = `${c.originalName} (from ${source})`;
+    sel.appendChild(opt);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 8: DASHBOARD UPDATE FUNCTIONS
+// These update KPI tiles + charts from processed data.
+// ═══════════════════════════════════════════════════════════════
+
+function updateSalesDashboard(data, ingest) {
+  const total = sumField(data, 'netSales');
+  setKPI('sales', '$' + fmtMoney(total), null, 'Live');
+
+  // Rebuild locations sidebar from actual data
+  const locs = [...new Set(data.map(r => r.location))].sort();
+  rebuildLocationSidebar(locs);
+
+  // Rebuild weekly sales chart
+  rebuildSalesChart(data, locs);
+
+  // Update avg check if guests available
+  const totalGuests = sumField(data, 'guests');
+  if (totalGuests > 0) {
+    setKPI('check', '$' + (total / totalGuests).toFixed(2), null, 'Live');
+  }
+
+  // Update date range label
+  const dates = data.map(r => r.date).sort();
+  if (dates.length > 0) {
+    document.getElementById('dateRangeLabel').textContent =
+      `${dates[0]} – ${dates[dates.length-1]} · ${locs.length} Location${locs.length>1?'s':''}`;
   }
 }
 
-function updateDashboard(type, summary, filename) {
-  // Update sidebar dots & badges
-  const dot = document.getElementById('dot-' + type);
-  const badge = document.getElementById('badge-' + type);
-  if (dot) { dot.className = 'ds-dot'; dot.style.background = '#10b981'; }
-  if (badge) { badge.textContent = 'Live'; badge.className = 'ds-badge'; }
-
-  // Update KPIs
-  if (summary.kpis) {
-    if (summary.kpis.sales) updateKpi('sales', summary.kpis.sales, 'Live', true);
-    if (summary.kpis.labor) updateKpi('labor', summary.kpis.labor, 'Live', true);
-    if (summary.kpis.foodcost) updateKpi('foodcost', summary.kpis.foodcost, 'Live', true);
-    if (summary.kpis.check) updateKpi('check', summary.kpis.check, 'Live', true);
-    if (summary.kpis.prime) updateKpi('prime', summary.kpis.prime, 'Live', true);
+function updateLaborDashboard(data, ingest) {
+  const validRows = data.filter(r => r.laborPct !== null);
+  if (validRows.length > 0) {
+    const avgLabor = avgField(validRows, 'laborPct');
+    const warn = avgLabor > 35;
+    setKPI('labor', avgLabor.toFixed(1) + '%',
+      (warn ? '↑ above 30% target' : '✓ within target'), 'Live',
+      warn ? 'delta-warn' : 'delta-up');
   }
-  // Auto-calculate prime cost when both labor and food cost are live
+  rebuildLaborChart(data);
   recalcPrimeCost();
+}
 
-  // Update charts
-  if (type === 'sales' && summary.chartData) {
-    const cd = summary.chartData;
-    salesChart.data.labels = cd.labels;
-    salesChart.data.datasets = cd.datasets;
-    salesChart.update();
-    document.getElementById('salesChartSrc').textContent = 'live data — ' + filename;
-    if (cd.locations) {
-      const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
-      const legend = document.getElementById('salesLegend');
-      if (legend) {
-        legend.innerHTML = cd.locations.map((loc,i) =>
-          `<div class="legend-item"><div class="legend-dot" style="background:${colors[i%colors.length]}"></div> <span>${loc}</span></div>`
-        ).join('');
-      }
-    }
+function updateFoodCostDashboard(data, ingest) {
+  const validRows = data.filter(r => r.foodCostPct !== null);
+  if (validRows.length > 0) {
+    const avg = avgField(validRows, 'foodCostPct');
+    const warn = avg > 30;
+    setKPI('foodcost', avg.toFixed(1) + '%',
+      (warn ? '↑ above 28% target' : '✓ within target'), 'Live',
+      warn ? 'delta-warn' : 'delta-up');
   }
-  if (type === 'labor' && summary.chartData) {
-    laborChart.data.labels = summary.chartData.labels;
-    laborChart.data.datasets = summary.chartData.datasets;
-    laborChart.update();
-    document.getElementById('laborSrc').textContent = 'live data — ' + filename;
-  }
-  if (type === 'pmix' && summary.chartData) {
-    pmixChart.data.labels = summary.chartData.labels;
-    pmixChart.data.datasets[0].data = summary.chartData.data;
-    pmixChart.update();
-    document.getElementById('pmixSrc').textContent = 'live';
-  }
+  recalcPrimeCost();
+}
 
-  // Handle custom CSV — add to sidebar and notify
-  if (type === 'custom') {
-    const dot = document.getElementById('dot-custom');
-    const badge = document.getElementById('badge-custom');
-    // Add sidebar item if not exists
-    let sidebarItem = document.getElementById('ds-custom');
-    if (!sidebarItem) {
-      const datasetList = document.querySelector('.dataset-list');
-      const newItem = document.createElement('div');
-      newItem.className = 'ds-item'; newItem.id = 'ds-custom';
-      newItem.innerHTML = `<div class="ds-dot" id="dot-custom" style="background:#10b981"></div><div class="ds-name">${filename.replace('.csv','')}</div><div class="ds-badge" id="badge-custom">Live</div>`;
-      datasetList.appendChild(newItem);
-    }
-    // If ambiguous columns found, ask user
-    if (summary.ambiguousColumns && summary.ambiguousColumns.length > 0) {
-      checkAmbiguousColumns(summary.ambiguousColumns, filename, () => {});
-    }
-    if (summary.error === 'missing_required_columns') {
-      appendMsg('ai', `⚠️ ${summary.summary}`);
-      return;
-    }
-  }
-
-  updateStatusBar();
-  questionPoolIndex = 0; // reset to start of pool when new data loaded
-  refreshSuggestedQuestions();
+function updatePmixDashboard(data, ingest) {
+  rebuildPmixChart(data);
+  updateSidebarBadge('pmix', 'Live');
 }
 
 function recalcPrimeCost() {
-  const laborData = uploadedData['labor'];
-  const fcData = uploadedData['foodcost'];
-  const salesData = uploadedData['sales'];
-  if (!fcData) return;
-
-  let laborPct = null;
-
-  // Try direct labor % KPI first
-  if (laborData?.summary?.kpis?.labor) {
-    laborPct = parseFloat(laborData.summary.kpis.labor);
+  const laborVal = parseFloat(document.getElementById('val-labor')?.textContent);
+  const foodVal  = parseFloat(document.getElementById('val-foodcost')?.textContent);
+  if (!isNaN(laborVal) && !isNaN(foodVal)) {
+    const prime = laborVal + foodVal;
+    const warn = prime > 65;
+    setKPI('prime', prime.toFixed(1) + '%',
+      warn ? '↑ above 65% benchmark' : '✓ within benchmark', 'Live',
+      warn ? 'delta-down' : 'delta-up');
   }
-  // Cross-calculate: labor cost / sales when no labor_pct column but both datasets exist
-  else if (laborData?.summary?.totalLaborCost && salesData) {
-    const totalSales = Object.values(salesData.summary?.rawSalesByDateLoc || {}).reduce((a,b)=>a+b,0);
-    if (totalSales > 0) {
-      laborPct = (laborData.summary.totalLaborCost / totalSales) * 100;
-      // Update labor KPI too since we now have it
-      updateKpi('labor', laborPct.toFixed(1)+'%', 'Live', true);
-      // Rebuild labor chart using cross-calc if no direct pct chart
-      if (!laborData.summary.chartData && laborData.summary.laborCostCol && salesData) {
-        rebuildLaborChartFromCost(laborData, salesData);
-      }
+}
+
+function setKPI(key, value, delta, source, deltaClass) {
+  const valEl   = document.getElementById(`val-${key}`);
+  const deltaEl = document.getElementById(`delta-${key}`);
+  const srcEl   = document.getElementById(`src-${key}`);
+  const card    = document.getElementById(`kpi-${key}`);
+  if (valEl)   valEl.textContent = value;
+  if (delta !== null && deltaEl) {
+    deltaEl.textContent = delta || '';
+    if (deltaClass) deltaEl.className = `kpi-delta ${deltaClass}`;
+  }
+  if (srcEl) {
+    srcEl.textContent = source;
+    srcEl.className = 'kpi-source ' + (source === 'Live' ? 'live-src' : 'demo-src');
+  }
+  if (card) card.className = 'kpi-card ' + (source === 'Live' ? 'live' : 'demo-card');
+}
+
+function fmtMoney(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return n.toFixed(0);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 9: AI CONTEXT BUILDER
+// Feeds Claude pre-calculated facts — no raw CSV rows.
+// Extra columns from ANY uploaded file are included so Claude
+// can answer questions about them even if the dashboard ignores them.
+// ═══════════════════════════════════════════════════════════════
+function buildAIContext() {
+  const activeLoc = window.activeLocation || 'All Locations';
+  const ctx = {
+    activeLocation: activeLoc,
+    period: document.getElementById('dateRangeLabel')?.textContent || 'Unknown',
+    datasetsLoaded: [],
+    datasetsNotLoaded: [],
+    kpis: {},
+    locationBreakdown: {},
+    extraDataAvailable: [],   // non-KPI columns from uploaded files
+    columnMapping: {},        // what column names were actually used
+    warnings: [],
+  };
+
+  // Pull pre-calculated KPIs from DOM (these are already correct)
+  const kpiDom = {
+    totalSales:  'val-sales',
+    laborPct:    'val-labor',
+    foodCostPct: 'val-foodcost',
+    primeCost:   'val-prime',
+    avgCheck:    'val-check',
+  };
+  for (const [k, id] of Object.entries(kpiDom)) {
+    const el = document.getElementById(id);
+    if (el && el.textContent && el.textContent !== 'N/A') ctx.kpis[k] = el.textContent.trim();
+  }
+
+  // Build per-location breakdowns from processed data
+  if (window.opticData.sales) {
+    ctx.datasetsLoaded.push('sales');
+    const locs = [...new Set(window.opticData.sales.map(r => r.location))];
+    for (const loc of locs) {
+      const rows = filterRowsByLocation(window.opticData.sales, loc);
+      if (!ctx.locationBreakdown[loc]) ctx.locationBreakdown[loc] = {};
+      ctx.locationBreakdown[loc].totalSales = '$' + fmtMoney(sumField(rows, 'netSales'));
+      const guests = sumField(rows, 'guests');
+      const sales  = sumField(rows, 'netSales');
+      if (guests > 0) ctx.locationBreakdown[loc].avgCheck = '$' + (sales / guests).toFixed(2);
     }
   }
 
-  const fcVal = parseFloat(fcData?.summary?.kpis?.foodcost);
-  if (laborPct !== null && !isNaN(fcVal)) {
-    const prime = (laborPct + fcVal).toFixed(1) + '%';
-    updateKpi('prime', prime, 'Live', true);
+  if (window.opticData.labor) {
+    ctx.datasetsLoaded.push('labor');
+    const locs = [...new Set(window.opticData.labor.map(r => r.location))];
+    for (const loc of locs) {
+      if (!ctx.locationBreakdown[loc]) ctx.locationBreakdown[loc] = {};
+      const rows = window.opticData.labor.filter(r => r.location === loc && r.laborPct !== null);
+      ctx.locationBreakdown[loc].avgLaborPct = rows.length > 0
+        ? (rows.reduce((s,r) => s + r.laborPct, 0) / rows.length).toFixed(1) + '%'
+        : 'N/A';
+    }
   }
-}
 
-function rebuildLaborChartFromCost(laborData, salesData) {
-  // Build labor % chart from cost/sales cross-calculation
-  const rows = laborData.rows;
-  const keys = Object.keys(rows[0]);
-  const locationCol = laborData.summary.locationCol;
-  const dateCol = laborData.summary.dateCol;
-  const costCol = laborData.summary.laborCostCol;
-  if (!costCol || !locationCol || !dateCol) return;
-
-  const salesLookup = salesData.summary?.rawSalesByDateLoc || {};
-  const enrichedRows = rows.map(r => {
-    const key = `${r[dateCol]}__${r[locationCol]}`;
-    const sales = salesLookup[key] || 0;
-    const cost = parseFloat(r[costCol]) || 0;
-    return { ...r, _labor_pct_calc: sales > 0 ? (cost / sales) * 100 : null };
-  }).filter(r => r._labor_pct_calc !== null);
-
-  if (enrichedRows.length === 0) return;
-
-  // Create a synthetic col reference
-  const chartData = buildLaborChart(enrichedRows, '_labor_pct_calc', locationCol, dateCol, 'percent');
-  if (chartData && laborChart) {
-    laborChart.data.labels = chartData.labels;
-    laborChart.data.datasets = chartData.datasets;
-    laborChart.update();
-    document.getElementById('laborSrc').textContent = 'live — calculated from cost/sales';
+  if (window.opticData.foodcost) {
+    ctx.datasetsLoaded.push('foodcost');
+    const locs = [...new Set(window.opticData.foodcost.map(r => r.location))];
+    for (const loc of locs) {
+      if (!ctx.locationBreakdown[loc]) ctx.locationBreakdown[loc] = {};
+      const rows = window.opticData.foodcost.filter(r => r.location === loc && r.foodCostPct !== null);
+      ctx.locationBreakdown[loc].avgFoodCostPct = rows.length > 0
+        ? (rows.reduce((s,r) => s + r.foodCostPct, 0) / rows.length).toFixed(1) + '%'
+        : 'N/A';
+    }
   }
-}
 
-// Ambiguous column registry — columns needing user clarification
-const ambiguousColumns = {
-  'transaction': { options: ['Check count (# of tickets)', 'Guest count (# of covers)', 'Something else'], label: 'transaction' },
-  'transactions': { options: ['Check count (# of tickets)', 'Guest count (# of covers)', 'Something else'], label: 'transactions' },
-  'count': { options: ['Check count (# of tickets)', 'Guest count (# of covers)', 'Transaction count', 'Something else'], label: 'count' },
-  'guest_count': { options: ['Guest covers', 'Something else'], label: 'guest_count' },
-  'covers': { options: ['Guest covers (# of people)', 'Check count (# of tickets)', 'Something else'], label: 'covers' },
-};
-
-// Field mapping registry — user-defined overrides
-const fieldMappings = {};
-
-function checkAmbiguousColumns(keys, filename, callback) {
-  const found = keys.filter(k => ambiguousColumns[k]);
-  if (found.length === 0) { callback({}); return; }
-
-  // Ask user in chat for each ambiguous column
-  const col = found[0]; // handle one at a time
-  const info = ambiguousColumns[col];
-  const optionBtns = info.options.map((opt, i) =>
-    `<button onclick="resolveAmbiguity('${col}','${opt}','${filename}',${JSON.stringify(found.slice(1))})" style="display:block;width:100%;text-align:left;padding:6px 10px;margin:3px 0;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#93c5fd'" onmouseout="this.style.borderColor='';this.style.color='var(--text2)'">${opt}</button>`
-  ).join('');
-
-  const w = document.createElement('div');
-  w.className = 'msg msg-ai'; w.id = 'ambig-' + col;
-  w.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(245,158,11,0.3);">
-    <div style="color:var(--amber);font-size:12px;margin-bottom:8px;">⚠️ I found a column called <strong>"${col}"</strong> in ${filename}. What does it represent?</div>
-    ${optionBtns}
-  </div>`;
-  messagesEl.appendChild(w);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-function resolveAmbiguity(col, choice, filename, remaining) {
-  fieldMappings[col] = choice;
-  const el = document.getElementById('ambig-' + col);
-  if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> = ${choice}. Analysis updated.</div>`;
-  appendMsg('ai', `Thanks! I'll treat "${col}" as "${choice}" in all analysis going forward.`);
-}
-
-function updateKpi(id, value, srcLabel, isLive) {
-  const valEl = document.getElementById('val-' + id);
-  const srcEl = document.getElementById('src-' + id);
-  const card = document.getElementById('kpi-' + id);
-  if (valEl) valEl.textContent = value;
-  if (srcEl) { srcEl.textContent = srcLabel; srcEl.className = isLive ? 'kpi-source live-src' : 'kpi-source demo-src'; }
-  if (card) { card.classList.toggle('live', isLive); card.classList.toggle('demo-card', !isLive); }
-}
-
-function updateStatusBar() {
-  const loaded = Object.values(uploadedData).filter(Boolean).length;
-  const bar = document.getElementById('statusBar');
-  const text = document.getElementById('statusText');
-  const loadedNames = Object.entries(uploadedData).filter(([,v]) => v).map(([k]) => k).join(', ');
-  const demoNames = Object.entries(uploadedData).filter(([,v]) => !v).map(([k]) => k).join(', ');
-
-  if (loaded === 0) {
-    bar.className = 'data-status-bar demo-mode';
-    text.innerHTML = 'Running on <strong>demo data</strong>. Upload your real CSVs to see your own numbers.';
-  } else if (loaded === 5) {
-    bar.className = 'data-status-bar live-mode';
-    text.innerHTML = '● All datasets are <strong>live</strong>. Analysis reflects your real operational data.';
-  } else {
-    bar.className = 'data-status-bar mixed-mode';
-    text.innerHTML = `<strong>Live:</strong> ${loadedNames} &nbsp;·&nbsp; <strong>Demo:</strong> ${demoNames}. Upload remaining datasets to complete your analysis.`;
+  if (window.opticData.pmix) {
+    ctx.datasetsLoaded.push('pmix');
+    const topItems = [...window.opticData.pmix]
+      .sort((a,b) => b.sales - a.sales)
+      .slice(0,10)
+      .map(r => ({ item: r.item, category: r.category, quantity: r.quantity, sales: '$'+fmtMoney(r.sales), margin: r.margin ? r.margin+'%' : 'N/A' }));
+    ctx.pmixTopItems = topItems;
   }
+
+  // Extra columns from ALL uploaded files
+  for (const file of window.opticData.files) {
+    if (Object.keys(file.coreColumns).length > 0) {
+      ctx.columnMapping[file.userLabel] = file.coreColumns;
+    }
+    for (const col of file.extraColumns) {
+      ctx.extraDataAvailable.push({
+        fromFile:     file.userLabel,
+        columnName:   col.originalName,
+        isNumeric:    col.isNumeric,
+        sampleValues: col.sampleValues,
+        ...(col.isNumeric ? { min: col.min, max: col.max, avg: col.avg } : {}),
+      });
+    }
+    ctx.warnings.push(...file.warnings);
+  }
+
+  const allDs = ['sales','labor','foodcost','pmix','inventory'];
+  ctx.datasetsNotLoaded = allDs.filter(k => !ctx.datasetsLoaded.includes(k));
+
+  // If no live data, note it's all demo
+  if (ctx.datasetsLoaded.length === 0) {
+    ctx.usingDemoData = true;
+    ctx.demoNote = '5 locations, 21 weeks (Feb–Jun 2026), demo data only';
+  }
+
+  return ctx;
 }
-
-// ---- MODAL ----
-function openUploadModal() { document.getElementById('uploadModal').classList.add('open'); }
-function closeUploadModal() { document.getElementById('uploadModal').classList.remove('open'); }
-document.getElementById('uploadModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUploadModal(); });
-
-// ---- AI CHAT ----
-const DEMO_CONTEXT = `You are OpticAI, an expert restaurant operations analyst AI. You have access to 12 weeks of operational data (Feb 3 – Apr 27, 2025) for a 3-location casual dining restaurant group.
-
-LOCATIONS: Downtown, Freedom Square, Government Square, Midtown, Westside (5 locations)
-
-SALES: 21 weeks (Feb 2–Jun 22 2026), $9.53M total across 5 locations. Downtown $79K–$123K/wk trending up strongly. Government Square $78K–$115K/wk strong performer. Freedom Square $80K–$100K/wk consistent. Midtown $75K–$100K/wk. Westside $58K–$85K/wk lowest volume. Fri-Sat peak days ($15.4K avg); Sunday weakest ($10.5K avg).
-
-LABOR: Blended 39.7% (target 30%) — significantly above target across all 5 locations. Downtown avg 39.0% (spikes to 49.4% in May 4 week — anomaly). Freedom Square avg 40.3%. Government Square avg 39.9%. Midtown avg 39.8%. Westside avg 40.7% (highest). All locations running ~10pts above 30% target — systemic overstaffing issue.
-
-FOOD COST: 30.4% blended average, above 28% target. Actual food cost tracked via Opening Inventory + Purchases + Transfers In/Out - Ending Inventory formula. Above-target food cost combined with above-target labor makes prime cost a critical issue.
-
-PMIX: Entree 79.9% of sales mix, Beverage 10.1%, Appetizer 5.5%, Side 4.4%. Heavy entree concentration — beverage and appetizer attach rates are opportunities to improve check average and margin.
-
-SALES BY DAY: Saturday $15,434 peak, Friday $15,021 strong. Sunday $10,770 is the weakest day (30% below Saturday). Mon–Thu fairly consistent at $12,400–$12,672. No single day dramatically underperforms — pattern is weekend-strong, Sunday-soft.
-
-PRIME COST: 70.1% (labor 39.7% + food cost 30.4%). Industry benchmark 55–65% for full-service. This group is ~5–15pts above benchmark. Industry benchmark 55–65% for full-service. This group is significantly above benchmark — labor is the primary driver.
-
-ANOMALIES: 1) Midtown Tue-Wed labor spike 3 consecutive weeks. 2) Tuesday structural dip. 3) Chicken over-ordering all 3 locations.
-
-Respond as a sharp, direct restaurant ops analyst. Specific numbers, actionable recommendations, concise (3–6 sentences unless full briefing requested). Bullet points for recs. No markdown headers.`;
-
-let conversationHistory = [];
-let liveDataContext = '';
-const messagesEl = document.getElementById('messages');
-const inputEl = document.getElementById('chatInput');
-const sendBtn = document.getElementById('sendBtn');
 
 function buildSystemPrompt() {
-  const hasLive = Object.values(uploadedData).some(Boolean);
-  if (!hasLive) return DEMO_CONTEXT;
+  const ctx = window.aiContext || buildAIContext();
+  return `You are OpticAI, a restaurant operations analyst. You are direct, specific, and operator-focused.
 
-  let liveSection = '\n\nLIVE UPLOADED DATA (use this instead of demo data where applicable):\n';
-  Object.entries(uploadedData).forEach(([type, data]) => {
-    if (data) liveSection += `\n${type.toUpperCase()} (from ${data.filename}):\n${data.summary.summary}\n`;
-  });
+RULES — follow exactly:
+1. Use ONLY the pre-calculated values in the data snapshot below. Do NOT recalculate KPIs.
+2. For questions about columns listed in extraDataAvailable, reason about patterns from the sample values provided.
+3. If a question requires a dataset listed in datasetsNotLoaded, say: "That requires [dataset] data — upload it to get that answer."
+4. Always cite the specific numbers you are using in your answer.
+5. If using demo data (usingDemoData: true), say so in your answer.
+6. Keep answers concise and actionable. Operators are busy.
 
-  const demoTypes = Object.entries(uploadedData).filter(([,v]) => !v).map(([k]) => k);
-  if (demoTypes.length > 0) liveSection += `\nNote: ${demoTypes.join(', ')} data is still demo data — say so if asked about those specifically.`;
-
-  return DEMO_CONTEXT + liveSection;
+CURRENT DATA SNAPSHOT:
+${JSON.stringify(ctx, null, 2)}`;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 10: CHAT & MESSAGING
+// ═══════════════════════════════════════════════════════════════
+let chatHistory = [];
+let isTyping = false;
+let welcomeCleared = false;
 
 function handleKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 }
-function sendSuggested(text) { inputEl.value = text.trim(); sendMessage(); }
 
-async function sendMessage() {
-  const text = inputEl.value.trim();
-  if (!text) return;
-  inputEl.value = '';
-  sendBtn.disabled = true;
-  // Remove welcome message permanently on first interaction
-  const welcome = document.getElementById('welcomeMsg');
-  if (welcome) welcome.remove();
-  appendMsg('user', text);
-  conversationHistory.push({ role: 'user', content: text });
-  const typingEl = appendTyping();
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: buildSystemPrompt(), messages: conversationHistory })
-    });
-    const data = await res.json();
-    const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, I had trouble with that. Try again.';
-    typingEl.remove();
-    appendMsg('ai', reply);
-    conversationHistory.push({ role: 'assistant', content: reply });
-  } catch(err) {
-    typingEl.remove();
-    appendMsg('ai', 'Sorry, I had trouble with that. Try again.');
+function sendSuggested(text) { sendMessage(text.trim()); }
+
+async function sendMessage(overrideText) {
+  const input = document.getElementById('chatInput');
+  const text = (overrideText || input.value).trim();
+  if (!text || isTyping) return;
+
+  if (!welcomeCleared) {
+    const wm = document.getElementById('welcomeMsg');
+    if (wm) wm.remove();
+    welcomeCleared = true;
   }
-  sendBtn.disabled = false;
+
+  input.value = '';
+  appendMessage('user', text);
+  chatHistory.push({ role: 'user', content: text });
+
+  showTyping(true);
+  isTyping = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: chatHistory,
+        system: buildSystemPrompt(),
+      }),
+    });
+
+    if (!response.ok) throw new Error(`API error ${response.status}`);
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'Sorry, I got an empty response. Please try again.';
+
+    showTyping(false);
+    appendMessage('ai', reply, true);
+    chatHistory.push({ role: 'assistant', content: reply });
+  } catch (err) {
+    showTyping(false);
+    appendMessage('ai', 'Something went wrong connecting to the AI. Please try again.');
+    console.error('Chat error:', err);
+  } finally {
+    isTyping = false;
+    document.getElementById('sendBtn').disabled = false;
+  }
 }
 
-function appendMsg(role, text) {
-  const w = document.createElement('div');
-  w.className = 'msg msg-' + (role === 'user' ? 'user' : 'ai');
-  const l = document.createElement('div'); l.className = 'msg-label'; l.textContent = role === 'user' ? 'You' : 'OpticAI';
-  const b = document.createElement('div'); b.className = 'msg-bubble'; b.textContent = text;
-  w.appendChild(l); w.appendChild(b); messagesEl.appendChild(w);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-  return w;
+function appendMessage(role, text, showCitation) {
+  const msgs = document.getElementById('messages');
+  const wrapper = document.createElement('div');
+  wrapper.className = `msg msg-${role === 'user' ? 'user' : 'ai'}`;
+
+  const label = document.createElement('div');
+  label.className = 'msg-label';
+  label.textContent = role === 'user' ? 'You' : 'OpticAI';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = text;
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(bubble);
+
+  // Citation footer on AI messages
+  if (showCitation && role === 'ai') {
+    const ctx = window.aiContext || buildAIContext();
+    const cite = document.createElement('div');
+    cite.className = 'msg-citation';
+    const parts = [];
+    if (ctx.kpis.totalSales)  parts.push(`Sales: ${ctx.kpis.totalSales}`);
+    if (ctx.kpis.laborPct)    parts.push(`Labor: ${ctx.kpis.laborPct}`);
+    if (ctx.kpis.foodCostPct) parts.push(`Food: ${ctx.kpis.foodCostPct}`);
+    parts.push(ctx.activeLocation);
+    cite.textContent = '📊 Based on: ' + parts.join(' · ');
+    wrapper.appendChild(cite);
+  }
+
+  msgs.appendChild(wrapper);
+  msgs.scrollTop = msgs.scrollHeight;
 }
-function appendTyping() {
-  const w = document.createElement('div'); w.className = 'msg msg-ai';
-  w.innerHTML = '<div class="msg-label">OpticAI</div><div class="msg-bubble"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>';
-  messagesEl.appendChild(w); messagesEl.scrollTop = messagesEl.scrollHeight;
-  return w;
+
+function showTyping(show) {
+  const existing = document.getElementById('typingIndicator');
+  if (existing) existing.remove();
+  if (show) {
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.id = 'typingIndicator';
+    div.className = 'msg msg-ai';
+    div.innerHTML = '<div class="msg-label">OpticAI</div><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+}
+
+function clearChat() {
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+  chatHistory = [];
+  welcomeCleared = false;
+  // Re-add welcome message
+  msgs.innerHTML = '<div class="msg msg-ai" id="welcomeMsg"><div class="msg-label">OpticAI</div><div class="msg-bubble">Chat cleared. Ask me anything about your operations data.</div></div>';
 }
 
 async function generateBriefing() {
   const btn = document.getElementById('briefingBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-loader" style="font-size:15px;animation:spin 1s linear infinite"></i> Generating briefing...';
+  if (btn) btn.disabled = true;
+  const briefingPrompt = `Generate a Weekly Ops Briefing with exactly these 6 sections:
+1. Performance Snapshot — key numbers this period
+2. Wins — what's working well
+3. Watch List — items needing attention
+4. Root Cause Analysis — why the top 1-2 issues are happening
+5. Action Items — 3 specific things to do this week
+6. Location Spotlight — call out the best and worst performing location
 
-  const briefingPrompt = `Generate a comprehensive Weekly Operations Briefing for this restaurant group. Format it clearly with these exact sections:
+Be specific. Use actual numbers from the data. Keep each section to 2-4 sentences.`;
 
-WEEKLY OPS BRIEFING
-===================
+  if (!welcomeCleared) {
+    const wm = document.getElementById('welcomeMsg');
+    if (wm) wm.remove();
+    welcomeCleared = true;
+  }
 
-PERFORMANCE SNAPSHOT
-List the 5 key KPIs with their values and trend direction.
-
-WINS THIS PERIOD
-2-3 things going well that the team should be recognized for.
-
-WATCH LIST
-2-3 specific issues that need attention, with the data that supports each concern.
-
-ROOT CAUSE ANALYSIS
-For each watch list item, explain why it is happening based on the data.
-
-ACTION ITEMS FOR THIS WEEK
-Numbered list of 3-5 specific, actionable steps the GM should take this week, with expected dollar or percentage impact where possible.
-
-LOCATION SPOTLIGHT
-One paragraph on the location that needs the most attention right now and what leadership should focus on there.
-
-Keep it direct, specific, and written for a GM — not an analyst. Use real numbers from the data.`;
-
-  const typingEl = appendTyping();
-  conversationHistory.push({ role: 'user', content: briefingPrompt });
+  showTyping(true);
+  isTyping = true;
 
   try {
-    const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: buildSystemPrompt(), messages: conversationHistory })
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: briefingPrompt }],
+        system: buildSystemPrompt(),
+      }),
     });
-    const data = await res.json();
-    const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, could not generate briefing.';
-    typingEl.remove();
-    appendBriefingMsg(reply);
-    conversationHistory.push({ role: 'assistant', content: reply });
-    // Show feedback prompt after briefing — high intent moment
-    setTimeout(() => openFeedback('after briefing'), 2000);
-  } catch(err) {
-    typingEl.remove();
-    appendMsg('ai', 'Sorry, could not generate the briefing. Try again.');
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'Could not generate briefing.';
+    showTyping(false);
+    appendMessage('ai', reply, false);
+    chatHistory.push({ role: 'user', content: briefingPrompt });
+    chatHistory.push({ role: 'assistant', content: reply });
+    setTimeout(() => openFeedback('briefing'), 2000);
+  } catch (err) {
+    showTyping(false);
+    appendMessage('ai', 'Error generating briefing. Please try again.');
+  } finally {
+    isTyping = false;
+    if (btn) btn.disabled = false;
   }
-
-  btn.disabled = false;
-  btn.innerHTML = '<i class="ti ti-file-analytics" style="font-size:15px"></i> Generate Weekly Ops Briefing';
 }
 
-function appendBriefingMsg(text) {
-  const w = document.createElement('div');
-  w.className = 'msg msg-ai';
-  w.style.width = '100%';
-
-  const label = document.createElement('div');
-  label.className = 'msg-label';
-  label.innerHTML = '<i class="ti ti-file-analytics" style="font-size:11px;margin-right:3px"></i> Weekly Ops Briefing';
-
-  const bubble = document.createElement('div');
-  bubble.className = 'msg-bubble';
-  bubble.style.cssText = 'background:var(--bg2);border:1px solid rgba(59,130,246,0.25);font-size:12px;line-height:1.7;white-space:pre-wrap;';
-
-  // Format the briefing with styled sections
-  const lines = text.split('\n');
-  let html = '';
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if (trimmed === 'WEEKLY OPS BRIEFING' || trimmed === '===================') {
-      if (trimmed !== '===================') html += `<div style="font-size:13px;font-weight:600;color:#93c5fd;margin-bottom:4px;letter-spacing:0.02em">${trimmed}</div>`;
-    } else if (trimmed.match(/^[A-Z][A-Z\s]+$/) && trimmed.length > 3) {
-      html += `<div style="font-size:10px;font-weight:600;color:#3b82f6;text-transform:uppercase;letter-spacing:0.08em;margin-top:14px;margin-bottom:5px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">${trimmed}</div>`;
-    } else if (trimmed.startsWith('- ') || trimmed.match(/^\d+\./)) {
-      html += `<div style="padding-left:10px;color:var(--text);margin:2px 0">${trimmed}</div>`;
-    } else if (trimmed) {
-      html += `<div style="color:var(--text2);margin:2px 0">${trimmed}</div>`;
-    }
-  });
-
-  bubble.innerHTML = html || text;
-  w.appendChild(label);
-  w.appendChild(bubble);
-  messagesEl.appendChild(w);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-  return w;
-}
-
-// ── CUSTOMIZE PANEL ──
-const kpiConfig = [
-  { id: 'sales',    label: 'Total Sales' },
-  { id: 'labor',    label: 'Labor %' },
-  { id: 'foodcost', label: 'Food Cost %' },
-  { id: 'prime',    label: 'Prime Cost' },
-  { id: 'check',    label: 'Avg Check' },
+// ═══════════════════════════════════════════════════════════════
+// SECTION 11: SUGGESTED QUESTIONS
+// Pulls from extra columns when live data is loaded.
+// ═══════════════════════════════════════════════════════════════
+const DEMO_QUESTIONS = [
+  'Why was labor high at Midtown last week?',
+  'Which location has the best food cost %?',
+  'What are my top 5 menu items by revenue?',
+  'How does Westside compare to Downtown on sales?',
+  'Which menu categories have the worst margins?',
+  'Give me a summary of this week\'s performance.',
+  'Which day of the week drives the most revenue?',
+  'Where is prime cost highest and why?',
+  'Are there any anomalies I should know about?',
+  'What\'s driving the labor variance at Freedom Square?',
 ];
-const chartConfig = [
-  { id: 'salesChartCard',  label: 'Weekly Sales by Location' },
-  { id: 'pmixChartCard',   label: 'PMIX — Margin by Category' },
-  { id: 'laborChartCard',  label: 'Labor % by Location' },
-  { id: 'dowChartCard',    label: 'Avg Daily Sales by Day of Week' },
-];
-
-function openCustomizePanel() {
-  // Build KPI toggles
-  const kpiContainer = document.getElementById('kpiToggles');
-  kpiContainer.innerHTML = kpiConfig.map(k => {
-    const card = document.getElementById('kpi-' + k.id);
-    const visible = card ? card.style.display !== 'none' : true;
-    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
-      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleKpi('${k.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
-      ${k.label}
-    </label>`;
-  }).join('');
-
-  // Build chart toggles — add IDs to chart cards first
-  document.querySelectorAll('.chart-card').forEach((card, i) => {
-    if (chartConfig[i]) card.id = chartConfig[i].id;
-  });
-  const chartContainer = document.getElementById('chartToggles');
-  chartContainer.innerHTML = chartConfig.map(c => {
-    const card = document.getElementById(c.id);
-    const visible = card ? card.style.display !== 'none' : true;
-    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
-      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleChart('${c.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
-      ${c.label}
-    </label>`;
-  }).join('');
-
-  // Populate custom chart column selector
-  const colSelect = document.getElementById('customChartCol');
-  colSelect.innerHTML = '<option value="">Select a metric column...</option>';
-  Object.entries(uploadedData).forEach(([type, data]) => {
-    if (data && data.summary?.metricCols) {
-      data.summary.metricCols.forEach(col => {
-        colSelect.innerHTML += `<option value="${type}:${col}">${col} (from ${type})</option>`;
-      });
-    }
-  });
-
-  document.getElementById('customizeModal').classList.add('open');
-}
-
-function closeCustomizePanel() { document.getElementById('customizeModal').classList.remove('open'); }
-document.getElementById('customizeModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCustomizePanel(); });
-
-function toggleKpi(id, show) {
-  const card = document.getElementById('kpi-' + id);
-  if (card) card.style.display = show ? '' : 'none';
-}
-
-function toggleChart(id, show) {
-  const card = document.getElementById(id);
-  if (card) card.style.display = show ? '' : 'none';
-}
-
-function resetDashboard() {
-  kpiConfig.forEach(k => toggleKpi(k.id, true));
-  chartConfig.forEach(c => toggleChart(c.id, true));
-  // Remove any custom charts
-  document.querySelectorAll('.custom-chart-card').forEach(el => el.remove());
-  closeCustomizePanel();
-}
-
-function buildCustomChart() {
-  const colSelect = document.getElementById('customChartCol');
-  const chartType = document.getElementById('customChartType').value;
-  const val = colSelect.value;
-  if (!val) return;
-
-  const [type, col] = val.split(':');
-  const data = uploadedData[type];
-  if (!data) return;
-
-  const rows = data.rows;
-  const keys = Object.keys(rows[0]);
-  const locationCol = keys.find(k => ['location','store','site'].includes(k));
-  const dateCol = keys.find(k => ['date','week','period'].includes(k));
-
-  let chartData;
-  if (locationCol) {
-    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].slice(0,4);
-    const labels = rows.filter(r => r[locationCol]===locs[0]).map((_,i)=>'W'+(i+1));
-    const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981'];
-    const datasets = locs.map((loc,i) => ({
-      label: loc,
-      data: rows.filter(r=>r[locationCol]===loc).map(r=>parseFloat(r[col])||0),
-      backgroundColor: chartType==='bar' ? colors[i] : undefined,
-      borderColor: colors[i], borderWidth: 2, tension: 0.4,
-      fill: false, pointRadius: 3
-    }));
-    chartData = { labels, datasets };
-  } else {
-    const labels = rows.map((_,i)=>'W'+(i+1));
-    chartData = { labels, datasets: [{ label: col, data: rows.map(r=>parseFloat(r[col])||0), backgroundColor:'#3b82f6', borderColor:'#3b82f6', borderWidth:2, tension:0.4 }] };
-  }
-
-  // Add chart card to chart section
-  const chartSection = document.querySelector('.chart-section');
-  const wrapper = document.createElement('div');
-  wrapper.className = 'chart-row custom-chart-card';
-  wrapper.style.cssText = 'flex:0 0 180px;';
-  wrapper.innerHTML = `
-    <div class="chart-card" style="flex:1;position:relative;">
-      <div class="chart-title">${col} <button onclick="this.closest('.custom-chart-card').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 4px;" title="Remove">✕</button></div>
-      <div class="chart-wrap"><canvas id="custom-chart-${Date.now()}"></canvas></div>
-    </div>`;
-  chartSection.appendChild(wrapper);
-
-  const canvas = wrapper.querySelector('canvas');
-  new Chart(canvas, {
-    type: chartType,
-    data: chartData,
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: locationCol ? true : false, labels: { color:'#8b909e', font:{size:11} } } },
-      scales: {
-        x: { grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#555b6a',font:{size:10}} },
-        y: { grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#555b6a',font:{size:10}} }
-      }
-    }
-  });
-
-  closeCustomizePanel();
-  appendMsg('ai', `Custom chart added for "${col}" from your ${type} data. You can see it at the bottom of the dashboard. Remove it anytime using the ✕ button.`);
-}
-
-// ── DYNAMIC SUGGESTED QUESTIONS — pool-based rotating system ──
-let questionPoolIndex = 0;
-
-function buildQuestionPool() {
-  const pool = [];
-  const locs = [...discoveredLocations].sort();
-  const locCount = locs.length || 5;
-  const locNames = locs.length ? locs : ['Downtown','Freedom Square','Government Square','Midtown','Westside'];
-  const worstSales = findWorstSalesLocation() || locNames[locNames.length - 1];
-  const highLabor = findHighLaborLocation() || locNames[0];
-  const laborKpi = parseFloat(document.getElementById('val-labor')?.textContent) || 39.7;
-  const primeKpi = parseFloat(document.getElementById('val-prime')?.textContent) || 70.1;
-  const fcKpi = parseFloat(document.getElementById('val-foodcost')?.textContent) || 30.4;
-  const activeLoc = activeLocation;
-  const locContext = activeLoc ? ` at ${activeLoc}` : ` across all ${locCount} locations`;
-
-  const loadedCount = Object.values(uploadedData).filter(Boolean).length;
-
-  // ── SALES pool ──
-  if (uploadedData.sales || loadedCount === 0) {
-    pool.push(`Compare sales performance${locContext}`);
-    pool.push(`What is the sales trend over the last 4 weeks${locContext}?`);
-    pool.push(`Which day of the week generates the most revenue${locContext}?`);
-    pool.push(`Why is ${worstSales} the lowest-revenue location?`);
-    pool.push(`What would it take to grow sales by 10%${locContext}?`);
-    pool.push(`How does weekend performance compare to weekday${locContext}?`);
-    pool.push(`What is the revenue gap between the best and worst location?`);
-    if (!activeLoc) pool.push(`Which location is growing fastest over the last 4 weeks?`);
-  }
-
-  // ── LABOR pool ──
-  if (uploadedData.labor || loadedCount === 0) {
-    pool.push(`Why is labor running at ${laborKpi.toFixed(1)}%${locContext} — above the 30% target?`);
-    pool.push(`Which location has the best labor efficiency?`);
-    pool.push(`Where can we cut labor hours without impacting service${locContext}?`);
-    pool.push(`What does the labor trend look like over the last 8 weeks${locContext}?`);
-    pool.push(`How much would prime cost improve if labor dropped to 32%${locContext}?`);
-    pool.push(`Is ${highLabor} consistently the highest-labor location?`);
-    if (!activeLoc) pool.push(`Which location has improved labor % the most recently?`);
-  }
-
-  // ── FOOD COST pool ──
-  if (uploadedData.foodcost || loadedCount === 0) {
-    pool.push(`Food cost is at ${fcKpi.toFixed(1)}% — what is driving it above target?`);
-    pool.push(`Which location has the best food cost control${locContext}?`);
-    pool.push(`What is the relationship between food cost and prime cost${locContext}?`);
-    pool.push(`Where is the biggest food cost variance week over week${locContext}?`);
-  }
-
-  // ── PMIX pool ──
-  if (uploadedData.pmix || loadedCount === 0) {
-    pool.push(`Which menu items are hurting our margin the most${locContext}?`);
-    pool.push(`What are our top 5 revenue-driving menu items?`);
-    pool.push(`Which category should we promote to improve profitability?`);
-    pool.push(`How does our beverage attach rate compare to industry benchmarks?`);
-    pool.push(`Which menu items have the best margin${locContext}?`);
-  }
-
-  // ── PRIME COST pool ──
-  if (primeKpi > 62) {
-    pool.push(`Prime cost is ${primeKpi.toFixed(1)}% — what is the fastest lever to bring it down?`);
-    pool.push(`If we fixed labor alone, where would prime cost land${locContext}?`);
-    pool.push(`What is a realistic prime cost target for this group and how do we get there?`);
-  }
-
-  // ── INVENTORY pool ──
-  if (uploadedData.inventory) {
-    pool.push(`Which inventory items have the highest waste variance${locContext}?`);
-    pool.push(`Where are we over-ordering and what is the dollar impact?`);
-    pool.push(`What are the top 5 items by variance that we should address first?`);
-  }
-
-  // ── CUSTOM / GUEST SATISFACTION pool ──
-  if (uploadedData.custom) {
-    const metricCols = uploadedData.custom.summary?.metricCols || [];
-    metricCols.forEach(col => {
-      const n = col.toLowerCase();
-      if (n.includes('satisfaction') || n.includes('score')) {
-        pool.push(`Which location has the lowest guest satisfaction score?`);
-        pool.push(`Is there a correlation between guest satisfaction and sales?`);
-        pool.push(`Has guest satisfaction improved or declined over the period?`);
-      }
-      if (n.includes('nps')) {
-        pool.push(`What is driving NPS differences between locations?`);
-        pool.push(`Which location has the best NPS and what are they doing right?`);
-        pool.push(`What NPS score should we be targeting and how far are we?`);
-      }
-      if (n.includes('complaint')) {
-        pool.push(`Which location generates the most complaints${locContext}?`);
-        pool.push(`Is there a pattern to when complaints spike?`);
-      }
-      if (n.includes('wait')) {
-        pool.push(`Does longer wait time correlate with lower guest satisfaction?`);
-        pool.push(`Which location has the longest avg wait time and why?`);
-      }
-      if (n.includes('review')) {
-        pool.push(`Which location has the best review rate and what can others learn?`);
-      }
-    });
-  }
-
-  // ── CROSS-DATASET pool ──
-  if (loadedCount >= 2) {
-    pool.push(`Give me a full weekly ops briefing across all loaded data`);
-    pool.push(`What are the top 3 things I should focus on this week?`);
-    pool.push(`Which location needs the most attention right now and why?`);
-  }
-
-  // ── DEMO fallback pool ──
-  if (loadedCount === 0) {
-    pool.push(`Give me a weekly ops briefing`);
-    pool.push(`What are the top 3 priorities for this group right now?`);
-    pool.push(`Which location needs the most attention?`);
-    pool.push(`What would you focus on if you were the VP of Ops this week?`);
-  }
-
-  // Deduplicate
-  return [...new Set(pool)];
-}
-
-function generateSuggestedQuestions() {
-  const pool = buildQuestionPool();
-  if (pool.length === 0) return ['Give me a weekly ops briefing'];
-
-  // Pick 4 questions starting at current index, cycling through pool
-  const selected = [];
-  const startIdx = questionPoolIndex % pool.length;
-  for (let i = 0; i < Math.min(4, pool.length); i++) {
-    selected.push(pool[(startIdx + i) % pool.length]);
-  }
-  return selected;
-}
-
-function findWorstSalesLocation() {
-  if (!uploadedData.sales?.rows) return null;
-  const rows = uploadedData.sales.rows;
-  const keys = Object.keys(rows[0]);
-  const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
-  const locationCol = findCol(keys, ['location','store','site','restaurant']);
-  if (!salesCol || !locationCol) return null;
-  const totals = {};
-  rows.forEach(r => {
-    const loc = r[locationCol];
-    totals[loc] = (totals[loc]||0) + (parseFloat(r[salesCol])||0);
-  });
-  return Object.entries(totals).sort((a,b)=>a[1]-b[1])[0]?.[0] || null;
-}
-
-function findHighLaborLocation() {
-  if (!uploadedData.labor?.rows) return null;
-  const rows = uploadedData.labor.rows;
-  const keys = Object.keys(rows[0]);
-  const laborPctCol = findCol(keys, ['labor pct','labor_pct','labor percent','labor %']);
-  const locationCol = findCol(keys, ['location','store','site']);
-  if (!laborPctCol || !locationCol) return null;
-  const fmt = detectPercentFormat(rows.map(r=>parseFloat(r[laborPctCol])).filter(v=>!isNaN(v)));
-  const totals = {};
-  const counts = {};
-  rows.forEach(r => {
-    const loc = r[locationCol];
-    const val = normalizePct(r[laborPctCol], fmt);
-    if (val !== null) { totals[loc] = (totals[loc]||0) + val; counts[loc] = (counts[loc]||0) + 1; }
-  });
-  const avgs = Object.entries(totals).map(([loc, sum]) => [loc, sum/counts[loc]]);
-  return avgs.sort((a,b)=>b[1]-a[1])[0]?.[0] || null;
-}
+let sqPool = [...DEMO_QUESTIONS];
+let sqIdx = 0;
 
 function refreshSuggestedQuestions() {
-  questionPoolIndex += 4; // advance by 4 so next refresh shows next batch
+  const ctx = window.aiContext || buildAIContext();
+  // Build dynamic questions from actual data
+  const dynamic = [];
+
+  if (ctx.extraDataAvailable.length > 0) {
+    ctx.extraDataAvailable.slice(0,3).forEach(col => {
+      dynamic.push(`What does the ${col.columnName} data tell us?`);
+      if (col.isNumeric) dynamic.push(`Which location has the highest ${col.columnName}?`);
+    });
+  }
+
+  if (ctx.locationBreakdown) {
+    const locs = Object.keys(ctx.locationBreakdown);
+    if (locs.length > 0) {
+      dynamic.push(`How is ${locs[0]} performing vs. the other locations?`);
+    }
+  }
+
+  sqPool = [...dynamic, ...DEMO_QUESTIONS];
+  sqIdx = 0;
+
   const container = document.getElementById('suggestedQs');
   if (!container) return;
-  const questions = generateSuggestedQuestions();
-  const refreshBtn = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-      <div class="sq-label" style="margin-bottom:0">Try asking</div>
-      <button onclick="refreshSuggestedQuestions()" title="Refresh questions" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:color 0.15s;display:flex;align-items:center;gap:3px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">
-        <i class="ti ti-refresh" style="font-size:13px"></i>
-      </button>
-    </div>`;
-  container.innerHTML = refreshBtn +
-    questions.map(q => `<button class="sq-btn" onclick="sendSuggested(this.textContent)">${q}</button>`).join('');
+  // Remove existing sq-btn elements
+  container.querySelectorAll('.sq-btn').forEach(b => b.remove());
+
+  // Show 4 questions
+  for (let i = 0; i < 4 && sqPool[sqIdx + i]; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'sq-btn';
+    btn.textContent = sqPool[sqIdx + i];
+    btn.onclick = () => sendSuggested(btn.textContent);
+    container.appendChild(btn);
+  }
+  sqIdx += 4;
+  if (sqIdx >= sqPool.length) sqIdx = 0;
 }
 
-// ── VOICE INPUT ──
+// ═══════════════════════════════════════════════════════════════
+// SECTION 12: CHART BUILDERS
+// ═══════════════════════════════════════════════════════════════
+const CHART_COLORS = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4','#ec4899','#84cc16'];
+const chartInstances = {};
+
+function destroyChart(id) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+
+function rebuildSalesChart(data, locs) {
+  destroyChart('salesChart');
+  const allDates = [...new Set(data.map(r => r.date))].sort();
+  const datasets = locs.map((loc, i) => ({
+    label: loc,
+    data: allDates.map(d => {
+      const r = data.find(x => x.location === loc && x.date === d);
+      return r ? r.netSales : 0;
+    }),
+    borderColor: CHART_COLORS[i % CHART_COLORS.length],
+    backgroundColor: CHART_COLORS[i % CHART_COLORS.length] + '22',
+    tension: 0.3,
+    fill: false,
+  }));
+
+  const canvas = document.getElementById('salesChart');
+  chartInstances['salesChart'] = new Chart(canvas, {
+    type: 'line',
+    data: { labels: allDates, datasets },
+    options: chartOptions('$'),
+  });
+
+  // Rebuild legend
+  const legend = document.getElementById('salesLegend');
+  if (legend) {
+    legend.innerHTML = locs.map((loc, i) =>
+      `<div class="legend-item"><div class="legend-dot" style="background:${CHART_COLORS[i%CHART_COLORS.length]}"></div><span>${loc}</span></div>`
+    ).join('');
+  }
+  document.getElementById('salesChartSrc').textContent = 'live data';
+}
+
+function rebuildLaborChart(data) {
+  destroyChart('laborChart');
+  const locs = [...new Set(data.map(r => r.location))];
+  const validData = data.filter(r => r.laborPct !== null);
+  const allDates = [...new Set(validData.map(r => r.date))].sort();
+
+  const datasets = locs.map((loc, i) => ({
+    label: loc,
+    data: allDates.map(d => {
+      const rows = validData.filter(r => r.location === loc && r.date === d);
+      return rows.length > 0 ? +(rows.reduce((s,r) => s+r.laborPct,0)/rows.length).toFixed(1) : null;
+    }),
+    borderColor: CHART_COLORS[i % CHART_COLORS.length],
+    tension: 0.3,
+    fill: false,
+  }));
+
+  // Add 30% target line
+  datasets.push({
+    label: 'Target (30%)',
+    data: allDates.map(() => 30),
+    borderColor: '#ef444444',
+    borderDash: [4,4],
+    pointRadius: 0,
+    fill: false,
+  });
+
+  const canvas = document.getElementById('laborChart');
+  chartInstances['laborChart'] = new Chart(canvas, {
+    type: 'line',
+    data: { labels: allDates, datasets },
+    options: chartOptions('%'),
+  });
+  document.getElementById('laborSrc').textContent = 'live · 30% target';
+}
+
+function rebuildPmixChart(data) {
+  destroyChart('pmixChart');
+  const byCat = {};
+  data.forEach(r => {
+    if (!byCat[r.category]) byCat[r.category] = { sales: 0, cost: 0 };
+    byCat[r.category].sales += r.sales;
+    byCat[r.category].cost  += r.cost;
+  });
+  const cats = Object.keys(byCat);
+  const margins = cats.map(c => byCat[c].sales > 0 ? +((byCat[c].sales - byCat[c].cost) / byCat[c].sales * 100).toFixed(1) : 0);
+
+  const canvas = document.getElementById('pmixChart');
+  chartInstances['pmixChart'] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: cats,
+      datasets: [{
+        label: 'Margin %',
+        data: margins,
+        backgroundColor: cats.map((_, i) => CHART_COLORS[i % CHART_COLORS.length] + 'bb'),
+      }],
+    },
+    options: chartOptions('%'),
+  });
+  document.getElementById('pmixSrc').textContent = 'live';
+}
+
+function chartOptions(unit) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#555b6a', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      y: { ticks: { color: '#555b6a', font: { size: 10 }, callback: v => unit === '$' ? '$'+fmtMoney(v) : v+unit }, grid: { color: 'rgba(255,255,255,0.04)' } },
+    },
+  };
+}
+
+function toggleChartGrid(chartId) {
+  const wrap = document.getElementById(`wrap-${chartId}`);
+  const grid = document.getElementById(`grid-${chartId}`);
+  const btn  = document.getElementById(`toggle-${chartId}`);
+  if (!wrap || !grid) return;
+  const showingGrid = grid.classList.contains('visible');
+  wrap.style.display = showingGrid ? '' : 'none';
+  grid.classList.toggle('visible', !showingGrid);
+  if (btn) btn.innerHTML = showingGrid ? '<i class="ti ti-table"></i> Grid' : '<i class="ti ti-chart-line"></i> Chart';
+  if (!showingGrid) buildChartGrid(chartId, grid);
+}
+
+function buildChartGrid(chartId, container) {
+  const inst = chartInstances[chartId];
+  if (!inst) return;
+  const { labels, datasets } = inst.data;
+  const table = document.createElement('table');
+  table.className = 'chart-grid-table';
+  const thead = table.createTHead();
+  const hr = thead.insertRow();
+  const th = document.createElement('th');
+  th.textContent = 'Period';
+  hr.appendChild(th);
+  datasets.forEach(ds => {
+    const t = document.createElement('th');
+    t.textContent = ds.label;
+    hr.appendChild(t);
+  });
+  const tbody = table.createTBody();
+  labels.forEach((label, i) => {
+    const tr = tbody.insertRow();
+    tr.insertCell().textContent = label;
+    datasets.forEach(ds => {
+      const val = ds.data[i];
+      tr.insertCell().textContent = val !== null && val !== undefined ? val : '—';
+    });
+  });
+  container.innerHTML = '';
+  container.appendChild(table);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 13: LOCATION FILTER
+// ═══════════════════════════════════════════════════════════════
+window.activeLocation = null;
+
+function filterByLocation(loc, el) {
+  window.activeLocation = loc;
+  document.querySelectorAll('.location-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  // Re-derive KPIs for active location
+  if (window.opticData.sales) {
+    const rows = filterRowsByLocation(window.opticData.sales, loc);
+    const total = sumField(rows, 'netSales');
+    document.getElementById('val-sales').textContent = '$' + fmtMoney(total);
+    const guests = sumField(rows, 'guests');
+    if (guests > 0) document.getElementById('val-check').textContent = '$' + (total / guests).toFixed(2);
+  }
+  if (window.opticData.labor) {
+    const rows = filterRowsByLocation(window.opticData.labor, loc).filter(r => r.laborPct !== null);
+    if (rows.length > 0) {
+      document.getElementById('val-labor').textContent = (rows.reduce((s,r)=>s+r.laborPct,0)/rows.length).toFixed(1) + '%';
+    }
+  }
+  if (window.opticData.foodcost) {
+    const rows = filterRowsByLocation(window.opticData.foodcost, loc).filter(r => r.foodCostPct !== null);
+    if (rows.length > 0) {
+      document.getElementById('val-foodcost').textContent = (rows.reduce((s,r)=>s+r.foodCostPct,0)/rows.length).toFixed(1) + '%';
+    }
+  }
+  recalcPrimeCost();
+
+  // Rebuild AI context for new location
+  window.aiContext = buildAIContext();
+  refreshSuggestedQuestions();
+}
+
+function rebuildLocationSidebar(locations) {
+  const list = document.getElementById('locationsList');
+  if (!list) return;
+  list.innerHTML = `<div class="location-pill active" onclick="filterByLocation(null, this)"><div class="location-dot"></div> All Locations</div>`;
+  locations.forEach((loc, i) => {
+    const color = CHART_COLORS[i % CHART_COLORS.length];
+    const pill = document.createElement('div');
+    pill.className = 'location-pill';
+    pill.innerHTML = `<div class="location-dot" style="background:${color}"></div> ${loc}`;
+    pill.onclick = function() { filterByLocation(loc, this); };
+    list.appendChild(pill);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 14: VOICE INPUT
+// ═══════════════════════════════════════════════════════════════
 let recognition = null;
 let isRecording = false;
 
 function toggleVoice() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    appendMsg('ai', "Voice input isn't supported in this browser. Try Chrome on desktop.");
+    alert('Voice input is not supported in this browser. Try Chrome.');
     return;
   }
-
   if (isRecording) {
-    recognition?.stop();
+    if (recognition) recognition.stop();
     return;
   }
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = true;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
   recognition.lang = 'en-US';
-
-  const voiceBtn = document.getElementById('voiceBtn');
-  const voiceIcon = document.getElementById('voiceIcon');
-  const input = document.getElementById('chatInput');
-
-  recognition.onstart = () => {
-    isRecording = true;
-    voiceBtn.classList.add('recording');
-    voiceIcon.className = 'ti ti-microphone-off';
-    input.placeholder = 'Listening...';
+  recognition.interimResults = false;
+  recognition.onresult = e => {
+    const text = e.results[0][0].transcript;
+    document.getElementById('chatInput').value = text;
+    sendMessage();
   };
-
-  recognition.onresult = (e) => {
-    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
-    input.value = transcript;
-    // Auto-send if final result
-    if (e.results[e.results.length - 1].isFinal) {
-      setTimeout(() => sendMessage(), 400);
-    }
+  recognition.onend = () => {
+    isRecording = false;
+    const btn = document.getElementById('voiceBtn');
+    if (btn) btn.classList.remove('recording');
+    document.getElementById('voiceIcon').className = 'ti ti-microphone';
   };
-
-  recognition.onerror = (e) => {
-    if (e.error !== 'aborted') appendMsg('ai', `Voice error: ${e.error}. Please try again.`);
-    stopRecording();
-  };
-
-  recognition.onend = () => stopRecording();
-
   recognition.start();
+  isRecording = true;
+  const btn = document.getElementById('voiceBtn');
+  if (btn) btn.classList.add('recording');
+  document.getElementById('voiceIcon').className = 'ti ti-microphone-off';
 }
 
-function stopRecording() {
-  isRecording = false;
-  const voiceBtn = document.getElementById('voiceBtn');
-  const voiceIcon = document.getElementById('voiceIcon');
-  const input = document.getElementById('chatInput');
-  if (voiceBtn) voiceBtn.classList.remove('recording');
-  if (voiceIcon) voiceIcon.className = 'ti ti-microphone';
-  if (input) input.placeholder = 'Ask about your operations...';
-}
-
-// ── CLEAR CHAT ──
-function clearChat() {
-  conversationHistory = [];
-  const messagesEl = document.getElementById('messages');
-  if (messagesEl) {
-    messagesEl.innerHTML = `
-      <div class="msg msg-ai" id="welcomeMsg">
-        <div class="msg-label">OpticAI</div>
-        <div class="msg-bubble">Chat cleared. Ask me anything about your operations data.</div>
-      </div>`;
-  }
-}
-
-// ── CHART ↔ GRID TOGGLE ──
-const chartGridState = {};
-
-function toggleChartGrid(chartId) {
-  const wrap    = document.getElementById('wrap-' + chartId);
-  const grid    = document.getElementById('grid-' + chartId);
-  const btn     = document.getElementById('toggle-' + chartId);
-  const legend  = document.getElementById('salesLegend'); // only for sales
-
-  if (!wrap || !grid || !btn) return;
-
-  const isGrid = chartGridState[chartId];
-  chartGridState[chartId] = !isGrid;
-
-  if (!isGrid) {
-    // Switch to grid
-    wrap.style.display = 'none';
-    if (chartId === 'salesChart' && legend) legend.style.display = 'none';
-    grid.classList.add('visible');
-    btn.innerHTML = '<i class="ti ti-chart-line"></i> Chart';
-    grid.innerHTML = buildGridHTML(chartId);
-  } else {
-    // Switch back to chart
-    wrap.style.display = '';
-    if (chartId === 'salesChart' && legend) legend.style.display = '';
-    grid.classList.remove('visible');
-    btn.innerHTML = '<i class="ti ti-table"></i> Grid';
-  }
-}
-
-function buildGridHTML(chartId) {
-  const chartObj = { salesChart, pmixChart, laborChart, dowChart }[chartId];
-  if (!chartObj) return '<div style="padding:12px;color:var(--text3);font-size:12px">No data available</div>';
-
-  const { labels, datasets } = chartObj.data;
-
-  if (chartId === 'pmixChart') {
-    // Doughnut — single dataset, show label + value + % 
-    const total = datasets[0].data.reduce((a,b)=>a+b,0);
-    let html = '<table class="chart-grid-table"><thead><tr><th>Category</th><th>% of Mix</th></tr></thead><tbody>';
-    labels.forEach((lbl, i) => {
-      const val = datasets[0].data[i];
-      html += `<tr><td>${lbl.replace(/ [\d.]+%$/, '')}</td><td>${typeof val === 'number' ? val.toFixed(1)+'%' : val}</td></tr>`;
-    });
-    html += '</tbody></table>';
-    return html;
-  }
-
-  if (chartId === 'dowChart') {
-    // Bar — days of week
-    const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-    let html = '<table class="chart-grid-table"><thead><tr><th>Day</th><th>Avg Sales</th></tr></thead><tbody>';
-    labels.forEach((lbl, i) => {
-      const val = datasets[0].data[i];
-      const fmt = typeof val === 'number' ? '$' + val.toLocaleString() : val;
-      html += `<tr><td>${days[i] || lbl}</td><td>${fmt}</td></tr>`;
-    });
-    html += '</tbody></table>';
-    return html;
-  }
-
-  // Multi-line charts (sales, labor)
-  const isLabor = chartId === 'laborChart';
-  const isSales = chartId === 'salesChart';
-
-  let html = '<table class="chart-grid-table"><thead><tr><th>Week</th>';
-  datasets.forEach(ds => { html += `<th>${ds.label}</th>`; });
-  if (datasets.length > 1) html += '<th>Total / Avg</th>';
-  html += '</tr></thead><tbody>';
-
-  labels.forEach((lbl, i) => {
-    html += `<tr><td>${lbl}</td>`;
-    const rowVals = datasets.map(ds => ds.data[i]);
-    rowVals.forEach(val => {
-      const fmt = val === null || val === undefined ? '—'
-        : isSales ? '$' + (val).toFixed(1) + 'K'
-        : isLabor ? val.toFixed(1) + '%'
-        : val;
-      html += `<td>${fmt}</td>`;
-    });
-    if (datasets.length > 1) {
-      const nums = rowVals.filter(v => v !== null && v !== undefined);
-      const agg = nums.length ? (isSales
-        ? '$' + nums.reduce((a,b)=>a+b,0).toFixed(1) + 'K'
-        : (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1) + '%')
-        : '—';
-      html += `<td style="color:var(--text);font-weight:500">${agg}</td>`;
-    }
-    html += '</tr>';
-  });
-
-  html += '</tbody></table>';
-  return html;
-}
-
-// ── FEEDBACK ──
-let selectedThumb = null;
-let feedbackSource = '';
+// ═══════════════════════════════════════════════════════════════
+// SECTION 15: FEEDBACK
+// ═══════════════════════════════════════════════════════════════
+let feedbackThumb = null;
 
 function openFeedback(source) {
-  feedbackSource = source || 'unknown';
-  selectedThumb = null;
-  document.getElementById('thumbUp').classList.remove('selected');
-  document.getElementById('thumbDown').classList.remove('selected');
-  document.getElementById('feedbackEmail').value = '';
-  document.getElementById('feedbackNote').value = '';
-  document.getElementById('fbSubmitBtn').disabled = true;
+  document.getElementById('feedbackOverlay').classList.add('open');
   document.getElementById('feedbackForm').style.display = '';
   document.getElementById('feedbackSuccess').style.display = 'none';
-  document.getElementById('feedbackOverlay').classList.add('open');
+  document.getElementById('feedbackEmail').value = '';
+  document.getElementById('feedbackNote').value = '';
+  feedbackThumb = null;
+  document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('fbSubmitBtn').disabled = true;
 }
 
 function closeFeedback() {
   document.getElementById('feedbackOverlay').classList.remove('open');
 }
 
-function selectThumb(val) {
-  selectedThumb = val;
-  document.getElementById('thumbUp').classList.toggle('selected', val === 'up');
-  document.getElementById('thumbDown').classList.toggle('selected', val === 'down');
+function selectThumb(t) {
+  feedbackThumb = t;
+  document.getElementById('thumbUp').classList.toggle('selected', t === 'up');
+  document.getElementById('thumbDown').classList.toggle('selected', t === 'down');
   document.getElementById('fbSubmitBtn').disabled = false;
 }
 
 async function submitFeedback() {
-  const btn = document.getElementById('fbSubmitBtn');
-  const email = document.getElementById('feedbackEmail').value.trim();
-  const note = document.getElementById('feedbackNote').value.trim();
-
-  // Describe what data was loaded
-  const loaded = Object.entries(uploadedData)
-    .filter(([,v]) => v)
-    .map(([k,v]) => `${k} (${v.filename})`)
-    .join(', ') || 'Demo data only';
-
+  const btn   = document.getElementById('fbSubmitBtn');
   btn.disabled = true;
   btn.textContent = 'Sending...';
-
+  const ctx = window.aiContext || buildAIContext();
+  const payload = {
+    sentiment: feedbackThumb,
+    email:     document.getElementById('feedbackEmail').value,
+    note:      document.getElementById('feedbackNote').value,
+    datasets:  ctx.datasetsLoaded.join(', ') || 'demo only',
+  };
   try {
-    const res = await fetch('/api/feedback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sentiment: selectedThumb,
-        email: email || null,
-        note: note || null,
-        source: feedbackSource,
-        dataUploaded: loaded
-      })
+    const r = await fetch('/api/feedback', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
     });
-
-    if (res.ok) {
+    if (r.ok) {
       document.getElementById('feedbackForm').style.display = 'none';
-      document.getElementById('feedbackSuccess').style.display = 'block';
-    } else {
-      throw new Error('Server error');
-    }
-  } catch(err) {
-    btn.disabled = false;
-    btn.textContent = 'Send feedback';
-    // Fallback: open email client
-    const subject = encodeURIComponent(`OpticAI Feedback: ${selectedThumb === 'up' ? 'Valuable' : 'Not for me'}`);
-    const body = encodeURIComponent(`Sentiment: ${selectedThumb}\nEmail: ${email}\nNote: ${note}\nData: ${loaded}`);
-    window.open(`mailto:sanpane@gmail.com?subject=${subject}&body=${body}`);
-    closeFeedback();
+      document.getElementById('feedbackSuccess').style.display = '';
+    } else throw new Error();
+  } catch {
+    window.location.href = `mailto:sanpane@gmail.com?subject=OpticAI Feedback (${feedbackThumb})&body=${encodeURIComponent(JSON.stringify(payload))}`;
   }
 }
 
-// ── LOCATION FILTER ENGINE ──
-let activeLocation = null; // null = All Locations
+// ═══════════════════════════════════════════════════════════════
+// SECTION 16: CUSTOMIZE PANEL
+// ═══════════════════════════════════════════════════════════════
+const KPI_DEFS   = ['sales','labor','foodcost','prime','check'];
+const CHART_DEFS = ['salesChart','pmixChart','laborChart','dowChart'];
 
-function filterByLocation(loc, el) {
-  activeLocation = loc;
+function openCustomizePanel() {
+  const modal = document.getElementById('customizeModal');
+  if (!modal) return;
+  modal.classList.add('open');
+  const kt = document.getElementById('kpiToggles');
+  const ct = document.getElementById('chartToggles');
+  if (kt) {
+    kt.innerHTML = KPI_DEFS.map(k => `
+      <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;">
+        <input type="checkbox" checked onchange="document.getElementById('kpi-${k}').style.display=this.checked?'':'none'" style="accent-color:var(--accent)">
+        <span style="font-size:13px">${k.charAt(0).toUpperCase()+k.slice(1)}</span>
+      </label>`).join('');
+  }
+  if (ct) {
+    ct.innerHTML = CHART_DEFS.map(c => `
+      <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;">
+        <input type="checkbox" checked onchange="document.getElementById('card-${c}').style.display=this.checked?'':'none'" style="accent-color:var(--accent)">
+        <span style="font-size:13px">${c.replace('Chart','').replace('dow','Day of Week')}</span>
+      </label>`).join('');
+  }
+}
 
-  // Update active pill styling
-  document.querySelectorAll('.location-pill').forEach(p => p.classList.remove('active'));
-  if (el) el.classList.add('active');
+function closeCustomizePanel() {
+  document.getElementById('customizeModal')?.classList.remove('open');
+}
 
-  // Update topbar label
-  const label = document.getElementById('dateRangeLabel');
-  if (label) {
-    const base = label.textContent.replace(/ · .*$/, '').replace(/ — .*$/, '');
-    label.textContent = loc ? `${label.textContent.split('·')[0].trim()} · ${loc}` : label.textContent.replace(/ · [^·]+$/, '');
+function resetDashboard() {
+  KPI_DEFS.forEach(k => { const el = document.getElementById(`kpi-${k}`); if(el) el.style.display=''; });
+  CHART_DEFS.forEach(c => { const el = document.getElementById(`card-${c}`); if(el) el.style.display=''; });
+  closeCustomizePanel();
+}
+
+function buildCustomChart() {
+  const colVal = document.getElementById('customChartCol')?.value;
+  const type   = document.getElementById('customChartType')?.value || 'bar';
+  if (!colVal) return;
+  const [source, colName] = colVal.split('::');
+  const file = window.opticData.files.find(f => f.userLabel === source);
+  if (!file) return;
+  const vals = file.rows.map(r => parseFloat(r[colName])).filter(v => !isNaN(v));
+  if (!vals.length) return;
+
+  const section = document.querySelector('.chart-section');
+  const row = document.createElement('div');
+  row.className = 'chart-row';
+  row.style.height = '180px';
+  const card = document.createElement('div');
+  card.className = 'chart-card';
+  card.style.flex = '1';
+  card.innerHTML = `<div class="chart-title">${colName} <span style="font-size:10px;color:var(--text3)">(custom)</span></div><div class="chart-wrap" style="flex:1;position:relative"><canvas id="customChart_${Date.now()}"></canvas></div>`;
+  row.appendChild(card);
+  section.appendChild(row);
+
+  const canvas = card.querySelector('canvas');
+  new Chart(canvas, {
+    type,
+    data: {
+      labels: vals.map((_,i) => i+1),
+      datasets: [{ label: colName, data: vals, backgroundColor: '#3b82f6bb' }],
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } },
+  });
+  closeCustomizePanel();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 17: MODAL HELPERS
+// ═══════════════════════════════════════════════════════════════
+function openUploadModal()  { document.getElementById('uploadModal')?.classList.add('open'); }
+function closeUploadModal() { document.getElementById('uploadModal')?.classList.remove('open'); }
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 18: DEMO CHART INITIALIZATION
+// Runs on load with demo data — untouched by uploads.
+// ═══════════════════════════════════════════════════════════════
+function initDemoCharts() {
+  const weeks = ['Feb 2','Feb 9','Feb 16','Feb 23','Mar 2','Mar 9','Mar 16','Mar 23','Mar 30',
+                 'Apr 6','Apr 13','Apr 20','Apr 27','May 4','May 11','May 18','May 25',
+                 'Jun 1','Jun 8','Jun 15','Jun 22'];
+  const locations = ['Downtown','Freedom Square','Government Square','Midtown','Westside'];
+  const baseWeekly = [42000,36000,31000,38000,29000];
+  const rnd = (base, noise) => base + (Math.random()-0.5)*2*noise;
+
+  // Sales chart
+  const salesCtx = document.getElementById('salesChart');
+  if (salesCtx) {
+    chartInstances['salesChart'] = new Chart(salesCtx, {
+      type: 'line',
+      data: {
+        labels: weeks,
+        datasets: locations.map((loc, i) => ({
+          label: loc,
+          data: weeks.map(() => Math.round(rnd(baseWeekly[i], 4000))),
+          borderColor: CHART_COLORS[i],
+          backgroundColor: CHART_COLORS[i]+'22',
+          tension: 0.3,
+          fill: false,
+        })),
+      },
+      options: chartOptions('$'),
+    });
   }
 
-  applyLocationFilter();
+  // Labor chart
+  const laborBase = [41, 38, 43, 40, 37];
+  const laborCtx = document.getElementById('laborChart');
+  if (laborCtx) {
+    chartInstances['laborChart'] = new Chart(laborCtx, {
+      type: 'line',
+      data: {
+        labels: weeks,
+        datasets: [
+          ...locations.map((loc, i) => ({
+            label: loc,
+            data: weeks.map(() => +rnd(laborBase[i], 3).toFixed(1)),
+            borderColor: CHART_COLORS[i],
+            tension: 0.3,
+            fill: false,
+          })),
+          { label:'Target (30%)', data: weeks.map(()=>30), borderColor:'#ef444444', borderDash:[4,4], pointRadius:0, fill:false },
+        ],
+      },
+      options: chartOptions('%'),
+    });
+  }
+
+  // PMIX chart
+  const pmixCtx = document.getElementById('pmixChart');
+  if (pmixCtx) {
+    chartInstances['pmixChart'] = new Chart(pmixCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Entrees','Beverages','Appetizers','Desserts','Bar'],
+        datasets: [{ label:'Margin %', data:[68,82,71,74,79], backgroundColor: CHART_COLORS.map(c => c+'bb') }],
+      },
+      options: chartOptions('%'),
+    });
+  }
+
+  // Day of week chart
+  const dowCtx = document.getElementById('dowChart');
+  if (dowCtx) {
+    chartInstances['dowChart'] = new Chart(dowCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets: [{ label:'Avg Sales', data:[5800,6200,6900,7400,9800,11200,8600], backgroundColor: '#3b82f6bb' }],
+      },
+      options: chartOptions('$'),
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 19: INIT
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Show mobile bar on small screens
+  if (window.innerWidth <= 768) {
+    const bar = document.querySelector('.mobile-bar');
+    if (bar) bar.style.display = 'flex';
+  }
+
+  initDemoCharts();
+
+  // Initialize AI context with demo data
+  window.aiContext = buildAIContext();
   refreshSuggestedQuestions();
-}
+});
 
-function applyLocationFilter() {
-  const loc = activeLocation;
-
-  // ── Sales chart ──
-  if (salesChart) {
-    salesChart.data.datasets.forEach(ds => { ds.hidden = loc ? ds.label !== loc : false; });
-    salesChart.update();
-  }
-
-  // ── Labor chart ──
-  if (laborChart) {
-    laborChart.data.datasets.forEach(ds => { ds.hidden = loc ? ds.label !== loc : false; });
-    laborChart.update();
-  }
-
-  // ── DOW chart — filter from uploaded sales or DEMO data ──
-  updateDowChart(loc);
-
-  // ── PMIX chart — filter from uploaded pmix or DEMO ──
-  updatePmixChart(loc);
-
-  // ── KPIs ──
-  updateFilteredKPIs(loc);
-}
-
-function updateDowChart(loc) {
-  if (!dowChart) return;
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-
-  if (uploadedData.sales?.rows) {
-    const rows = uploadedData.sales.rows;
-    const keys = Object.keys(rows[0]);
-    const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
-    const locationCol = findCol(keys, ['location','store','site','restaurant']);
-    const dateCol = findCol(keys, ['date','day','week','period']);
-    if (!salesCol || !dateCol) return;
-
-    const locRows = (loc && locationCol) ? rows.filter(r => r[locationCol] === loc) : rows;
-    const dow = {0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
-    locRows.forEach(r => {
-      const d = new Date(r[dateCol]);
-      if (!isNaN(d)) dow[d.getDay()].push(parseFloat(r[salesCol])||0);
-    });
-    // Reorder Mon=0 to Sun=6 (JS getDay: 0=Sun)
-    const ordered = [1,2,3,4,5,6,0].map(i => dow[i].length ? dow[i].reduce((a,b)=>a+b,0)/dow[i].length : 0);
-    dowChart.data.datasets[0].data = ordered;
-    const peak = Math.max(...ordered);
-    dowChart.data.datasets[0].backgroundColor = ordered.map(v =>
-      v === peak ? '#10b981' : v === Math.min(...ordered) ? '#ef4444' : '#3b82f6'
-    );
-  } else {
-    // Use DEMO data — filter by location index
-    const locMap = {
-      'Downtown':         [1467,1456,1423,1532,1821,1940,1298],
-      'Freedom Square':   [1245,1212,1267,1298,1489,1523,1034],
-      'Government Square':[1523,1534,1578,1612,1934,1998,1312],
-      'Midtown':          [1198,1189,1198,1245,1512,1567,978],
-      'Westside':         [1110,1109,1075,1083,1265,1367,704],
-    };
-    if (loc && locMap[loc]) {
-      dowChart.data.datasets[0].data = locMap[loc];
-      const peak = Math.max(...locMap[loc]);
-      const min = Math.min(...locMap[loc]);
-      dowChart.data.datasets[0].backgroundColor = locMap[loc].map(v =>
-        v === peak ? '#10b981' : v === min ? '#ef4444' : '#3b82f6'
-      );
-    } else {
-      dowChart.data.datasets[0].data = DEMO.dow;
-      dowChart.data.datasets[0].backgroundColor = ['#3b82f6','#3b82f6','#3b82f6','#3b82f6','#10b981','#10b981','#ef4444'];
-    }
-  }
-  dowChart.update();
-}
-
-function updatePmixChart(loc) {
-  if (!pmixChart) return;
-  const COLORS = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4'];
-
-  if (uploadedData.pmix?.rows) {
-    const rows = uploadedData.pmix.rows;
-    const keys = Object.keys(rows[0]);
-    const catCol = findCol(keys, ['category','cat','group','type','section','menu category']);
-    const revCol = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount','total sales','item sales']);
-    const locationCol = findCol(keys, ['location','store','site','restaurant','unit']);
-    
-    if (!catCol || !revCol) {
-      console.warn('PMIX: could not find category or revenue column. Keys:', keys);
-      return;
-    }
-
-    const locRows = (loc && locationCol) ? rows.filter(r => r[locationCol] === loc) : rows;
-    
-    if (locRows.length === 0) {
-      console.warn('PMIX: no rows for location', loc);
-      return;
-    }
-
-    const catTotals = {};
-    let total = 0;
-    locRows.forEach(r => {
-      const cat = r[catCol] || 'Other';
-      const val = parseFloat(r[revCol]) || 0;
-      catTotals[cat] = (catTotals[cat] || 0) + val;
-      total += val;
-    });
-
-    if (total === 0) return;
-
-    const sorted = Object.entries(catTotals).sort((a,b) => b[1] - a[1]).slice(0, 6);
-    
-    // Update labels, data, AND colors together to keep them in sync
-    pmixChart.data.labels = sorted.map(([k,v]) => `${k} ${(v/total*100).toFixed(1)}%`);
-    pmixChart.data.datasets[0].data = sorted.map(([,v]) => v/total*100);
-    pmixChart.data.datasets[0].backgroundColor = sorted.map((_, i) => COLORS[i % COLORS.length]);
-    
-  } else {
-    // Demo data — add per-location variation to make filter feel useful
-    const demoByLoc = {
-      'Downtown':          { labels: ['Entree 81.2%','Beverage 9.8%','Appetizer 5.1%','Side 3.9%'], data: [81.2,9.8,5.1,3.9] },
-      'Freedom Square':    { labels: ['Entree 78.3%','Beverage 11.4%','Appetizer 5.9%','Side 4.4%'], data: [78.3,11.4,5.9,4.4] },
-      'Government Square': { labels: ['Entree 80.1%','Beverage 10.2%','Appetizer 5.6%','Side 4.1%'], data: [80.1,10.2,5.6,4.1] },
-      'Midtown':           { labels: ['Entree 79.0%','Beverage 10.8%','Appetizer 5.4%','Side 4.8%'], data: [79.0,10.8,5.4,4.8] },
-      'Westside':          { labels: ['Entree 80.5%','Beverage 9.5%','Appetizer 5.7%','Side 4.3%'], data: [80.5,9.5,5.7,4.3] },
-    };
-    const locData = (loc && demoByLoc[loc]) ? demoByLoc[loc] : { labels: DEMO.pmix.labels, data: DEMO.pmix.data };
-    pmixChart.data.labels = locData.labels;
-    pmixChart.data.datasets[0].data = locData.data;
-    pmixChart.data.datasets[0].backgroundColor = COLORS.slice(0, locData.data.length);
-  }
-
-  pmixChart.update('active');
-}
-
-function updateFilteredKPIs(loc) {
-  if (!loc) {
-    // Restore full KPIs
-    if (!uploadedData.sales) {
-      // Restore demo KPIs
-      updateKpi('sales', '$9.53M', 'Demo', false);
-      updateKpi('labor', '39.7%', 'Demo', false);
-      updateKpi('foodcost', '30.4%', 'Demo', false);
-      updateKpi('prime', '70.1%', 'Demo', false);
-      updateKpi('check', '$27.60', 'Demo', false);
-      return;
-    }
-    if (uploadedData.sales) {
-      const rows = uploadedData.sales.rows;
-      const keys = Object.keys(rows[0]);
-      const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
-      const checkCountCol = findCol(keys, ['check count','check_count','checks','transactions']);
-      const avgCheckCol = findCol(keys, ['average check','avg check','avg_check']);
-      const total = rows.reduce((s,r) => s+(parseFloat(r[salesCol])||0), 0);
-      const totalChecks = checkCountCol ? rows.reduce((s,r)=>s+(parseFloat(r[checkCountCol])||0),0) : 0;
-      const avgCheck = totalChecks > 0 ? total/totalChecks : (avgCheckCol ? rows.reduce((s,r)=>s+(parseFloat(r[avgCheckCol])||0),0)/rows.length : null);
-      updateKpi('sales', '$'+(total>=1000000?(total/1000000).toFixed(2)+'M':(total/1000).toFixed(0)+'K'), 'Live', true);
-      if (avgCheck) updateKpi('check', '$'+avgCheck.toFixed(2), 'Live', true);
-    }
-    recalcPrimeCost();
-    return;
-  }
-
-  // Filter to single location
-  if (!uploadedData.sales) {
-    // Use DEMO per-location KPIs
-    const demoKpis = {
-      'Downtown':          { sales: '$1.99M', labor: '39.0%', foodcost: '30.4%', prime: '69.4%', check: '$27.80' },
-      'Freedom Square':    { sales: '$1.84M', labor: '40.3%', foodcost: '30.4%', prime: '70.7%', check: '$27.45' },
-      'Government Square': { sales: '$2.10M', labor: '39.9%', foodcost: '30.4%', prime: '70.3%', check: '$27.60' },
-      'Midtown':           { sales: '$1.86M', labor: '39.8%', foodcost: '30.4%', prime: '70.2%', check: '$27.55' },
-      'Westside':          { sales: '$1.57M', labor: '40.7%', foodcost: '30.4%', prime: '71.1%', check: '$27.10' },
-    };
-    const kpis = demoKpis[loc];
-    if (kpis) {
-      updateKpi('sales', kpis.sales, loc, true);
-      updateKpi('labor', kpis.labor, loc, true);
-      updateKpi('foodcost', kpis.foodcost, loc, true);
-      updateKpi('prime', kpis.prime, loc, true);
-      updateKpi('check', kpis.check, loc, true);
-    }
-    return;
-  }
-  if (uploadedData.sales) {
-    const rows = uploadedData.sales.rows;
-    const keys = Object.keys(rows[0]);
-    const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
-    const locationCol = findCol(keys, ['location','store','site','restaurant']);
-    const checkCountCol = findCol(keys, ['check count','check_count','checks','transactions']);
-    const avgCheckCol = findCol(keys, ['average check','avg check','avg_check']);
-
-    const locRows = locationCol ? rows.filter(r => r[locationCol] === loc) : rows;
-    const total = locRows.reduce((s,r) => s+(parseFloat(r[salesCol])||0), 0);
-    const totalChecks = checkCountCol ? locRows.reduce((s,r)=>s+(parseFloat(r[checkCountCol])||0),0) : 0;
-    const avgCheck = totalChecks > 0 ? total/totalChecks : (avgCheckCol ? locRows.reduce((s,r)=>s+(parseFloat(r[avgCheckCol])||0),0)/locRows.length : null);
-    updateKpi('sales', '$'+(total>=1000000?(total/1000000).toFixed(2)+'M':(total/1000).toFixed(0)+'K'), loc, true);
-    if (avgCheck) updateKpi('check', '$'+avgCheck.toFixed(2), loc, true);
-  }
-
-  if (uploadedData.labor) {
-    const rows = uploadedData.labor.rows;
-    const keys = Object.keys(rows[0]);
-    const locationCol = findCol(keys, ['location','store','site']);
-    const laborCostCol = findCol(keys, ['labor cost','labor_cost','wages']);
-    const laborPctCol = findCol(keys, ['labor pct','labor_pct','labor percent','labor %']);
-    const locRows = locationCol ? rows.filter(r => r[locationCol] === loc) : rows;
-
-    if (laborPctCol) {
-      const vals = locRows.map(r=>parseFloat(r[laborPctCol])).filter(v=>!isNaN(v));
-      const fmt = detectPercentFormat(vals);
-      const avg = vals.map(v=>normalizePct(v,fmt)).reduce((a,b)=>a+b,0)/vals.length;
-      updateKpi('labor', avg.toFixed(1)+'%', loc, true);
-    } else if (laborCostCol && uploadedData.sales) {
-      // Cross-calculate for this location
-      const sRows = uploadedData.sales.rows;
-      const sKeys = Object.keys(sRows[0]);
-      const sCol = findCol(sKeys, ['net sales','net_sales','revenue','sales']);
-      const sLocCol = findCol(sKeys, ['location','store','site','restaurant']);
-      const locSales = sLocCol ? sRows.filter(r=>r[sLocCol]===loc).reduce((s,r)=>s+(parseFloat(r[sCol])||0),0) : 0;
-      const locLabor = locRows.reduce((s,r)=>s+(parseFloat(r[laborCostCol])||0),0);
-      if (locSales > 0) updateKpi('labor', (locLabor/locSales*100).toFixed(1)+'%', loc, true);
-    }
-  }
-
-  if (uploadedData.foodcost) {
-    const rows = uploadedData.foodcost.rows;
-    const keys = Object.keys(rows[0]);
-    const locationCol = findCol(keys, ['location','store','site']);
-    const fcPctCol = findCol(keys, ['food cost %','food_cost_pct','food cost percent','fc pct']);
-    const locRows = locationCol ? rows.filter(r=>r[locationCol]===loc) : rows;
-    if (fcPctCol && locRows.length) {
-      const vals = locRows.map(r=>parseFloat(r[fcPctCol])).filter(v=>!isNaN(v));
-      const fmt = detectPercentFormat(vals);
-      const avg = vals.map(v=>normalizePct(v,fmt)).reduce((a,b)=>a+b,0)/vals.length;
-      updateKpi('foodcost', avg.toFixed(1)+'%', loc, true);
-      // Recalc prime for this location
-      const laborKpi = document.getElementById('val-labor')?.textContent;
-      if (laborKpi) {
-        const laborVal = parseFloat(laborKpi);
-        if (!isNaN(laborVal)) updateKpi('prime', (laborVal+avg).toFixed(1)+'%', loc, true);
-      }
-    }
-  }
-}
-
-initCharts();
-refreshSuggestedQuestions();
-
-// Show mobile nav bar on small screens
-function handleResize() {
-  const mobileBar = document.querySelector('.mobile-bar');
-  if (mobileBar) {
-    mobileBar.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
-  }
-}
-handleResize();
-window.addEventListener('resize', handleResize);
 </script>
 </body>
 </html>
