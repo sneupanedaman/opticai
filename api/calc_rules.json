@@ -1,0 +1,186 @@
+{
+  "$schema": "opticai-calc-rules/v2",
+  "version": "2026.05.2",
+  "description": "How KPIs are computed, including the definitional choices that vary by brand. Each rule has an industry-standard DEFAULT plus an overridable set of options. Per-org overrides live in the org profile and merge on top of these defaults at query time. v2 reflects industry-standard definitions: direct (operational) labor vs. fully-burdened labor with a burden multiplier; the Food Cost vs. COGS distinction (paper/packaging sits in COGS, not Food Cost); beverage cost tracked separately from food with sub-categories; and operating week-start treated as a required per-brand setting rather than an assumed default.",
+
+  "definitional_rules": {
+    "sales_basis": {
+      "question": "Are cost percentages computed against net or gross sales?",
+      "default": "net_sales",
+      "options": ["net_sales", "gross_sales"],
+      "why_it_matters": "Using gross instead of net understates every cost percentage and overstates margin. Net is the industry standard denominator.",
+      "override_key": "sales_basis"
+    },
+
+    "labor_basis": {
+      "question": "When this operator quotes 'labor %', is it Direct (operational/unburdened) labor or Fully-Burdened labor?",
+      "default": "direct",
+      "options": ["direct", "fully_burdened"],
+      "why_it_matters": "Direct labor = the unburdened cost of scheduled shifts (hourly wages, shift pay, and salaried floor-management pay) — what operators review daily for scheduling efficiency. Fully-burdened labor adds the labor burden on top: payroll taxes (FICA, Medicare, FUTA), benefits (health, 401k match), workers' comp, PTO, and uniforms. If OpticAI reports a direct number to an operator who runs fully-burdened figures (or vice versa), it will be 4-6 points off their P&L and lose trust instantly. Always state which basis is being used.",
+      "override_key": "labor_basis"
+    },
+    "labor_burden_multiplier": {
+      "question": "What burden multiplier converts direct wages to fully-burdened labor for this operator?",
+      "default": 1.18,
+      "range": [1.15, 1.25],
+      "why_it_matters": "Most operators estimate burden between pay periods by multiplying raw payroll by a burden factor. The labor burden adds roughly 15-25% on top of base wages, depending on state and benefits offered. Used to convert between direct and fully-burdened when only one is present in the data. Always label a converted figure as an estimate.",
+      "formula_hint": "fully_burdened_labor = direct_labor * labor_burden_multiplier",
+      "override_key": "labor_burden_multiplier"
+    },
+    "labor_includes_salaried_management": {
+      "question": "Does direct labor include salaried managers tied to running the floor?",
+      "default": true,
+      "options": [true, false],
+      "why_it_matters": "Direct/operational labor conventionally includes salaried manager pay directly tied to running the floor. Excluding it understates labor and hides over-management at low-volume units.",
+      "override_key": "labor_includes_salaried_management"
+    },
+    "track_foh_boh_split": {
+      "question": "Does this operator break labor into Front of House and Back of House?",
+      "default": true,
+      "options": [true, false],
+      "why_it_matters": "Operators optimize scheduling by department. BOH (heart of house: chefs, dishwashers) typically runs a HIGHER labor % of sales. FOH (servers, hosts, bartenders) runs a LOWER base operational wage % because FOH relies heavily on tips. Reporting a blended labor number hides which department is actually driving an overage. If FOH/BOH columns exist, analyze them separately before blending.",
+      "override_key": "track_foh_boh_split"
+    },
+
+    "food_cost_definition": {
+      "question": "What does this operator count in 'Food Cost' (as distinct from total COGS)?",
+      "default": "edible_only",
+      "options": ["edible_only", "includes_paper"],
+      "why_it_matters": "On a restaurant P&L, Food Cost is STRICTLY edible ingredients (proteins, produce, dairy, dry goods, spices). Paper & packaging (to-go boxes, bags, napkins, straws, utensils) is a SEPARATE line. Total COGS = Food Cost + Beverage Cost + Paper/Packaging. Keeping paper out of Food Cost prevents seasonal packaging spikes (e.g. holiday delivery volume) from distorting food-waste and portion-control analysis. Default is edible-only; QSR/fast-casual concepts that group packaging into product cost set this to includes_paper.",
+      "override_key": "food_cost_definition"
+    },
+    "paper_packaging_accounting": {
+      "question": "How is paper/packaging classified?",
+      "default": "cogs_separate_line",
+      "options": ["cogs_separate_line", "in_food_cost", "operating_expense"],
+      "why_it_matters": "Direct disposables that physically leave the building with food (to-go boxes, delivery bags, straws) belong in COGS as a separate line. Indirect supplies used for cleaning or BOH operations (restroom paper towels, guest checks, kitchen trash bags) belong in Operating Expenses, NOT COGS. Limited-service packaging targets run ~3-4% of net sales; full-service ~1-2%. Misclassifying indirect supplies into COGS inflates apparent product cost.",
+      "override_key": "paper_packaging_accounting"
+    },
+    "recipe_card_paper_rule": {
+      "question": "When costing a menu item's recipe card, is required packaging included?",
+      "default": "include_if_mandatory",
+      "options": ["include_if_mandatory", "always_exclude"],
+      "why_it_matters": "The 100% Rule for recipe-cost cards: INCLUDE packaging if the item always requires it (pizza box for a pizza, cup+lid for a fountain drink, wrapper for a food-truck taco). EXCLUDE it if optional (don't add a to-go container to a sit-down pasta card just because a guest might box leftovers). Adding optional packaging artificially pads target food cost and hides real kitchen waste or theft.",
+      "override_key": "recipe_card_paper_rule"
+    },
+
+    "beverage_cost_tracking": {
+      "question": "How does this operator segment beverage cost?",
+      "default": "by_subcategory",
+      "options": ["by_subcategory", "single_beverage_line", "combined_with_food"],
+      "why_it_matters": "Alcohol is part of BEVERAGE cost, tracked SEPARATELY from food cost. Beverage is commonly broken into sub-categories: soda/water (N/A), beer, wine, and liquor — or at minimum alcoholic vs. non-alcoholic. Pour costs differ sharply by type (liquor ~18-20%, beer ~24-28%, wine ~30-40%, soda <10%), so a single blended beverage number hides which category is leaking margin. Never fold alcohol into food cost.",
+      "override_key": "beverage_cost_tracking"
+    },
+
+    "operating_week_start": {
+      "question": "What day does this operator's operating week start? (REQUIRED per brand — do not assume.)",
+      "default": null,
+      "required_from_user": true,
+      "options": ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+      "why_it_matters": "Operating week start differs from brand to brand — there is no safe industry default. Week-over-week comparisons and weekly rollups MUST align to the operator's fiscal week or every comparison is silently misaligned. OpticAI must ask for this at setup rather than guessing. If unset, flag weekly comparisons as un-aligned.",
+      "override_key": "operating_week_start"
+    },
+    "business_day_close_hour": {
+      "question": "At what hour does the business day roll over (for late-night sales)?",
+      "default": 4,
+      "options": "integer 0-6",
+      "why_it_matters": "A bar selling at 1am should book to the prior business date. A 4am close is common but varies; confirm for late-night concepts.",
+      "override_key": "business_day_close_hour"
+    }
+  },
+
+  "computed_metrics": {
+    "direct_labor_pct": {
+      "formula": "direct_labor / sales_basis * 100",
+      "inputs": ["direct_labor (wages + shift pay + salaried floor mgmt)", "net_sales"],
+      "note": "The daily scheduling-efficiency number. Unburdened.",
+      "rounding": 1
+    },
+    "fully_burdened_labor_pct": {
+      "formula": "(direct_labor * labor_burden_multiplier) / sales_basis * 100",
+      "alt_formula": "(direct_wages + labor_burden) / sales_basis * 100",
+      "inputs": ["direct_labor", "labor_burden_multiplier OR explicit labor_burden", "net_sales"],
+      "note": "The P&L number. If only direct labor is present, estimate burden via the multiplier and LABEL it an estimate. If both direct and burden columns exist, use them directly rather than the multiplier.",
+      "rounding": 1
+    },
+    "labor_pct": {
+      "formula": "depends on labor_basis: if 'direct' -> direct_labor_pct; if 'fully_burdened' -> fully_burdened_labor_pct",
+      "note": "Resolve to the operator's declared basis. ALWAYS state which basis the reported number uses. If a direct labor_pct column is present, compare to computed value; a gap >1.5 points usually means a different sales_basis or labor definition.",
+      "rounding": 1
+    },
+    "foh_labor_pct": {
+      "formula": "foh_labor / sales_basis * 100",
+      "note": "Expected to run lower than BOH due to tip-supported base wages.",
+      "rounding": 1
+    },
+    "boh_labor_pct": {
+      "formula": "boh_labor / sales_basis * 100",
+      "note": "Expected to run higher than FOH as a % of sales.",
+      "rounding": 1
+    },
+    "food_cost_pct": {
+      "formula": "food_cost / sales_basis * 100",
+      "inputs": ["food_cost (edible only, per food_cost_definition)", "net_sales"],
+      "note": "Edible ingredients only unless food_cost_definition = includes_paper. Do NOT include beverage or paper here.",
+      "rounding": 1
+    },
+    "beverage_cost_pct": {
+      "formula": "beverage_cost / beverage_sales * 100",
+      "note": "Compute against BEVERAGE sales, not total sales, for a true pour cost. Segment by sub-category where available.",
+      "rounding": 1
+    },
+    "paper_packaging_pct": {
+      "formula": "paper_packaging_cost / sales_basis * 100",
+      "note": "Limited-service target ~3-4%; full-service ~1-2%. Only direct disposables; indirect supplies are OpEx.",
+      "rounding": 1
+    },
+    "total_cogs_pct": {
+      "formula": "(food_cost + beverage_cost + paper_packaging_cost) / sales_basis * 100",
+      "note": "Total COGS is the sum of food, beverage, and paper/packaging. Distinct from Food Cost alone.",
+      "rounding": 1
+    },
+    "prime_cost_pct": {
+      "formula": "labor_pct + total_cogs_pct",
+      "alt_note": "Some operators define prime cost as labor% + food_cost% only; others use labor% + total COGS%. Confirm which, and keep labor and COGS on the SAME sales_basis or the sum is meaningless.",
+      "inputs": ["labor_pct (per labor_basis)", "total_cogs_pct or food_cost_pct"],
+      "rounding": 1
+    },
+    "average_check": {
+      "formula": "net_sales / check_count",
+      "fallback": "If only guest_count is present, compute per-person average and label it as such.",
+      "rounding": 2
+    },
+    "sales_per_labor_hour": {
+      "formula": "net_sales / labor_hours",
+      "rounding": 2
+    },
+    "comps_pct": {
+      "formula": "comps / sales_basis * 100",
+      "rounding": 1
+    },
+    "item_margin": {
+      "formula": "item_price - food_cost_per_item",
+      "note": "item_price derived as item_revenue / quantity_sold when no explicit price column exists. Apply the recipe_card_paper_rule when packaging is mandatory for the item.",
+      "rounding": 2
+    },
+    "wow_change": {
+      "formula": "(current_period - prior_period) / prior_period * 100",
+      "note": "Week-over-week % change. REQUIRES aligned weeks per operating_week_start. If week start is unset, flag the comparison as potentially misaligned.",
+      "rounding": 1
+    }
+  },
+
+  "concept_to_benchmark_segment": {
+    "description": "Map a detected or user-declared concept type to the right benchmark band. Comparing a fine-dining unit to QSR benchmarks is a credibility-killer. Note that paper-in-COGS and labor-basis conventions also shift by segment.",
+    "segments": ["quick_service", "fast_casual", "casual_dining", "full_service", "fine_dining"],
+    "default_if_unknown": "casual_dining",
+    "detection_hints": "Average check < $12 -> quick_service/fast_casual; $12-25 -> casual; $25-50 -> full_service; >$50 -> fine_dining. Significant alcohol category suggests full_service+. QSR/fast_casual more likely to set food_cost_definition=includes_paper.",
+    "segment_conventions": {
+      "quick_service":  { "common_food_cost_definition": "includes_paper", "packaging_target_pct": [3, 4] },
+      "fast_casual":    { "common_food_cost_definition": "includes_paper", "packaging_target_pct": [3, 4] },
+      "casual_dining":  { "common_food_cost_definition": "edible_only", "packaging_target_pct": [2, 3] },
+      "full_service":   { "common_food_cost_definition": "edible_only", "packaging_target_pct": [1, 2] },
+      "fine_dining":    { "common_food_cost_definition": "edible_only", "packaging_target_pct": [1, 2] }
+    }
+  }
+}
