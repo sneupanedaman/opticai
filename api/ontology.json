@@ -1,0 +1,386 @@
+{
+  "$schema": "opticai-ontology/v1",
+  "version": "2026.05.1",
+  "description": "Canonical restaurant operations ontology. Each metric has a stable id, human label, the synonyms/aliases used across POS exports, the formula (if derived), the valid sane range used for sanity-checking uploads, and the unit/format. This is the durable, accreting asset: every new POS quirk and customer correction lands here, not in code.",
+  "entities": {
+    "location": {
+      "label": "Location",
+      "description": "A single physical restaurant unit within the operator's group.",
+      "synonyms": ["location", "store", "site", "restaurant", "unit", "branch", "venue", "store_name", "store_id", "location_name", "rooftop", "shop"],
+      "role": "dimension",
+      "notes": "Multi-location operators are the core user. Location is the primary slicing dimension for almost every comparison."
+    },
+    "date": {
+      "label": "Business Date",
+      "description": "The operating/business date a record belongs to. NOT the same as the transaction timestamp — a sale at 1am may belong to the prior business date depending on the day-part close.",
+      "synonyms": ["date", "day", "business_date", "biz_date", "trans_date", "transaction_date", "sale_date", "order_date", "week", "period", "week_ending", "week_start", "fiscal_period", "service_date"],
+      "role": "dimension",
+      "notes": "Toast exports 'Business Date'; Square uses 'Date'; Clover uses 'Date' or a full timestamp that must be truncated to a calendar day."
+    },
+    "daypart": {
+      "label": "Daypart",
+      "description": "Service period bucket — breakfast, lunch, dinner, late night.",
+      "synonyms": ["daypart", "day_part", "service_period", "meal_period", "shift", "period_name"],
+      "role": "dimension"
+    },
+    "menu_item": {
+      "label": "Menu Item",
+      "description": "An individually sold item on the menu. The unit of product-mix (PMIX) analysis.",
+      "synonyms": ["menu_item", "item", "item_name", "product", "dish", "name", "menu_name", "plu_name", "sku_name"],
+      "role": "dimension"
+    },
+    "menu_category": {
+      "label": "Menu Category",
+      "description": "Grouping of menu items — Apps, Entrees, Beverages, Alcohol, Desserts.",
+      "synonyms": ["category", "cat", "menu_category", "menu_group", "group", "type", "section", "menu_section", "sales_category", "reporting_group", "family"],
+      "role": "dimension"
+    }
+  },
+  "metrics": {
+    "net_sales": {
+      "label": "Net Sales",
+      "description": "Revenue from food and beverage sales AFTER discounts/comps and BEFORE tax. The denominator for nearly every cost percentage. Almost all restaurant KPIs are expressed as a % of net sales, not gross.",
+      "synonyms": ["net_sales", "net sales", "net_revenue", "sales", "revenue", "total_sales", "total_net_sales", "net_amount", "net", "sales_net"],
+      "pos_aliases": {
+        "toast": ["Net Sales", "Net Amount"],
+        "square": ["Net Sales", "Net Total"],
+        "clover": ["Net Revenue", "Net Sales"]
+      },
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 5000000, "per": "location-week", "warn_below": 1000 },
+      "is_denominator_for": ["labor_pct", "food_cost_pct", "prime_cost_pct", "comps_pct"],
+      "disambiguate_from": ["gross_sales"],
+      "notes": "If both gross and net are present, OpticAI uses net for all percentage denominators and says so. Confusing gross for net silently overstates margins — a classic amateur mistake."
+    },
+    "gross_sales": {
+      "label": "Gross Sales",
+      "description": "Revenue BEFORE discounts and comps. Higher than net sales. Should not be used as the denominator for cost percentages.",
+      "synonyms": ["gross_sales", "gross sales", "gross_revenue", "gross", "gross_amount", "total_gross"],
+      "pos_aliases": {
+        "toast": ["Gross Sales", "Gross Amount"],
+        "square": ["Gross Sales"],
+        "clover": ["Gross Revenue"]
+      },
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 6000000, "per": "location-week" }
+    },
+    "direct_labor": {
+      "label": "Direct (Operational) Labor Cost",
+      "description": "The unburdened raw cost of scheduled shifts: hourly wages, shift pay, and salaried floor-management pay tied to running the floor. This is the daily scheduling-efficiency number. Distinct from fully-burdened labor (see labor_burden). See calc_rules labor_basis.",
+      "synonyms": ["direct_labor", "operational_labor", "labor_cost", "labor cost", "labour_cost", "total_labor", "wages", "wage_cost", "labor_dollars", "payroll", "scheduled_labor", "total_wages", "labor_total"],
+      "pos_aliases": {
+        "toast": ["Labor Cost", "Total Labor"],
+        "square": ["Labor Cost", "Wages", "Total Paid"],
+        "clover": ["Labor"]
+      },
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 2000000, "per": "location-week" },
+      "notes": "If the operator's labor_basis is 'fully_burdened' but only this direct figure is present, gross up via labor_burden_multiplier and label the result an estimate."
+    },
+    "labor_burden": {
+      "label": "Labor Burden",
+      "description": "Overhead costs of putting employees on the schedule, on top of direct wages: payroll taxes (FICA, Medicare, FUTA), benefits (health, 401k match), workers' comp, PTO, and uniforms. Adds roughly 15-25% to base wages.",
+      "synonyms": ["labor_burden", "burden", "payroll_taxes", "benefits", "burden_cost", "labor_overhead", "fringe", "fringe_cost"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 600000, "per": "location-week" }
+    },
+    "foh_labor": {
+      "label": "Front of House Labor",
+      "description": "Labor cost for servers, hosts, and bartenders. Lower base operational wage % of sales because FOH relies heavily on tips.",
+      "synonyms": ["foh_labor", "foh", "front_of_house", "foh_cost", "service_labor", "server_labor"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure"
+    },
+    "boh_labor": {
+      "label": "Back of House (Heart of House) Labor",
+      "description": "Labor cost for chefs, line cooks, and dishwashers. Typically a HIGHER labor % of sales than FOH.",
+      "synonyms": ["boh_labor", "boh", "back_of_house", "heart_of_house", "hoh", "boh_cost", "kitchen_labor"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure"
+    },
+    "labor_pct": {
+      "label": "Labor %",
+      "description": "Labor cost as a percentage of net sales. The single most-watched controllable cost line. Resolve to the operator's declared basis (direct vs. fully-burdened) and always state which.",
+      "synonyms": ["labor_pct", "labor %", "labor_percent", "labor_cost_pct", "labor_cost_percent", "labor_percentage", "lbr_pct", "labor_ratio"],
+      "unit": "percent",
+      "format": "0.0%",
+      "role": "measure",
+      "formula": "labor_cost / net_sales * 100 (labor_cost per labor_basis)",
+      "depends_on": ["direct_labor", "net_sales"],
+      "sane_range": { "min": 5, "max": 60, "typical_min": 25, "typical_max": 40 },
+      "benchmark": { "quick_service": [22, 30], "fast_casual": [25, 32], "casual_dining": [28, 36], "full_service": [30, 40], "fine_dining": [32, 42] },
+      "notes": "Benchmarks here are direct/operational labor. Fully-burdened runs ~4-6 points higher. If a direct labor_pct column exists, prefer it only if it agrees with computed value within ~1.5 points; otherwise flag — usually a different sales_basis or labor definition."
+    },
+    "food_cost": {
+      "label": "Food Cost (COGS)",
+      "description": "STRICTLY the edible ingredients (proteins, produce, dairy, dry goods, spices). NOT the same as total COGS — Food Cost excludes beverage and paper/packaging. See calc_rules food_cost_definition. QSR/fast-casual may include packaging (set food_cost_definition=includes_paper).",
+      "synonyms": ["food_cost", "food cost", "actual_food_cost", "food_costs", "fc", "food_product_cost", "edible_cost"],
+      "pos_aliases": {
+        "toast": ["Food Cost"],
+        "square": ["Food Cost"],
+        "clover": []
+      },
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 2000000, "per": "location-week" },
+      "disambiguate_from": ["total_cogs", "beverage_cost", "paper_packaging"],
+      "notes": "If a column is labeled 'COGS' it may be TOTAL COGS (food+beverage+paper), not food cost alone. Confirm before treating it as food cost."
+    },
+    "total_cogs": {
+      "label": "Total COGS",
+      "description": "Sum of Food Cost + Beverage Cost + Paper/Packaging Cost. The full cost of goods sold. Distinct from Food Cost alone.",
+      "synonyms": ["total_cogs", "cogs", "cost_of_goods", "cost_of_sales", "total_cost_of_goods", "total_product_cost"],
+      "pos_aliases": {
+        "toast": ["COGS"],
+        "square": ["Cost of Goods Sold", "COGS"],
+        "clover": ["Cost"]
+      },
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 3000000, "per": "location-week" }
+    },
+    "beverage_cost": {
+      "label": "Beverage Cost",
+      "description": "Cost of beverages, tracked SEPARATELY from food. Commonly segmented into soda/water (N/A), beer, wine, and liquor. Alcohol is ALWAYS beverage, never food cost.",
+      "synonyms": ["beverage_cost", "bev_cost", "drink_cost", "pour_cost", "liquor_cost", "bar_cost", "alcohol_cost", "wine_cost", "beer_cost"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 1000000, "per": "location-week" },
+      "notes": "Pour costs differ by type: liquor ~18-20%, beer ~24-28%, wine ~30-40%, soda <10%. Segment where possible."
+    },
+    "beverage_sales": {
+      "label": "Beverage Sales",
+      "description": "Revenue from beverages — the correct denominator for beverage/pour cost %, not total sales.",
+      "synonyms": ["beverage_sales", "bev_sales", "drink_sales", "bar_sales", "alcohol_sales", "liquor_sales"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure"
+    },
+    "paper_packaging": {
+      "label": "Paper & Packaging Cost",
+      "description": "Direct disposables that leave the building with food: to-go boxes, delivery bags, napkins, straws, utensils. Belongs in COGS as a separate line, NOT in Food Cost. Indirect supplies (restroom towels, kitchen trash bags, guest checks) are Operating Expenses, not COGS.",
+      "synonyms": ["paper_packaging", "paper_cost", "packaging", "packaging_cost", "disposables", "paper_goods", "to_go_supplies"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 300000, "per": "location-week" },
+      "notes": "Target ~3-4% of net sales for limited-service, ~1-2% for full-service."
+    },
+    "food_cost_pct": {
+      "label": "Food Cost %",
+      "description": "Food cost (edible only) as a percentage of net sales. Distinct from total COGS %.",
+      "synonyms": ["food_cost_pct", "food cost %", "food_cost_percent", "fc_pct", "food_percentage", "food_%"],
+      "unit": "percent",
+      "format": "0.0%",
+      "role": "measure",
+      "formula": "food_cost / net_sales * 100",
+      "depends_on": ["food_cost", "net_sales"],
+      "sane_range": { "min": 10, "max": 50, "typical_min": 26, "typical_max": 34 },
+      "benchmark": { "quick_service": [25, 32], "fast_casual": [26, 32], "casual_dining": [28, 34], "full_service": [28, 35], "fine_dining": [30, 40] }
+    },
+    "beverage_cost_pct": {
+      "label": "Beverage (Pour) Cost %",
+      "description": "Beverage cost as a percentage of BEVERAGE sales (not total sales).",
+      "synonyms": ["beverage_cost_pct", "pour_cost_pct", "bev_cost_pct", "pour_cost", "liquor_cost_pct"],
+      "unit": "percent",
+      "format": "0.0%",
+      "role": "measure",
+      "formula": "beverage_cost / beverage_sales * 100",
+      "depends_on": ["beverage_cost", "beverage_sales"],
+      "sane_range": { "min": 5, "max": 50, "typical_min": 18, "typical_max": 30 }
+    },
+    "total_cogs_pct": {
+      "label": "Total COGS %",
+      "description": "Food + beverage + paper/packaging as a percentage of net sales.",
+      "synonyms": ["total_cogs_pct", "cogs_pct", "cost_pct", "total_cost_pct"],
+      "unit": "percent",
+      "format": "0.0%",
+      "role": "measure",
+      "formula": "(food_cost + beverage_cost + paper_packaging) / net_sales * 100",
+      "depends_on": ["food_cost", "beverage_cost", "paper_packaging", "net_sales"],
+      "sane_range": { "min": 15, "max": 55, "typical_min": 28, "typical_max": 38 }
+    },
+    "prime_cost_pct": {
+      "label": "Prime Cost %",
+      "description": "Labor % + COGS % combined. The headline controllable-cost number. Some operators use labor + food cost only; others use labor + total COGS. Confirm which. Rule of thumb: keep under 60-65% of net sales for full service.",
+      "synonyms": ["prime_cost", "prime cost", "prime_cost_pct", "prime_pct", "prime"],
+      "unit": "percent",
+      "format": "0.0%",
+      "role": "measure",
+      "formula": "labor_pct + total_cogs_pct (or food_cost_pct per operator definition)",
+      "depends_on": ["labor_pct", "food_cost_pct"],
+      "sane_range": { "min": 30, "max": 95, "typical_min": 55, "typical_max": 65 },
+      "benchmark": { "quick_service": [50, 60], "fast_casual": [52, 62], "casual_dining": [58, 65], "full_service": [60, 67], "fine_dining": [62, 70] },
+      "notes": "Prime cost above ~70% of net sales is a serious profitability warning in full-service. This is the number most operators check first."
+    },
+    "check_count": {
+      "label": "Check Count",
+      "description": "Number of guest checks/tickets closed. NOT the same as guest count (covers) — one check can cover multiple guests.",
+      "synonyms": ["check_count", "check count", "checks", "tickets", "ticket_count", "num_checks", "order_count", "orders", "num_orders", "receipts"],
+      "pos_aliases": {
+        "toast": ["Check Count", "# of Checks"],
+        "square": ["Transactions", "Transaction Count"],
+        "clover": ["Orders", "Order Count"]
+      },
+      "unit": "count",
+      "format": "#,##0",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 200000, "per": "location-week" },
+      "disambiguate_from": ["guest_count"],
+      "notes": "Square's 'Transactions' usually means checks, not covers. This is a frequent ambiguity — confirm with user when the column is just 'transactions' or 'count'."
+    },
+    "guest_count": {
+      "label": "Guest Count (Covers)",
+      "description": "Number of individual guests served (covers). Used for per-person spend and capacity analysis.",
+      "synonyms": ["guest_count", "guest count", "covers", "guests", "cover_count", "num_guests", "pax", "heads", "diners"],
+      "pos_aliases": {
+        "toast": ["Guest Count", "Covers"],
+        "square": [],
+        "clover": []
+      },
+      "unit": "count",
+      "format": "#,##0",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 500000, "per": "location-week" },
+      "disambiguate_from": ["check_count"],
+      "notes": "Square and Clover often do NOT track covers natively. If absent, per-guest metrics fall back to per-check."
+    },
+    "average_check": {
+      "label": "Average Check",
+      "description": "Net sales divided by number of checks. The per-ticket spend.",
+      "synonyms": ["average_check", "avg_check", "average check", "avg check", "check_average", "ticket_average", "avg_ticket", "ppa"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "formula": "net_sales / check_count",
+      "depends_on": ["net_sales", "check_count"],
+      "sane_range": { "min": 2, "max": 500, "typical_min": 8, "typical_max": 80 },
+      "notes": "PPA (per-person average) uses guest_count instead of check_count. If only checks are available, label the metric 'average check' not 'per-person average' to stay honest."
+    },
+    "comps": {
+      "label": "Comps & Discounts",
+      "description": "Dollar value of complimentary items and discounts. High comps can mask service problems or theft.",
+      "synonyms": ["comps", "comp", "discounts", "discount", "voids", "promo", "promotions", "comps_discounts", "adjustments"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 500000, "per": "location-week" }
+    },
+    "comps_pct": {
+      "label": "Comps %",
+      "description": "Comps and discounts as a percentage of gross or net sales.",
+      "synonyms": ["comps_pct", "comp_pct", "discount_pct", "discount_percent", "comp_percentage"],
+      "unit": "percent",
+      "format": "0.0%",
+      "role": "measure",
+      "formula": "comps / net_sales * 100",
+      "depends_on": ["comps", "net_sales"],
+      "sane_range": { "min": 0, "max": 30, "typical_min": 1, "typical_max": 5 },
+      "notes": "Comps above ~5% of sales warrant investigation — could be service recovery, manager abuse, or theft."
+    },
+    "overtime_hours": {
+      "label": "Overtime Hours",
+      "description": "Hours paid at the overtime premium. A primary driver of labor cost overruns.",
+      "synonyms": ["overtime_hours", "ot_hours", "overtime", "ot", "overtime_hrs", "ot_hrs"],
+      "unit": "hours",
+      "format": "#,##0.0",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 2000, "per": "location-week" }
+    },
+    "labor_hours": {
+      "label": "Labor Hours",
+      "description": "Total hours worked across all staff for the period.",
+      "synonyms": ["labor_hours", "labor hours", "total_hours", "hours_worked", "hours", "scheduled_hours", "actual_hours"],
+      "unit": "hours",
+      "format": "#,##0.0",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 20000, "per": "location-week" }
+    },
+    "sales_per_labor_hour": {
+      "label": "Sales per Labor Hour (SPLH)",
+      "description": "Net sales divided by labor hours. A productivity measure independent of wage rates.",
+      "synonyms": ["splh", "sales_per_labor_hour", "sales_per_hour", "sphr"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "formula": "net_sales / labor_hours",
+      "depends_on": ["net_sales", "labor_hours"],
+      "sane_range": { "min": 20, "max": 1000, "typical_min": 40, "typical_max": 120 }
+    },
+    "quantity_sold": {
+      "label": "Quantity Sold",
+      "description": "Units of a menu item sold. The basis of PMIX analysis.",
+      "synonyms": ["quantity_sold", "qty_sold", "quantity", "qty", "units_sold", "sold", "units", "count_sold", "item_count"],
+      "unit": "count",
+      "format": "#,##0",
+      "role": "measure",
+      "sane_range": { "min": 0, "max": 1000000 }
+    },
+    "item_revenue": {
+      "label": "Item Revenue",
+      "description": "Revenue attributable to a single menu item — used in PMIX to rank menu performance.",
+      "synonyms": ["item_revenue", "item_sales", "gross_sales", "revenue", "sales", "amount", "total", "line_total", "extended_price"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure"
+    },
+    "food_cost_per_item": {
+      "label": "Item Food Cost",
+      "description": "The plate cost / recipe cost of a single menu item. Combined with price to compute item margin.",
+      "synonyms": ["item_cost", "plate_cost", "recipe_cost", "food_cost", "cost", "unit_cost", "ideal_cost"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure"
+    },
+    "item_margin": {
+      "label": "Item Contribution Margin",
+      "description": "Price minus plate cost — the gross profit contributed by each unit sold. Drives menu engineering (stars/plowhorses/puzzles/dogs).",
+      "synonyms": ["margin", "contribution", "contribution_margin", "profit", "item_margin", "gross_margin"],
+      "unit": "currency",
+      "format": "$#,##0.00",
+      "role": "measure",
+      "formula": "item_price - food_cost_per_item",
+      "depends_on": ["item_revenue", "food_cost_per_item"]
+    },
+    "waste": {
+      "label": "Waste / Spoilage",
+      "description": "Quantity or dollar value of product wasted, spoiled, or thrown out.",
+      "synonyms": ["waste", "waste_qty", "spoilage", "spoiled", "thrown_out", "shrink", "loss"],
+      "unit": "count",
+      "format": "#,##0.0",
+      "role": "measure"
+    },
+    "inventory_variance": {
+      "label": "Inventory Variance",
+      "description": "Difference between theoretical (recipe-based) usage and actual usage. High variance signals waste, over-portioning, or theft.",
+      "synonyms": ["variance", "variance_pct", "usage_variance", "overage", "underage", "theo_vs_actual", "inventory_variance"],
+      "unit": "percent",
+      "format": "0.0%",
+      "role": "measure",
+      "sane_range": { "min": -50, "max": 50, "typical_min": -3, "typical_max": 3 },
+      "notes": "Variance beyond +/- a few percent on a high-cost item (proteins especially) is a top diagnostic flag."
+    },
+    "guest_satisfaction": {
+      "label": "Guest Satisfaction Score",
+      "description": "Aggregate guest rating — could be a star rating, NPS, or survey score depending on source.",
+      "synonyms": ["satisfaction", "guest_satisfaction", "csat", "nps", "rating", "score", "review_score", "star_rating", "guest_score"],
+      "unit": "score",
+      "format": "0.0",
+      "role": "measure",
+      "notes": "Scale varies (1-5 stars, 0-10 NPS, 0-100). Detect scale from value range before interpreting."
+    }
+  }
+}
