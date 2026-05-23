@@ -1,6 +1,6 @@
 const { resolveSchema } = require('./lib/resolver.js');
-const ontology   = require('./semantic/ontology.json');
-const posDict    = require('./semantic/pos_dictionary.json');
+const ontology   = require('./Semantic/ontology.json');
+const posDict    = require('./Semantic/pos_dictionary.json');
 
 module.exports = async (req, res) => {
   // Allow the frontend to call this
