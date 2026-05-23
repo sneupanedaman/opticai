@@ -1,0 +1,152 @@
+{
+  "$schema": "opticai-pos-dictionary/v1",
+  "version": "2026.05.1",
+  "description": "Per-POS export column dictionary. This is the single most defensible asset in OpticAI: the encoded knowledge of exactly how Toast, Square, and Clover name and structure their exports, including the gotchas. A weekend clone has none of this and will mis-map columns the moment a real export is uploaded. Expand this with every new export you see in the wild \u2014 it compounds.",
+  "pos_systems": {
+    "toast": {
+      "label": "Toast POS",
+      "detection_signatures": {
+        "comment": "How to recognize a Toast export from its headers. If 2+ signature columns are present, classify as Toast.",
+        "signature_columns": [
+          "Business Date",
+          "Net Sales",
+          "Gross Sales",
+          "Void Amount",
+          "Check Count"
+        ],
+        "filename_hints": [
+          "toast",
+          "salessummary",
+          "sales_summary"
+        ]
+      },
+      "column_map": {
+        "Business Date": "date",
+        "Date": "date",
+        "Location": "location",
+        "Restaurant": "location",
+        "Net Sales": "net_sales",
+        "Net Amount": "net_sales",
+        "Gross Sales": "gross_sales",
+        "Gross Amount": "gross_sales",
+        "Check Count": "check_count",
+        "# of Checks": "check_count",
+        "Guest Count": "guest_count",
+        "Covers": "guest_count",
+        "Void Amount": "comps",
+        "Discount Amount": "comps",
+        "Labor Cost": "direct_labor",
+        "Total Labor": "direct_labor",
+        "Labor %": "labor_pct",
+        "Menu Item": "menu_item",
+        "Sales Category": "menu_category",
+        "Item Qty": "quantity_sold",
+        "Quantity": "quantity_sold",
+        "Food Cost": "food_cost",
+        "COGS": "total_cogs"
+      },
+      "gotchas": [
+        "Toast 'Net Sales' is already after discounts and comps \u2014 do NOT subtract comps again.",
+        "Toast labor exports are a SEPARATE report from sales; they will arrive as different CSVs and must be joined on Business Date + Location.",
+        "Toast 'Sales Category' is the reporting group, which may differ from the kitchen menu category.",
+        "Multi-location Toast accounts sometimes export one file per location with no location column \u2014 the location is in the filename.",
+        "A column labeled 'COGS' is usually TOTAL COGS (food+beverage+paper), not Food Cost alone \u2014 map to total_cogs and confirm before using as food cost."
+      ]
+    },
+    "square": {
+      "label": "Square",
+      "detection_signatures": {
+        "signature_columns": [
+          "Gross Sales",
+          "Net Sales",
+          "Transactions",
+          "Item",
+          "Category"
+        ],
+        "filename_hints": [
+          "square",
+          "items",
+          "transactions",
+          "sales"
+        ]
+      },
+      "column_map": {
+        "Date": "date",
+        "Location": "location",
+        "Net Sales": "net_sales",
+        "Net Total": "net_sales",
+        "Gross Sales": "gross_sales",
+        "Transactions": "check_count",
+        "Transaction Count": "check_count",
+        "Discounts": "comps",
+        "Item": "menu_item",
+        "Category": "menu_category",
+        "Qty": "quantity_sold",
+        "Item Sales": "item_revenue",
+        "Cost of Goods Sold": "total_cogs",
+        "COGS": "total_cogs",
+        "Food Cost": "food_cost",
+        "Total Paid": "direct_labor"
+      },
+      "gotchas": [
+        "Square 'Transactions' = checks/tickets, NOT covers. Square does not natively track guest count \u2014 per-person metrics must fall back to per-check.",
+        "Square 'Net Sales' = Gross Sales - Discounts - Comps - Refunds; tax is separate.",
+        "Square labor data comes from Square Shifts/Payroll, a different export with columns like 'Total Paid' and 'Regular Hours'.",
+        "Square exports often split into separate 'Items', 'Categories', and 'Sales Summary' files \u2014 they must be reconciled.",
+        "A column labeled 'COGS' is usually TOTAL COGS (food+beverage+paper), not Food Cost alone \u2014 map to total_cogs and confirm before using as food cost."
+      ]
+    },
+    "clover": {
+      "label": "Clover",
+      "detection_signatures": {
+        "signature_columns": [
+          "Order ID",
+          "Net Revenue",
+          "Revenue",
+          "Payment",
+          "Item Name"
+        ],
+        "filename_hints": [
+          "clover",
+          "orders",
+          "revenue",
+          "items"
+        ]
+      },
+      "column_map": {
+        "Date": "date",
+        "Order Date": "date",
+        "Net Revenue": "net_sales",
+        "Net Sales": "net_sales",
+        "Revenue": "gross_sales",
+        "Gross Revenue": "gross_sales",
+        "Orders": "check_count",
+        "Order Count": "check_count",
+        "Discounts": "comps",
+        "Item Name": "menu_item",
+        "Category": "menu_category",
+        "Quantity": "quantity_sold",
+        "Cost": "total_cogs"
+      },
+      "gotchas": [
+        "Clover often exports at the ORDER or LINE-ITEM grain, not pre-aggregated by day \u2014 expect to roll up to business date yourself.",
+        "Clover timestamps are full datetimes; truncate to business date and apply the business_day_close_hour rule for late-night.",
+        "Clover 'Revenue' vs 'Net Revenue' distinction is inconsistent across merchant configs \u2014 verify which is post-discount.",
+        "Clover has weak native labor reporting; labor usually comes from a third-party integration with its own schema.",
+        "A column labeled 'COGS' is usually TOTAL COGS (food+beverage+paper), not Food Cost alone \u2014 map to total_cogs and confirm before using as food cost."
+      ]
+    },
+    "generic": {
+      "label": "Unknown / Generic CSV",
+      "detection_signatures": {
+        "signature_columns": [],
+        "filename_hints": []
+      },
+      "column_map": {},
+      "gotchas": [
+        "No POS signature matched. Fall back to the ontology synonym map and raise confirmation prompts more eagerly.",
+        "Treat all ambiguous columns (transactions, count, covers) as requiring user confirmation."
+      ]
+    }
+  }
+}

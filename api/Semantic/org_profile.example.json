@@ -1,0 +1,53 @@
+{
+  "$schema": "opticai-org-profile/v2",
+  "org_id": "example-org-0001",
+  "org_name": "Example Restaurant Group",
+  "version": 4,
+  "updated_at": "2026-05-22T00:00:00Z",
+  "description": "Per-organization overrides, layered ON TOP of calc_rules.json defaults. Only keys present here override; everything else inherits the industry standard. This is the user-owned, accreting customization that makes OpticAI 'know' a specific operator. v2 keys match calc_rules v2 (labor_basis, burden multiplier, food_cost_definition, beverage tracking, operating_week_start).",
+
+  "segment": "full_service",
+
+  "calc_overrides": {
+    "sales_basis": "net_sales",
+    "labor_basis": "fully_burdened",
+    "labor_burden_multiplier": 1.20,
+    "labor_includes_salaried_management": true,
+    "track_foh_boh_split": true,
+    "food_cost_definition": "edible_only",
+    "paper_packaging_accounting": "cogs_separate_line",
+    "beverage_cost_tracking": "by_subcategory",
+    "operating_week_start": "monday"
+  },
+
+  "custom_column_aliases": {
+    "comment": "Maps THIS org's quirky export column names to canonical metric ids. Captured progressively as users confirm ambiguous columns (manual confirmation in v1).",
+    "net_sales": ["NetSls", "Sales_Net_AfterDisc"],
+    "direct_labor": ["TtlLbr_Direct"],
+    "labor_burden": ["Burden_Est"],
+    "check_count": ["Tkts"]
+  },
+
+  "custom_metrics": {
+    "comment": "Org-defined KPIs not in the base ontology.",
+    "liquor_pour_cost_pct": {
+      "label": "Liquor Pour Cost %",
+      "formula": "liquor_cost / liquor_sales * 100",
+      "target_range": [18, 20]
+    }
+  },
+
+  "location_metadata": {
+    "comment": "Per-unit context that improves analysis.",
+    "Downtown": { "segment": "full_service", "seats": 120, "opened": "2019-03-01" },
+    "Westside": { "segment": "full_service", "seats": 85, "opened": "2024-11-01", "note": "newest unit, expect training drag" }
+  },
+
+  "targets": {
+    "comment": "Org-specific goals. Note these are FULLY-BURDENED labor targets, matching this org's labor_basis.",
+    "labor_pct": 36.0,
+    "food_cost_pct": 30.0,
+    "beverage_cost_pct": 22.0,
+    "prime_cost_pct": 66.0
+  }
+}

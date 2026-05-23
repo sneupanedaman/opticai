@@ -1,0 +1,148 @@
+{
+  "$schema": "opticai-diagnostic-graph/v1",
+  "version": "2026.05.1",
+  "description": "Diagnostic reasoning chains. When a metric is out of range or a user asks 'why', this graph tells OpticAI what to check, in what order, and what the likely causes are. This encodes the mental model of an experienced multi-unit operator. A generic chatbot will give a plausible-sounding but generic answer; this makes OpticAI investigate like a pro. Each symptom lists ordered checks, each check points to data to inspect and the causes it would confirm.",
+
+  "symptoms": {
+    "high_labor_pct": {
+      "trigger": "labor_pct above segment benchmark high band, or user asks why labor is high",
+      "headline": "Labor % is elevated. Labor % rises when EITHER labor dollars are too high OR sales are too low for the labor deployed — always check the denominator first.",
+      "checks": [
+        {
+          "id": "sales_softness",
+          "look_at": ["net_sales trend vs prior weeks", "net_sales vs same period last year", "check_count trend"],
+          "confirms": "Labor % is high because sales fell, not because labor grew. Fix is sales-side (traffic, marketing, pricing), not scheduling.",
+          "priority": 1,
+          "why_first": "Operators reflexively cut hours when the real problem is a sales dip. Cutting labor into a sales recovery hurts service and worsens the spiral."
+        },
+        {
+          "id": "overtime",
+          "look_at": ["overtime_hours by location and week", "overtime as % of total labor_hours"],
+          "confirms": "Overtime premium is inflating labor cost. Often caused by understaffing, no-shows, or poor shift handoffs.",
+          "priority": 2
+        },
+        {
+          "id": "overscheduling",
+          "look_at": ["labor_hours vs sales by daypart", "sales_per_labor_hour by daypart", "scheduled vs actual hours"],
+          "confirms": "Too many bodies scheduled relative to volume — especially in slow dayparts. Fix is schedule optimization against demand.",
+          "priority": 3
+        },
+        {
+          "id": "new_hire_drag",
+          "look_at": ["headcount changes", "training hours", "recent hires by location"],
+          "confirms": "A wave of new hires creates temporary double-coverage and training inefficiency. Self-corrects in a few weeks.",
+          "priority": 4
+        },
+        {
+          "id": "wage_inflation",
+          "look_at": ["average wage rate trend", "labor_cost per hour over time"],
+          "confirms": "Hourly rates rose (minimum wage change, market pressure) without a price increase to offset. Structural — needs menu pricing response.",
+          "priority": 5
+        },
+        {
+          "id": "management_load",
+          "look_at": ["salaried management cost vs unit volume", "manager count per location"],
+          "confirms": "Small-volume units carrying too much fixed management labor. Common in newer or underperforming locations.",
+          "priority": 6
+        }
+      ]
+    },
+
+    "high_food_cost_pct": {
+      "trigger": "food_cost_pct above segment benchmark high band, or user asks why food cost is high",
+      "headline": "Food cost % is elevated. Check the denominator (sales/pricing) and the numerator (purchasing, portioning, waste, theft) systematically.",
+      "checks": [
+        {
+          "id": "menu_price_lag",
+          "look_at": ["average_check trend", "menu price changes vs COGS changes"],
+          "confirms": "Ingredient costs rose but menu prices didn't follow. The most common cause and the easiest to miss.",
+          "priority": 1
+        },
+        {
+          "id": "inventory_variance",
+          "look_at": ["inventory_variance by item", "theoretical vs actual usage on high-cost proteins"],
+          "confirms": "Actual usage exceeds recipe — over-portioning, prep waste, or theft. Focus on high-dollar items (proteins, seafood).",
+          "priority": 2
+        },
+        {
+          "id": "waste_spoilage",
+          "look_at": ["waste by item and location", "spoilage trend"],
+          "confirms": "Product is being thrown out — over-ordering, poor rotation (FIFO failures), or forecasting misses.",
+          "priority": 3
+        },
+        {
+          "id": "over_ordering",
+          "look_at": ["purchase quantity vs usage", "inventory on hand trend by item"],
+          "confirms": "Buying more than the unit consumes, tying up cash and inviting spoilage. Cross-check with PMIX to right-size pars.",
+          "priority": 4
+        },
+        {
+          "id": "mix_shift",
+          "look_at": ["PMIX category mix trend", "share of low-margin / high-cost items"],
+          "confirms": "Guests are buying a costlier product mix. Not necessarily bad if check grows, but it moves the cost %.",
+          "priority": 5
+        },
+        {
+          "id": "vendor_price_creep",
+          "look_at": ["unit cost by ingredient over time", "invoice price trend"],
+          "confirms": "Supplier prices rose. Action is re-bidding, substitution, or menu engineering — not blaming the kitchen.",
+          "priority": 6
+        }
+      ]
+    },
+
+    "low_average_check": {
+      "trigger": "average_check declining or below location peers",
+      "headline": "Average check is soft. Decompose into mix, pricing, and add-on attachment.",
+      "checks": [
+        { "id": "attachment", "look_at": ["appetizer attach rate", "dessert attach rate", "beverage/alcohol attach rate"], "confirms": "Servers aren't upselling add-ons. Training and incentive opportunity.", "priority": 1 },
+        { "id": "mix_downshift", "look_at": ["PMIX share of premium vs entry items"], "confirms": "Guests trading down to cheaper items — could be value perception or menu layout.", "priority": 2 },
+        { "id": "pricing", "look_at": ["menu prices vs market", "last price increase date"], "confirms": "Prices haven't kept pace. Often the simplest lever.", "priority": 3 },
+        { "id": "daypart_mix", "look_at": ["share of sales by daypart"], "confirms": "Growth in lower-check dayparts (e.g. lunch) dilutes the blended average — may be fine in absolute dollars.", "priority": 4 }
+      ]
+    },
+
+    "sales_decline": {
+      "trigger": "net_sales declining week-over-week or vs last year",
+      "headline": "Sales are declining. Separate traffic (check_count) from spend (average_check) — they have completely different fixes.",
+      "checks": [
+        { "id": "traffic_vs_spend", "look_at": ["check_count trend", "average_check trend"], "confirms": "Decompose: fewer guests (traffic problem -> marketing/competition) vs same guests spending less (check problem -> menu/upsell).", "priority": 1, "why_first": "The single most important split in restaurant diagnostics. Everything downstream depends on which one moved." },
+        { "id": "daypart_loss", "look_at": ["sales by daypart trend"], "confirms": "A specific daypart collapsed — often a competitor opening, a schedule/quality change, or local event loss.", "priority": 2 },
+        { "id": "location_specific", "look_at": ["per-location trend vs group"], "confirms": "Is it the whole group (macro/seasonal/brand) or one unit (local execution, staffing, competition)?", "priority": 3 },
+        { "id": "guest_satisfaction_link", "look_at": ["guest_satisfaction trend leading the sales decline"], "confirms": "Falling reviews/satisfaction often precede sales decline by weeks — a leading indicator.", "priority": 4 }
+      ]
+    },
+
+    "high_comps_pct": {
+      "trigger": "comps_pct above typical band (>5%)",
+      "headline": "Comps/discounts are high. Distinguish legitimate service recovery from leakage and abuse.",
+      "checks": [
+        { "id": "comp_concentration", "look_at": ["comps by employee/server", "comps by manager"], "confirms": "Comps concentrated on specific staff — possible abuse or theft pattern.", "priority": 1 },
+        { "id": "comp_by_daypart", "look_at": ["comps by daypart and day of week"], "confirms": "Concentrated comps may map to a recurring promo or a chronic kitchen issue causing remakes.", "priority": 2 },
+        { "id": "promo_overlap", "look_at": ["active promotions vs comp spike timing"], "confirms": "Stacked or unmanaged promotions eroding margin.", "priority": 3 }
+      ]
+    },
+
+    "guest_satisfaction_drop": {
+      "trigger": "guest_satisfaction declining",
+      "headline": "Guest satisfaction is falling — treat as a leading indicator for future sales loss.",
+      "checks": [
+        { "id": "labor_link", "look_at": ["labor_hours / SPLH during low-score periods"], "confirms": "Under-staffing during peaks degrades service and scores. Cross-reference satisfaction dips with labor cuts.", "priority": 1 },
+        { "id": "speed_link", "look_at": ["ticket times if available", "check_count surge periods"], "confirms": "Slow service during rushes. Often a kitchen capacity or expo problem.", "priority": 2 },
+        { "id": "location_pattern", "look_at": ["satisfaction by location"], "confirms": "Isolated to a unit -> local management/execution. Group-wide -> menu, recipe, or brand-level change.", "priority": 3 }
+      ]
+    }
+  },
+
+  "cross_metric_relationships": {
+    "description": "General dependencies OpticAI should reason about even without an explicit symptom.",
+    "edges": [
+      { "from": "labor_cuts", "to": "guest_satisfaction", "sign": "negative", "lag": "same-week", "note": "Cutting labor too far shows up immediately in service scores." },
+      { "from": "guest_satisfaction", "to": "net_sales", "sign": "positive", "lag": "2-6 weeks", "note": "Satisfaction is a leading indicator of sales." },
+      { "from": "menu_price_increase", "to": "check_count", "sign": "slightly_negative", "lag": "1-3 weeks", "note": "Modest price increases rarely dent traffic; watch for overcorrection." },
+      { "from": "over_ordering", "to": "waste", "sign": "positive", "lag": "1-2 weeks", "note": "Excess pars become spoilage." },
+      { "from": "overtime_hours", "to": "labor_pct", "sign": "positive", "lag": "same-week" },
+      { "from": "new_hires", "to": "labor_pct", "sign": "positive", "lag": "2-4 weeks transient", "note": "Training drag is temporary." }
+    ]
+  }
+}
