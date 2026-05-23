@@ -1,51 +1,91 @@
-// api/chat.js — Vercel serverless function
-// Proxies requests to Anthropic. API key stays server-side.
+const Anthropic = require('@anthropic-ai/sdk');
+const client = new Anthropic();
 
-export default async function handler(req, res) {
-  // Only allow POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+// ---- Semantic layer ----
+const { buildQueryContext, contextToSystemBlock } = require('./lib/retriever.js');
+const ontology    = require('./Semantic/ontology.json');
+const calcRules   = require('./Semantic/calc_rules.json');
+const diagnostics = require('./Semantic/diagnostic_graph.json');
+const posDict     = require('./Semantic/pos_dictionary.json');
 
-  const { messages, system } = req.body;
+/**
+ * The frontend embeds two markers into the system prompt string:
+ *   __RESOLVED_SCHEMAS__:{json}
+ *   __USER_QUESTION__:{text}
+ *
+ * We extract them here, build the semantic context block, then strip
+ * the markers so the model never sees them directly.
+ */
+function extractSemanticPayload(system) {
+  const schemaMatch   = system.match(/__RESOLVED_SCHEMAS__:([\s\S]*?)(?=__USER_QUESTION__|$)/);
+  const questionMatch = system.match(/__USER_QUESTION__:([\s\S]*?)$/);
 
-  if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'messages array is required' });
-  }
+  let schemas  = {};
+  let question = '';
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error('ANTHROPIC_API_KEY not set in environment variables');
-    return res.status(500).json({ error: 'API key not configured' });
-  }
+  try { if (schemaMatch)   schemas  = JSON.parse(schemaMatch[1].trim());  } catch(e) {}
+  try { if (questionMatch) question = questionMatch[1].trim();             } catch(e) {}
+
+  const cleanSystem = system
+    .replace(/__RESOLVED_SCHEMAS__:[\s\S]*?(?=__USER_QUESTION__|$)/, '')
+    .replace(/__USER_QUESTION__:[\s\S]*$/, '')
+    .trim();
+
+  return { schemas, question, cleanSystem };
+}
+
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') { res.status(200).end(); return; }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type':      'application/json',
-        'x-api-key':         process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model:      'claude-sonnet-4-5',
-        max_tokens: 1024,
-        temperature: 0,           // Deterministic — same data = same answer
-        system:     system || '',
-        messages,
-      }),
-    });
+    const { model, max_tokens, system, messages } = req.body;
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('Anthropic API error:', response.status, errText);
-      return res.status(response.status).json({ error: `Anthropic API error: ${response.status}` });
+    // Pull out the schema payload the frontend embedded
+    const { schemas, question, cleanSystem } = extractSemanticPayload(system || '');
+
+    // Build semantic context block if any schemas were resolved
+    let semanticBlock = '';
+    const schemaList = Object.values(schemas);
+    if (schemaList.length > 0) {
+      try {
+        // Use the first resolved schema as primary context.
+        // When multiple files are uploaded we pick the one most relevant
+        // to the question — for now, first one is fine for v1.
+        const primarySchema = schemaList[0];
+
+        const ctx = buildQueryContext({
+          schema: primarySchema,
+          question,
+          ontology,
+          calcRules,
+          diagnostics,
+          posDict,
+          orgProfile: null   // no org profile in v1
+        });
+
+        semanticBlock = '\n\n' + contextToSystemBlock(ctx);
+      } catch (e) {
+        // Non-fatal: if the semantic build fails, chat still works
+        console.warn('Semantic context build failed (non-fatal):', e.message);
+      }
     }
 
-    const data = await response.json();
-    return res.status(200).json(data);
+    const finalSystem = cleanSystem + semanticBlock;
+
+    const response = await client.messages.create({
+      model,
+      max_tokens,
+      system: finalSystem,
+      messages
+    });
+
+    res.json(response);
 
   } catch (err) {
-    console.error('Proxy error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('chat error:', err);
+    res.status(500).json({ error: err.message });
   }
-}
+};
