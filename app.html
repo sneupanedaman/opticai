@@ -1672,7 +1672,7 @@ async function sendMessage() {
   try {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: buildSystemPrompt(text), messages: conversationHistory })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system: buildSystemPrompt(text), messages: conversationHistory })
     });
     const data = await res.json();
     const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, I had trouble with that. Try again.';
@@ -1738,7 +1738,7 @@ Keep it direct, specific, and written for a GM — not an analyst. Use real numb
   try {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: conversationHistory })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: conversationHistory })
     });
     const data = await res.json();
     const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, could not generate briefing.';
