@@ -110,6 +110,23 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .sq-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; }
 .sq-btn { padding: 7px 10px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-size: 12px; cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: all 0.15s; line-height: 1.35; }
 .sq-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.07); }
+/* INSIGHTS FEED (top-5 actionable insights after data load) */
+.insights-feed { padding: 12px 12px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: rgba(59,130,246,0.03); }
+.if-header { display: flex; align-items: center; gap: 6px; margin-bottom: 9px; }
+.if-header i { color: var(--accent); font-size: 15px; }
+.if-title { font-size: 12px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.if-sub { font-size: 10px; color: var(--text3); margin-left: auto; font-family: 'DM Mono', monospace; }
+.if-list { display: flex; flex-direction: column; gap: 6px; }
+.if-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: all 0.15s; width: 100%; }
+.if-item:hover { border-color: var(--accent); background: rgba(59,130,246,0.07); }
+.if-item:hover .if-cta { color: var(--accent); }
+.if-sev { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.if-sev.high { background: var(--red); } .if-sev.med { background: var(--amber); } .if-sev.low { background: var(--green); }
+.if-body { flex: 1; min-width: 0; }
+.if-text { font-size: 12px; color: var(--text); line-height: 1.4; }
+.if-cta { font-size: 11px; color: var(--text3); margin-top: 3px; display: flex; align-items: center; gap: 3px; transition: color 0.15s; }
+.if-loading { font-size: 12px; color: var(--text3); padding: 4px 2px; display: flex; align-items: center; gap: 7px; }
+.if-loading .typing-dot { width: 5px; height: 5px; }
 .messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 .messages::-webkit-scrollbar { width: 4px; }
 .messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
@@ -465,6 +482,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
             <i class="ti ti-file-analytics" style="font-size:15px"></i> Generate Weekly Ops Briefing
           </button>
         </div>
+        <div class="insights-feed" id="insightsFeed" style="display:none;"></div>
         <div class="suggested-qs" id="suggestedQs">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
             <div class="sq-label" style="margin-bottom:0">Try asking</div>
@@ -618,7 +636,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     </div>
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeUploadModal()">Close</button>
-      <button class="btn-sm btn-primary" onclick="closeUploadModal()"><i class="ti ti-check"></i> Done</button>
+      <button class="btn-sm btn-primary" onclick="finishUploadAndAnalyze()"><i class="ti ti-check"></i> Done</button>
     </div>
   </div>
 </div>
@@ -1357,9 +1375,8 @@ function checkAmbiguousColumns(keys, filename, callback) {
   // Ask user in chat for each ambiguous column
   const col = found[0]; // handle one at a time
   const info = ambiguousColumns[col];
-  const remainingJson = JSON.stringify(found.slice(1)).replace(/"/g, '&quot;');
   const optionBtns = info.options.map((opt, i) =>
-    `<button onclick="resolveAmbiguity('${col}','${opt}','${filename}',${remainingJson})" style="display:block;width:100%;text-align:left;padding:6px 10px;margin:3px 0;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#93c5fd'" onmouseout="this.style.borderColor='';this.style.color='var(--text2)'">${opt}</button>`
+    `<button onclick="resolveAmbiguity('${col}','${opt}','${filename}',${JSON.stringify(found.slice(1))})" style="display:block;width:100%;text-align:left;padding:6px 10px;margin:3px 0;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#93c5fd'" onmouseout="this.style.borderColor='';this.style.color='var(--text2)'">${opt}</button>`
   ).join('');
 
   const w = document.createElement('div');
@@ -1466,10 +1483,9 @@ function checkAmbiguousColumnsFromSchema(ambiguousCols, filename) {
   if (!ambiguousCols || ambiguousCols.length === 0) return;
   const col = ambiguousCols[0];
   const remaining = ambiguousCols.slice(1);
-  const remainingJson = JSON.stringify(remaining).replace(/"/g, '&quot;');
 
   const optionBtns = col.top.map(opt =>
-    `<button onclick="resolveAmbiguityFromSchema('${col.column}','${opt.canonId}','${filename}',${remainingJson})"
+    `<button onclick="resolveAmbiguityFromSchema('${col.column}','${opt.canonId}','${filename}',${JSON.stringify(remaining)})"
       style="display:block;width:100%;text-align:left;padding:6px 10px;margin:3px 0;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;"
       onmouseover="this.style.borderColor='#3b82f6';this.style.color='#93c5fd'"
       onmouseout="this.style.borderColor='';this.style.color='var(--text2)'"
@@ -1482,65 +1498,24 @@ function checkAmbiguousColumnsFromSchema(ambiguousCols, filename) {
   w.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(245,158,11,0.3);">
     <div style="color:var(--amber);font-size:12px;margin-bottom:8px;">⚠️ I found a column called <strong>"${col.column}"</strong> in ${filename}. What does it represent?</div>
     ${optionBtns}
-    <div style="margin-top:6px;border-top:1px solid rgba(255,255,255,0.07);padding-top:8px;">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:5px;">Or type a custom definition:</div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <input type="text" id="custom-ambig-def-${col.column}" placeholder="e.g. Delivery fee, Waste cost…"
-          style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;color:var(--text);font-size:11px;font-family:'DM Sans',sans-serif;outline:none;"
-          onkeydown="if(event.key==='Enter')resolveAmbiguityFromSchemaCustom('${col.column}','${filename}',${remainingJson})">
-        <button onclick="resolveAmbiguityFromSchemaCustom('${col.column}','${filename}',${remainingJson})"
-          style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Use this</button>
-      </div>
-      <button onclick="resolveAmbiguityFromSchema('${col.column}','__ignore__','${filename}',${remainingJson})"
-        style="display:block;width:100%;text-align:center;padding:5px 10px;margin-top:5px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Ignore this column</button>
-    </div>
   </div>`;
   messagesEl.appendChild(w);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 function resolveAmbiguityFromSchema(col, canonId, filename, remaining) {
-  const el = document.getElementById('ambig-schema-' + col);
-  if (canonId === '__ignore__') {
-    if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid var(--border);font-size:12px;color:var(--text3);">Okay — I'll leave <strong>"${col}"</strong> out of the analysis.</div>`;
-  } else {
-    Object.keys(resolvedSchemas).forEach(type => {
-      const schema = resolvedSchemas[type];
-      if (schema && schema.ambiguous) {
-        const match = schema.ambiguous.find(a => a.column === col);
-        if (match) {
-          schema.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_confirmed' };
-          schema.ambiguous = schema.ambiguous.filter(a => a.column !== col);
-        }
-      }
-    });
-    if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> mapped to ${canonId}. Analysis updated.</div>`;
-  }
-  if (remaining && remaining.length > 0) checkAmbiguousColumnsFromSchema(remaining, filename);
-}
-
-function resolveAmbiguityFromSchemaCustom(col, filename, remaining) {
-  const input = document.getElementById('custom-ambig-def-' + col);
-  const text = input ? input.value.trim() : '';
-  if (!text) {
-    if (input) { input.style.borderColor = 'var(--red)'; input.focus(); }
-    return;
-  }
-  const canonId = 'custom_' + col.toLowerCase().replace(/[^a-z0-9]+/g, '_');
   Object.keys(resolvedSchemas).forEach(type => {
     const schema = resolvedSchemas[type];
     if (schema && schema.ambiguous) {
       const match = schema.ambiguous.find(a => a.column === col);
       if (match) {
-        schema.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_taught', customLabel: text };
+        schema.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_confirmed' };
         schema.ambiguous = schema.ambiguous.filter(a => a.column !== col);
       }
     }
   });
-  if (!learnedAliases[canonId]) learnedAliases[canonId] = [];
-  if (!learnedAliases[canonId].includes(col)) learnedAliases[canonId].push(col);
   const el = document.getElementById('ambig-schema-' + col);
-  if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> = "${text}". I'll use this for the rest of the session.</div>`;
+  if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> mapped to ${canonId}. Analysis updated.</div>`;
   if (remaining && remaining.length > 0) checkAmbiguousColumnsFromSchema(remaining, filename);
 }
 
@@ -1568,10 +1543,9 @@ function checkUnmappedColumnsFromSchema(unmappedCols, type, filename) {
   // Skip pure identifier-ish columns we already capture elsewhere
   const col = unmappedCols[0];
   const remaining = unmappedCols.slice(1);
-  const remainingJson = JSON.stringify(remaining).replace(/"/g, '&quot;');
 
   const optionBtns = LEARNABLE_CONCEPTS.map(([id,label]) =>
-    `<button onclick="learnUnmappedColumn('${col}','${id}','${type}','${filename}',${remainingJson})"
+    `<button onclick="learnUnmappedColumn('${col}','${id}','${type}','${filename}',${JSON.stringify(remaining)})"
       style="display:inline-block;text-align:left;padding:5px 9px;margin:2px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;"
       onmouseover="this.style.borderColor='#3b82f6';this.style.color='#93c5fd'"
       onmouseout="this.style.borderColor='';this.style.color='var(--text2)'"
@@ -1584,18 +1558,8 @@ function checkUnmappedColumnsFromSchema(unmappedCols, type, filename) {
   w.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(59,130,246,0.3);">
     <div style="color:#93c5fd;font-size:12px;margin-bottom:8px;">🆕 I found a column I don't recognize: <strong>"${col}"</strong> in ${filename}. What is it? (I'll remember for this session.)</div>
     <div style="display:flex;flex-wrap:wrap;gap:0;margin-bottom:6px;">${optionBtns}</div>
-    <div style="margin-top:6px;border-top:1px solid rgba(255,255,255,0.07);padding-top:8px;">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:5px;">Or type a custom definition:</div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <input type="text" id="custom-def-${col}" placeholder="e.g. Delivery fee, Waste cost…"
-          style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;color:var(--text);font-size:11px;font-family:'DM Sans',sans-serif;outline:none;"
-          onkeydown="if(event.key==='Enter')learnUnmappedColumnCustom('${col}','${type}','${filename}',${remainingJson})">
-        <button onclick="learnUnmappedColumnCustom('${col}','${type}','${filename}',${remainingJson})"
-          style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Use this</button>
-      </div>
-      <button onclick="learnUnmappedColumn('${col}','__ignore__','${type}','${filename}',${remainingJson})"
-        style="display:block;width:100%;text-align:center;padding:5px 10px;margin-top:5px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Ignore this column</button>
-    </div>
+    <button onclick="learnUnmappedColumn('${col}','__ignore__','${type}','${filename}',${JSON.stringify(remaining)})"
+      style="display:block;width:100%;text-align:center;padding:6px 10px;margin-top:4px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Something else / ignore this column</button>
   </div>`;
   messagesEl.appendChild(w);
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -1627,36 +1591,146 @@ function learnUnmappedColumn(col, canonId, type, filename, remaining) {
   if (remaining && remaining.length > 0) checkUnmappedColumnsFromSchema(remaining, type, filename);
 }
 
-function learnUnmappedColumnCustom(col, type, filename, remaining) {
-  const input = document.getElementById('custom-def-' + col);
-  const text = input ? input.value.trim() : '';
-  if (!text) {
-    if (input) { input.style.borderColor = 'var(--red)'; input.focus(); }
-    return;
-  }
-  const canonId = 'custom_' + col.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-  const schema = resolvedSchemas[type];
-  if (schema) {
-    schema.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_taught', customLabel: text };
-    if (Array.isArray(schema.unmapped)) schema.unmapped = schema.unmapped.filter(c => c !== col);
-  }
-  if (!learnedAliases[canonId]) learnedAliases[canonId] = [];
-  if (!learnedAliases[canonId].includes(col)) learnedAliases[canonId].push(col);
-  Object.values(resolvedSchemas).forEach(s => {
-    if (s && Array.isArray(s.unmapped) && s.unmapped.includes(col)) {
-      s.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_taught', customLabel: text };
-      s.unmapped = s.unmapped.filter(c => c !== col);
-    }
-  });
-  const el = document.getElementById('unmapped-' + col);
-  if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> = "${text}". I'll use this for the rest of the session.</div>`;
-  if (remaining && remaining.length > 0) checkUnmappedColumnsFromSchema(remaining, type, filename);
-}
-
 function handleKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 }
 function sendSuggested(text) { inputEl.value = text.trim(); sendMessage(); }
+
+// ---- TOP-5 ACTIONABLE INSIGHTS FEED ----
+// Fires when the user clicks "Done" on the upload modal. Generates 5 ranked,
+// clickable insights from the uploaded data. Each insight, when clicked, drops
+// its drill-down question into chat so the user gets the full root-cause answer.
+//
+// Source: one /api/chat call returning structured JSON. A deterministic local
+// fallback covers API failure so the demo never stalls.
+//
+// GRAIN SAFETY: Square/Clover exports may be raw transaction-grain (one row per
+// payment) that has NOT been rolled up to location-week. Asserting a precise
+// rolled-up percentage off un-aggregated rows would be wrong — and this audience
+// will catch it. So the prompt instructs the model to phrase insights from
+// non-Toast / non-aggregated sources qualitatively (direction/trend), reserving
+// precise figures for data we can stand behind.
+async function finishUploadAndAnalyze() {
+  closeUploadModal();
+  const hasLive = Object.values(uploadedData).some(Boolean);
+  if (!hasLive) return; // no real data uploaded — leave demo welcome as-is
+  await generateInsights();
+}
+
+function detectGrainContext() {
+  // Returns which uploaded POS systems are present and whether any are likely
+  // raw transaction-grain (Square/Clover) rather than period-aggregated (Toast).
+  const systems = [];
+  let hasRawGrain = false;
+  Object.values(resolvedSchemas).forEach(s => {
+    if (!s || !s.posSystem) return;
+    const pos = String(s.posSystem).toLowerCase();
+    if (!systems.includes(pos)) systems.push(pos);
+    if (pos.includes('square') || pos.includes('clover')) hasRawGrain = true;
+  });
+  return { systems, hasRawGrain };
+}
+
+async function generateInsights() {
+  const feed = document.getElementById('insightsFeed');
+  if (!feed) return;
+  feed.style.display = 'block';
+  feed.innerHTML = `<div class="if-header"><i class="ti ti-bulb"></i><span class="if-title">Top insights from your data</span></div>
+    <div class="if-loading"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div> Analyzing your operations…</div>`;
+
+  const grain = detectGrainContext();
+  const grainNote = grain.hasRawGrain
+    ? 'IMPORTANT: Some uploaded data is from Square/Clover, which export raw per-transaction rows that may NOT be rolled up to location-week. For any insight based on that data, describe the direction/trend in plain language and DO NOT assert a precise aggregated percentage or dollar figure you cannot verify. Reserve exact figures for clearly period-aggregated data (e.g. Toast).'
+    : '';
+
+  const insightPrompt = `Based on the uploaded restaurant data in your context, identify the 5 MOST ACTIONABLE insights an operator should act on now. Rank by business impact (dollars / urgency).
+
+${grainNote}
+
+Return ONLY a JSON array (no prose, no markdown fences) of exactly 5 objects with this shape:
+[{"severity":"high|med|low","insight":"<one sentence, name the specific location/item and the problem, <=18 words>","question":"<the question to ask you to get the full root-cause + recommended action, phrased as the user would type it>"}]
+
+Rules: severity reflects impact. "insight" must be specific and reference real values/locations from the data, not generic. "question" must be answerable from the uploaded data. No trailing commas.`;
+
+  let insights = null;
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 900, system: buildSystemPrompt(insightPrompt), messages: [{ role: 'user', content: insightPrompt }] })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || '').filter(Boolean).join('') || '';
+    insights = parseInsightJson(raw);
+  } catch (err) {
+    console.warn('[OpticAI] Insight generation failed, using local fallback:', err.message);
+  }
+
+  if (!insights || !insights.length) insights = localFallbackInsights();
+  renderInsights(insights, grain);
+}
+
+function parseInsightJson(raw) {
+  if (!raw) return null;
+  // Strip any accidental markdown fences, then grab the first [...] block.
+  let s = raw.replace(/```json|```/g, '').trim();
+  const start = s.indexOf('['); const end = s.lastIndexOf(']');
+  if (start === -1 || end === -1) return null;
+  try {
+    const arr = JSON.parse(s.slice(start, end + 1));
+    if (!Array.isArray(arr)) return null;
+    return arr.filter(o => o && o.insight && o.question)
+      .slice(0, 5)
+      .map(o => ({ severity: ['high','med','low'].includes(o.severity) ? o.severity : 'med', insight: String(o.insight), question: String(o.question) }));
+  } catch { return null; }
+}
+
+function localFallbackInsights() {
+  // Deterministic insights derived from whatever summaries are loaded, so the
+  // demo always shows something sensible even if the API call fails.
+  const out = [];
+  const push = (severity, insight, question) => { if (out.length < 5) out.push({ severity, insight, question }); };
+  const k = type => uploadedData[type] && uploadedData[type].summary && uploadedData[type].summary.kpis;
+
+  const labor = k('labor'); const food = k('foodcost'); const sales = k('sales');
+  if (labor && labor.labor != null && labor.labor > 30)
+    push('high', `Labor is running ${labor.labor}% — above the 30% target.`, 'Why is labor high and what can I do to bring it down?');
+  if (food && food.foodcost != null && food.foodcost > 28)
+    push('high', `Food cost is ${food.foodcost}% — above the 28% benchmark.`, "What's driving food cost up and how do I fix it?");
+  if (sales && sales.check != null)
+    push('med', `Average check is $${sales.check} — check upsell opportunities.`, 'How can I raise average check across locations?');
+  push('med', 'Sales vary widely by location — the weakest site is dragging the group.', 'Which location is underperforming on sales and why?');
+  push('low', 'Day-of-week patterns suggest staffing may be mismatched to demand.', 'Are we overstaffed on slow days? Show labor vs sales by day of week.');
+  // pad to 5 with safe generic prompts if needed
+  while (out.length < 5) push('low', 'Review your week-over-week trends for emerging issues.', 'Summarize the biggest week-over-week changes in my data.');
+  return out.slice(0, 5);
+}
+
+function renderInsights(insights, grain) {
+  const feed = document.getElementById('insightsFeed');
+  if (!feed) return;
+  const srcLabel = grain && grain.systems.length ? grain.systems.join(' + ').toUpperCase() : 'YOUR DATA';
+  const sevClass = s => s === 'high' ? 'high' : s === 'low' ? 'low' : 'med';
+
+  const items = insights.map((it, i) => {
+    const q = it.question.replace(/"/g, '&quot;');
+    return `<button class="if-item" onclick="askInsight('${encodeURIComponent(it.question)}')">
+      <span class="if-sev ${sevClass(it.severity)}"></span>
+      <span class="if-body">
+        <span class="if-text">${it.insight}</span>
+        <span class="if-cta"><i class="ti ti-arrow-right" style="font-size:12px"></i> See what's driving it &amp; what to do</span>
+      </span>
+    </button>`;
+  }).join('');
+
+  feed.innerHTML = `<div class="if-header"><i class="ti ti-bulb"></i><span class="if-title">Top insights from your data</span><span class="if-sub">${srcLabel}</span></div>
+    <div class="if-list">${items}</div>`;
+}
+
+function askInsight(encodedQuestion) {
+  const q = decodeURIComponent(encodedQuestion);
+  // Use the existing chat path so the user gets the full root-cause answer.
+  sendSuggested(q);
+}
 
 async function sendMessage() {
   const text = inputEl.value.trim();
