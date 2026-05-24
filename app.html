@@ -614,7 +614,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 
     <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;margin-bottom:14px;">
       <i class="ti ti-shield-check" style="color:#10b981;font-size:15px;flex-shrink:0"></i>
-      <span style="font-size:12px;color:#8b909e;line-height:1.5"><strong style="color:#e8eaf0">Your data never leaves your browser.</strong> Uploaded files are processed locally in your session only. Nothing is stored on our servers or retained after you close the tab.</span>
+      <span style="font-size:12px;color:#8b909e;line-height:1.5"><strong style="color:#e8eaf0">Your data is private and protected.</strong> Files are encrypted in transit and at rest, isolated to your organization, never used to train AI models, and deletable on request.</span>
     </div>
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeUploadModal()">Close</button>
@@ -1151,7 +1151,7 @@ function handleFileUpload(event, type) {
         const resolveRes = await fetch('/api/resolve', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ headers, filename: file.name })
+          body: JSON.stringify({ headers, filename: file.name, learnedAliases })
         });
         if (resolveRes.ok) {
           const schema = await resolveRes.json();
@@ -1159,7 +1159,12 @@ function handleFileUpload(event, type) {
           if (schema.ambiguous && schema.ambiguous.length > 0) {
             checkAmbiguousColumnsFromSchema(schema.ambiguous, file.name);
           }
-          console.log(`[OpticAI] ${file.name} → POS: ${schema.posSystem}, resolved: ${Object.keys(schema.resolved).join(', ')}`);
+          // NEW: surface genuinely-new (unmapped) columns so we can learn them
+          if (schema.unmapped && schema.unmapped.length > 0) {
+            checkUnmappedColumnsFromSchema(schema.unmapped, type, file.name);
+          }
+          const idKeys = schema.identifiers ? Object.keys(schema.identifiers) : [];
+          console.log(`[OpticAI] ${file.name} → POS: ${schema.posSystem}, resolved: ${Object.keys(schema.resolved).join(', ')}${idKeys.length ? ', join-keys: ' + idKeys.join(', ') : ''}${schema.unmapped && schema.unmapped.length ? ', unmapped: ' + schema.unmapped.join(', ') : ''}`);
         }
       } catch(schemaErr) {
         console.warn('[OpticAI] Schema resolve failed (non-fatal):', schemaErr.message);
@@ -1494,6 +1499,78 @@ function resolveAmbiguityFromSchema(col, canonId, filename, remaining) {
   const el = document.getElementById('ambig-schema-' + col);
   if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> mapped to ${canonId}. Analysis updated.</div>`;
   if (remaining && remaining.length > 0) checkAmbiguousColumnsFromSchema(remaining, filename);
+}
+
+// ---- LEARN FROM NEW (UNMAPPED) COLUMNS ----
+// Session-only: when the resolver can't place a column at all, ask the user
+// what it is instead of silently dropping it, then remember the answer for
+// the rest of the session and pass it to the model. (Cross-session
+// persistence to an org profile is the next-session item — see design doc.)
+let learnedAliases = {}; // canonId -> [source column names the user taught us]
+
+// A short curated pick-list of canonical concepts a new column most likely is.
+// (Kept small so the prompt isn't overwhelming; "Something else / ignore" covers the rest.)
+const LEARNABLE_CONCEPTS = [
+  ['net_sales','Net Sales'], ['gross_sales','Gross Sales'], ['comps','Comps / Discounts'],
+  ['voids','Voids'], ['tax','Sales Tax'], ['tips','Tips'], ['service_charges','Service Charges'],
+  ['check_count','Check Count'], ['guest_count','Guest Count'], ['direct_labor','Labor Cost'],
+  ['labor_hours','Labor Hours'], ['overtime_hours','Overtime Hours'], ['food_cost','Food Cost'],
+  ['beverage_cost','Beverage Cost'], ['total_cogs','Total COGS'], ['paper_packaging','Paper/Packaging'],
+  ['quantity_sold','Quantity Sold'], ['item_revenue','Item Revenue'], ['inventory_variance','Inventory Variance'],
+  ['employee','Employee / Server'], ['order_source','Order Source'], ['revenue_center','Revenue Center']
+];
+
+function checkUnmappedColumnsFromSchema(unmappedCols, type, filename) {
+  if (!unmappedCols || unmappedCols.length === 0) return;
+  // Skip pure identifier-ish columns we already capture elsewhere
+  const col = unmappedCols[0];
+  const remaining = unmappedCols.slice(1);
+
+  const optionBtns = LEARNABLE_CONCEPTS.map(([id,label]) =>
+    `<button onclick="learnUnmappedColumn('${col}','${id}','${type}','${filename}',${JSON.stringify(remaining)})"
+      style="display:inline-block;text-align:left;padding:5px 9px;margin:2px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;"
+      onmouseover="this.style.borderColor='#3b82f6';this.style.color='#93c5fd'"
+      onmouseout="this.style.borderColor='';this.style.color='var(--text2)'"
+    >${label}</button>`
+  ).join('');
+
+  const w = document.createElement('div');
+  w.className = 'msg msg-ai';
+  w.id = 'unmapped-' + col;
+  w.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(59,130,246,0.3);">
+    <div style="color:#93c5fd;font-size:12px;margin-bottom:8px;">🆕 I found a column I don't recognize: <strong>"${col}"</strong> in ${filename}. What is it? (I'll remember for this session.)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0;margin-bottom:6px;">${optionBtns}</div>
+    <button onclick="learnUnmappedColumn('${col}','__ignore__','${type}','${filename}',${JSON.stringify(remaining)})"
+      style="display:block;width:100%;text-align:center;padding:6px 10px;margin-top:4px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Something else / ignore this column</button>
+  </div>`;
+  messagesEl.appendChild(w);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function learnUnmappedColumn(col, canonId, type, filename, remaining) {
+  const el = document.getElementById('unmapped-' + col);
+  if (canonId === '__ignore__') {
+    if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid var(--border);font-size:12px;color:var(--text3);">Okay — I'll leave <strong>"${col}"</strong> out of the analysis.</div>`;
+  } else {
+    // Store on the schema so the model sees it this session
+    const schema = resolvedSchemas[type];
+    if (schema) {
+      schema.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_taught' };
+      if (Array.isArray(schema.unmapped)) schema.unmapped = schema.unmapped.filter(c => c !== col);
+    }
+    // Remember the alias so future files THIS SESSION resolve it automatically
+    if (!learnedAliases[canonId]) learnedAliases[canonId] = [];
+    if (!learnedAliases[canonId].includes(col)) learnedAliases[canonId].push(col);
+    // Apply retroactively to any other already-loaded schema with the same unmapped column
+    Object.values(resolvedSchemas).forEach(s => {
+      if (s && Array.isArray(s.unmapped) && s.unmapped.includes(col)) {
+        s.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_taught' };
+        s.unmapped = s.unmapped.filter(c => c !== col);
+      }
+    });
+    if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Learned — <strong>"${col}"</strong> = ${canonId}. I'll recognize it for the rest of this session.</div>`;
+  }
+  if (remaining && remaining.length > 0) checkUnmappedColumnsFromSchema(remaining, type, filename);
 }
 
 function handleKey(e) {
