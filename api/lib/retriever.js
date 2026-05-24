@@ -151,6 +151,7 @@ function buildQueryContext({ schema, question, ontology, calcRules, diagnostics,
     pos_system: schema.posSystem,
     pos_gotchas: pos.gotchas,
     resolved_columns: schema.resolved,
+    identifier_columns: schema.identifiers || {},
     unmapped_columns: schema.unmapped,
     metric_definitions: metricDefs,
     effective_calc_rules: rules,
@@ -175,6 +176,13 @@ function contextToSystemBlock(ctx) {
     lines.push(`- "${m.sourceColumn}" => ${id} (conf ${m.confidence})`);
   }
   if (ctx.unmapped_columns?.length) lines.push(`Unmapped (ignore unless asked): ${ctx.unmapped_columns.join(', ')}`);
+  const idKeys = Object.entries(ctx.identifier_columns || {});
+  if (idKeys.length) {
+    lines.push('\n## Join keys / timestamps (identifiers — not metrics; use for joining tables and deriving business date, never sum them):');
+    for (const [id, arr] of idKeys) {
+      lines.push(`- ${id}: ${arr.map(a => `"${a.sourceColumn}"`).join(', ')}`);
+    }
+  }
 
   lines.push('\n## Metric definitions & valid ranges:');
   for (const [id, d] of Object.entries(ctx.metric_definitions)) {
