@@ -110,33 +110,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .sq-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; }
 .sq-btn { padding: 7px 10px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-size: 12px; cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: all 0.15s; line-height: 1.35; }
 .sq-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.07); }
-/* INSIGHTS POPUP (top-5 actionable insights, shown as a modal after data load) */
-.insights-modal { width: 540px; max-width: 95vw; padding: 0; overflow: hidden; }
-.im-head { padding: 22px 24px 18px; border-bottom: 1px solid var(--border); }
-.im-eyebrow { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
-.im-eyebrow i { color: var(--accent); font-size: 18px; }
-.im-eyebrow span { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--accent); }
-.im-title { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); margin-bottom: 5px; }
-.im-sub { font-size: 13px; color: var(--text3); line-height: 1.5; }
-.im-src { display: inline-block; margin-left: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); background: var(--bg3); padding: 1px 7px; border-radius: 4px; }
-.im-list { padding: 14px 16px; display: flex; flex-direction: column; gap: 9px; max-height: 52vh; overflow-y: auto; }
-.im-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 11px; border: 1px solid var(--border); background: var(--bg3); transition: border-color 0.15s; }
-.im-rank { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text3); width: 18px; flex-shrink: 0; text-align: center; padding-top: 1px; }
-.im-sev { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-.im-sev.high { background: var(--red); box-shadow: 0 0 0 3px rgba(239,68,68,0.14); }
-.im-sev.med { background: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,0.14); }
-.im-sev.low { background: var(--green); box-shadow: 0 0 0 3px rgba(16,185,129,0.14); }
-.im-text { flex: 1; min-width: 0; font-size: 14px; color: var(--text); line-height: 1.45; }
-.im-loading { padding: 30px 24px 34px; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--text3); font-size: 13px; }
-.im-foot { padding: 16px 24px 22px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.im-foot-note { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
-.im-foot-note i { font-size: 14px; color: var(--text3); }
-.im-cta { padding: 9px 20px; border-radius: 9px; border: none; background: var(--accent); color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 7px; transition: background 0.15s; white-space: nowrap; }
-.im-cta:hover { background: var(--accent2); }
-/* reopen affordance in chat header */
-.insights-chip { margin-left: 8px; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; font-size: 11px; padding: 3px 9px; border-radius: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; display: none; align-items: center; gap: 4px; transition: all 0.15s; }
-.insights-chip:hover { background: rgba(59,130,246,0.2); color: #bfdbfe; }
-.insights-chip i { font-size: 12px; }
 .messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 .messages::-webkit-scrollbar { width: 4px; }
 .messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
@@ -483,7 +456,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           <i class="ti ti-message-bolt"></i>
           <span class="chat-header-text">AI Analyst</span>
           <span class="chat-header-badge">● Live</span>
-          <button class="insights-chip" id="insightsChip" onclick="openInsightsModal()" title="View top insights"><i class="ti ti-bulb"></i> Insights</button>
           <button onclick="clearChat()" title="Clear chat" style="margin-left:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:color 0.15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">
             <i class="ti ti-trash"></i>
           </button>
@@ -647,27 +619,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeUploadModal()">Close</button>
       <button class="btn-sm btn-primary" onclick="finishUploadAndAnalyze()"><i class="ti ti-check"></i> Done</button>
-    </div>
-  </div>
-</div>
-
-<!-- INSIGHTS POPUP -->
-<div class="modal-overlay" id="insightsModal" onclick="if(event.target===this)closeInsightsModal()">
-  <div class="modal insights-modal">
-    <div class="im-head">
-      <div class="im-eyebrow"><i class="ti ti-bulb"></i><span>Top insights</span></div>
-      <div class="im-title">Here's what stands out in your data</div>
-      <div class="im-sub" id="imSub">The 5 most actionable items, ranked by business impact.</div>
-    </div>
-    <div id="imContent">
-      <div class="im-loading">
-        <div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
-        Analyzing your operations…
-      </div>
-    </div>
-    <div class="im-foot">
-      <span class="im-foot-note"><i class="ti ti-message-bolt"></i> Dismiss to start asking questions</span>
-      <button class="im-cta" onclick="closeInsightsModal()"><i class="ti ti-arrow-right"></i> Start exploring</button>
     </div>
   </div>
 </div>
@@ -1325,6 +1276,308 @@ function updateDashboard(type, summary, filename) {
   refreshSuggestedQuestions();
 }
 
+/* ============================================================
+   LIVE-ONLY DASHBOARD RECONCILIATION
+   Runs when the user clicks "Done". Looks at ALL live data at
+   once and decides what each of the 4 chart slots should show.
+   Rules:
+   - Once anything is uploaded, the dashboard is 100% live — no
+     demo data is ever shown.
+   - A chart slot is filled only if it has supporting live data
+     (direct OR derivable from another live file).
+   - Slots with no direct chart are reused for the next
+     highest-value chart that DOES have live data.
+   - Any slot that still cannot be filled is hidden.
+   - Every rendered chart shows its live source filename.
+   ============================================================ */
+
+const PALETTE = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
+const AXIS = { grid: 'rgba(255,255,255,0.04)', tick: '#555b6a' };
+
+// The 4 physical slots in the dashboard, in DOM/priority order.
+const DASH_SLOTS = ['salesChart','pmixChart','laborChart','dowChart'];
+
+// Holds the Chart.js instance currently living in each slot canvas.
+const slotCharts = { salesChart: null, pmixChart: null, laborChart: null, dowChart: null };
+
+function liveTypes() {
+  return Object.entries(uploadedData).filter(([,v]) => v).map(([k]) => k);
+}
+function hasAnyLive() { return liveTypes().length > 0; }
+
+// ---- helpers that build datasets straight from live rows ----
+
+function liveSalesParts() {
+  const d = uploadedData.sales;
+  if (!d?.rows?.length) return null;
+  const keys = Object.keys(d.rows[0]);
+  const salesCol = findCol(keys, ['net sales','net_sales','revenue','gross sales','gross_sales','sales','amount','total sales','total_sales']);
+  if (!salesCol) return null;
+  const locationCol = findCol(keys, ['location','store','site','restaurant','unit','branch']);
+  const dateCol = findCol(keys, ['date','day','week','period','transaction_date','sale_date']);
+  return { rows: d.rows, salesCol, locationCol, dateCol, filename: d.filename };
+}
+
+// Does the live sales file carry real per-day dates (>=5 distinct weekdays)?
+function salesHasDayGrain() {
+  const p = liveSalesParts();
+  if (!p || !p.dateCol) return false;
+  const dows = new Set();
+  for (const r of p.rows) { const dt = new Date(r[p.dateCol]); if (!isNaN(dt)) dows.add(dt.getDay()); }
+  return dows.size >= 5;
+}
+
+function liveLaborPct() {
+  // Returns a {chartData, src} if a live labor % chart can be produced
+  const lab = uploadedData.labor;
+  if (!lab) return null;
+  if (lab.summary?.chartData) return { chartData: lab.summary.chartData, src: 'live — ' + lab.filename };
+  // derive from labor cost + live sales
+  const sales = uploadedData.sales;
+  if (lab.summary?.laborCostCol && sales) {
+    const rows = lab.rows, keys = Object.keys(rows[0]);
+    const locationCol = lab.summary.locationCol, dateCol = lab.summary.dateCol, costCol = lab.summary.laborCostCol;
+    if (costCol && locationCol && dateCol) {
+      const lookup = sales.summary?.rawSalesByDateLoc || {};
+      const enriched = rows.map(r => {
+        const s = lookup[`${r[dateCol]}__${r[locationCol]}`] || 0;
+        const c = parseFloat(r[costCol]) || 0;
+        return { ...r, _lp: s > 0 ? (c / s) * 100 : null };
+      }).filter(r => r._lp !== null);
+      if (enriched.length) {
+        const cd = buildLaborChart(enriched, '_lp', locationCol, dateCol, 'percent');
+        if (cd) return { chartData: cd, src: 'live — calc from ' + lab.filename + ' + ' + sales.filename };
+      }
+    }
+  }
+  return null;
+}
+
+// ---- slot painters: each destroys the slot's old chart and draws fresh ----
+
+function paintInto(slotId, cfg) {
+  if (slotCharts[slotId]) { try { slotCharts[slotId].destroy(); } catch(e){} }
+  const canvas = document.getElementById(slotId);
+  slotCharts[slotId] = new Chart(canvas, cfg);
+  // keep the legacy globals pointed at the right instances where slot identity is unchanged
+  if (slotId === 'salesChart') salesChart = slotCharts[slotId];
+  if (slotId === 'pmixChart')  pmixChart  = slotCharts[slotId];
+  if (slotId === 'laborChart') laborChart = slotCharts[slotId];
+  if (slotId === 'dowChart')   dowChart   = slotCharts[slotId];
+}
+
+function setSlotChrome(slotId, title, srcText) {
+  const card = document.getElementById('card-' + slotId);
+  if (card) {
+    card.style.display = '';
+    const titleEl = card.querySelector('.chart-title');
+    if (titleEl && titleEl.childNodes.length) titleEl.childNodes[0].textContent = title + ' ';
+  }
+  const srcMap = { salesChart: 'salesChartSrc', pmixChart: 'pmixSrc', laborChart: 'laborSrc', dowChart: 'dowSrc' };
+  const srcEl = document.getElementById(srcMap[slotId]);
+  if (srcEl) srcEl.textContent = srcText;
+  // sales slot has a separate legend block; hide it unless a sales line lives there
+  const legend = document.getElementById('salesLegend');
+  if (legend && slotId === 'salesChart') legend.style.display = (title.toLowerCase().includes('sales by location') && title.toLowerCase().includes('weekly')) ? '' : 'none';
+}
+
+function hideSlot(slotId) {
+  if (slotCharts[slotId]) { try { slotCharts[slotId].destroy(); } catch(e){} slotCharts[slotId] = null; }
+  const card = document.getElementById('card-' + slotId);
+  if (card) card.style.display = 'none';
+}
+
+const lineScales = pctAxis => ({
+  x: { grid: { color: AXIS.grid }, ticks: { color: AXIS.tick, font: { size: 11 } } },
+  y: { grid: { color: AXIS.grid }, ticks: { color: AXIS.tick, font: { size: 11 }, callback: v => pctAxis ? v + '%' : '$' + v + 'K' } }
+});
+
+// ---- the renderable chart catalog (priority order) ----
+// Each: id, title, weight, available(), paint(slotId)
+function chartCatalog() {
+  return [
+    {
+      id: 'salesTrend', title: 'Weekly sales by location', weight: 100,
+      available: () => !!(uploadedData.sales?.summary?.chartData),
+      paint: (slot) => {
+        const cd = uploadedData.sales.summary.chartData;
+        paintInto(slot, { type: 'line', data: { labels: cd.labels, datasets: cd.datasets },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: lineScales(false) } });
+        setSlotChrome(slot, 'Weekly sales by location', 'live — ' + uploadedData.sales.filename);
+        if (cd.locations) {
+          const legend = document.getElementById('salesLegend');
+          if (legend && slot === 'salesChart') {
+            legend.style.display = '';
+            legend.innerHTML = cd.locations.map((loc,i) => `<div class="legend-item"><div class="legend-dot" style="background:${PALETTE[i%PALETTE.length]}"></div> <span>${loc}</span></div>`).join('');
+          }
+        }
+      }
+    },
+    {
+      id: 'laborPct', title: 'Labor % by location', weight: 90,
+      available: () => !!liveLaborPct(),
+      paint: (slot) => {
+        const lp = liveLaborPct();
+        paintInto(slot, { type: 'line', data: { labels: lp.chartData.labels, datasets: lp.chartData.datasets },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: lineScales(true) } });
+        setSlotChrome(slot, 'Labor % by location', lp.src);
+      }
+    },
+    {
+      id: 'dow', title: 'Avg daily sales by day of week', weight: 80,
+      available: () => salesHasDayGrain(),
+      paint: (slot) => {
+        const p = liveSalesParts();
+        const dow = {0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
+        p.rows.forEach(r => { const dt = new Date(r[p.dateCol]); if (!isNaN(dt)) dow[dt.getDay()].push(parseFloat(r[p.salesCol])||0); });
+        const ordered = [1,2,3,4,5,6,0].map(i => dow[i].length ? dow[i].reduce((a,b)=>a+b,0)/dow[i].length : 0);
+        const peak = Math.max(...ordered), min = Math.min(...ordered.filter(v=>v>0).concat([0]));
+        paintInto(slot, { type: 'bar', data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+            datasets: [{ data: ordered, backgroundColor: ordered.map(v => v===peak ? '#10b981' : v===min ? '#ef4444' : '#3b82f6'), borderRadius: 5, borderWidth: 0 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { x: { grid: { display: false }, ticks: { color: AXIS.tick, font: { size: 11 } } },
+                      y: { grid: { color: AXIS.grid }, ticks: { color: AXIS.tick, font: { size: 10 }, callback: v => '$' + (v>=1000?(v/1000).toFixed(0)+'K':v.toFixed(0)) } } } } });
+        setSlotChrome(slot, 'Avg daily sales by day of week', 'live — ' + p.filename);
+      }
+    },
+    {
+      id: 'pmix', title: 'PMIX — sales mix by category', weight: 70,
+      available: () => {
+        const d = uploadedData.pmix; if (!d?.rows?.length) return false;
+        const keys = Object.keys(d.rows[0]);
+        return !!(findCol(keys,['category','cat','group','type','section','menu category']) && findCol(keys,['gross sales','gross_sales','revenue','sales','amount','total sales','item sales']));
+      },
+      paint: (slot) => {
+        const d = uploadedData.pmix, keys = Object.keys(d.rows[0]);
+        const catCol = findCol(keys,['category','cat','group','type','section','menu category']);
+        const revCol = findCol(keys,['gross sales','gross_sales','revenue','sales','amount','total sales','item sales']);
+        const totals = {}; let total = 0;
+        d.rows.forEach(r => { const c = r[catCol]||'Other'; const v = parseFloat(r[revCol])||0; totals[c]=(totals[c]||0)+v; total+=v; });
+        const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]).slice(0,6);
+        paintInto(slot, { type: 'doughnut', data: { labels: sorted.map(([k,v])=>`${k} ${(v/total*100).toFixed(1)}%`),
+            datasets: [{ data: sorted.map(([,v])=>v/total*100), backgroundColor: sorted.map((_,i)=>PALETTE[i%PALETTE.length]), borderWidth: 0, hoverOffset: 6 }] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { color: '#8b909e', font: { size: 11 }, boxWidth: 10, padding: 8 } } } } });
+        setSlotChrome(slot, 'PMIX — sales mix by category', 'live — ' + d.filename);
+      }
+    },
+    // ---- replacement fillers (used when a primary chart has no live data) ----
+    {
+      id: 'salesByLoc', title: 'Total sales by location', weight: 60,
+      available: () => !!liveSalesParts(),
+      paint: (slot) => {
+        const p = liveSalesParts();
+        const totals = {};
+        p.rows.forEach(r => { const loc = p.locationCol ? (r[p.locationCol]||'All') : 'All'; totals[loc] = (totals[loc]||0) + (parseFloat(r[p.salesCol])||0); });
+        const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]).slice(0,8);
+        paintInto(slot, { type: 'bar', data: { labels: sorted.map(([k])=>k),
+            datasets: [{ data: sorted.map(([,v])=>v/1000), backgroundColor: sorted.map((_,i)=>PALETTE[i%PALETTE.length]), borderRadius: 5, borderWidth: 0 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { x: { grid: { display: false }, ticks: { color: AXIS.tick, font: { size: 10 } } },
+                      y: { grid: { color: AXIS.grid }, ticks: { color: AXIS.tick, font: { size: 10 }, callback: v => '$' + v + 'K' } } } } });
+        setSlotChrome(slot, 'Total sales by location', 'live — ' + p.filename);
+      }
+    },
+    {
+      id: 'primeSplit', title: 'Prime cost split (labor vs food)', weight: 55,
+      available: () => {
+        const lp = liveLaborPct();
+        const fc = parseFloat(uploadedData.foodcost?.summary?.kpis?.foodcost);
+        return !!(lp && !isNaN(fc));
+      },
+      paint: (slot) => {
+        const lab = uploadedData.labor, fc = uploadedData.foodcost;
+        let laborVal = parseFloat(lab?.summary?.kpis?.labor);
+        if (isNaN(laborVal)) {
+          // pull the averaged value from the derived labor chart
+          const lp = liveLaborPct();
+          const allPts = lp.chartData.datasets.flatMap(ds => ds.data.filter(v => v != null));
+          laborVal = allPts.length ? allPts.reduce((a,b)=>a+b,0)/allPts.length : 0;
+        }
+        const fcVal = parseFloat(fc.summary.kpis.foodcost);
+        const other = Math.max(0, 100 - laborVal - fcVal);
+        paintInto(slot, { type: 'doughnut', data: { labels: [`Labor ${laborVal.toFixed(1)}%`, `Food ${fcVal.toFixed(1)}%`, `Other ${other.toFixed(1)}%`],
+            datasets: [{ data: [laborVal, fcVal, other], backgroundColor: ['#3b82f6','#f59e0b','#2a2f3a'], borderWidth: 0, hoverOffset: 6 }] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { color: '#8b909e', font: { size: 11 }, boxWidth: 10, padding: 8 } } } } });
+        setSlotChrome(slot, 'Prime cost split (labor vs food)', 'live — ' + lab.filename + ' + ' + fc.filename);
+      }
+    },
+    {
+      id: 'topItems', title: 'Top items by revenue', weight: 50,
+      available: () => {
+        const d = uploadedData.pmix; if (!d?.rows?.length) return false;
+        const keys = Object.keys(d.rows[0]);
+        return !!(findCol(keys,['menu item','menu_item','item name','item_name','item','product','dish','name']) && findCol(keys,['gross sales','gross_sales','revenue','sales','amount','total','item sales']));
+      },
+      paint: (slot) => {
+        const d = uploadedData.pmix, keys = Object.keys(d.rows[0]);
+        const itemCol = findCol(keys,['menu item','menu_item','item name','item_name','item','product','dish','name']);
+        const revCol = findCol(keys,['gross sales','gross_sales','revenue','sales','amount','total','item sales']);
+        const totals = {};
+        d.rows.forEach(r => { const n = r[itemCol]||'—'; totals[n] = (totals[n]||0) + (parseFloat(r[revCol])||0); });
+        const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]).slice(0,7);
+        paintInto(slot, { type: 'bar', data: { labels: sorted.map(([k])=>k.length>14?k.slice(0,13)+'…':k),
+            datasets: [{ data: sorted.map(([,v])=>v/1000), backgroundColor: '#8b5cf6', borderRadius: 5, borderWidth: 0 }] },
+          options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
+            scales: { x: { grid: { color: AXIS.grid }, ticks: { color: AXIS.tick, font: { size: 10 }, callback: v => '$' + v + 'K' } },
+                      y: { grid: { display: false }, ticks: { color: AXIS.tick, font: { size: 10 } } } } } });
+        setSlotChrome(slot, 'Top items by revenue', 'live — ' + d.filename);
+      }
+    }
+  ];
+}
+
+function reconcileDashboard() {
+  if (!hasAnyLive()) return; // pure demo session — leave the demo dashboard untouched
+
+  const catalog = chartCatalog();
+  // Pick every renderable chart, dedupe, sort by weight desc, cap at slot count.
+  const chosen = catalog.filter(c => { try { return c.available(); } catch(e){ return false; } })
+                        .sort((a,b) => b.weight - a.weight)
+                        .slice(0, DASH_SLOTS.length);
+
+  // Assign chosen charts to physical slots in order; hide leftover slots.
+  DASH_SLOTS.forEach((slot, i) => {
+    if (i < chosen.length) {
+      try { chosen[i].paint(slot); }
+      catch(e){ console.warn('[OpticAI] chart paint failed for', chosen[i].id, e); hideSlot(slot); }
+    } else {
+      hideSlot(slot);
+    }
+  });
+
+  // If we're live but nothing could be charted (e.g. only a foodcost % file),
+  // show a friendly placeholder instead of an empty chart panel.
+  const section = document.querySelector('.chart-section');
+  let ph = document.getElementById('noChartPlaceholder');
+  if (chosen.length === 0) {
+    if (section && !ph) {
+      ph = document.createElement('div');
+      ph.id = 'noChartPlaceholder';
+      ph.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:13px;text-align:center;padding:24px;';
+      ph.innerHTML = 'Your uploaded data updated the KPIs above, but didn\u2019t include a time series or category breakdown to chart.<br>Upload a sales, labor, or product-mix file to populate the charts.';
+      section.appendChild(ph);
+    }
+  } else if (ph) {
+    ph.remove();
+  }
+
+  // Demo location-filter fallbacks should never run now that we're live-only.
+  // (updateDowChart / updatePmixChart still key off uploadedData and are safe.)
+  refreshChartToggleList();
+}
+
+// Keep the Customize panel's chart toggle list honest about what's actually shown.
+function refreshChartToggleList() {
+  // no-op hook: existing customize logic reads card display state directly.
+}
+
+// Called by the Done button.
+function finishUploadAndAnalyze() {
+  closeUploadModal();
+  reconcileDashboard();
+  updateStatusBar();
+}
+
 function recalcPrimeCost() {
   const laborData = uploadedData['labor'];
   const fcData = uploadedData['foodcost'];
@@ -1441,17 +1694,15 @@ function updateStatusBar() {
   const bar = document.getElementById('statusBar');
   const text = document.getElementById('statusText');
   const loadedNames = Object.entries(uploadedData).filter(([,v]) => v).map(([k]) => k).join(', ');
-  const demoNames = Object.entries(uploadedData).filter(([,v]) => !v).map(([k]) => k).join(', ');
 
   if (loaded === 0) {
     bar.className = 'data-status-bar demo-mode';
     text.innerHTML = 'Running on <strong>demo data</strong>. Upload your real CSVs to see your own numbers.';
-  } else if (loaded === 5) {
-    bar.className = 'data-status-bar live-mode';
-    text.innerHTML = '● All datasets are <strong>live</strong>. Analysis reflects your real operational data.';
   } else {
-    bar.className = 'data-status-bar mixed-mode';
-    text.innerHTML = `<strong>Live:</strong> ${loadedNames} &nbsp;·&nbsp; <strong>Demo:</strong> ${demoNames}. Upload remaining datasets to complete your analysis.`;
+    // Once anything is uploaded the dashboard is live-only. Datasets that
+    // weren't uploaded are simply absent — we never fall back to demo.
+    bar.className = 'data-status-bar live-mode';
+    text.innerHTML = `● <strong>Live</strong> — dashboard built from your uploaded data: ${loadedNames}. Charts reflect only the data you provided.`;
   }
 }
 
@@ -1497,8 +1748,8 @@ function buildSystemPrompt(userQuestion) {
     if (data) liveSection += `\n${type.toUpperCase()} (from ${data.filename}):\n${data.summary.summary}\n`;
   });
 
-  const demoTypes = Object.entries(uploadedData).filter(([,v]) => !v).map(([k]) => k);
-  if (demoTypes.length > 0) liveSection += `\nNote: ${demoTypes.join(', ')} data is still demo data — say so if asked about those specifically.`;
+  const missingTypes = Object.entries(uploadedData).filter(([,v]) => !v).map(([k]) => k);
+  if (missingTypes.length > 0) liveSection += `\nNote: ${missingTypes.join(', ')} data was not uploaded — say it's not available rather than citing any demo figures for those.`;
 
   // Attach resolved schemas for server-side semantic context injection
   if (Object.keys(resolvedSchemas).length > 0) {
@@ -1627,163 +1878,6 @@ function handleKey(e) {
 }
 function sendSuggested(text) { inputEl.value = text.trim(); sendMessage(); }
 
-// ---- TOP-5 ACTIONABLE INSIGHTS FEED ----
-// Fires when the user clicks "Done" on the upload modal. Generates 5 ranked,
-// clickable insights from the uploaded data. Each insight, when clicked, drops
-// its drill-down question into chat so the user gets the full root-cause answer.
-//
-// Source: one /api/chat call returning structured JSON. A deterministic local
-// fallback covers API failure so the demo never stalls.
-//
-// GRAIN SAFETY: Square/Clover exports may be raw transaction-grain (one row per
-// payment) that has NOT been rolled up to location-week. Asserting a precise
-// rolled-up percentage off un-aggregated rows would be wrong — and this audience
-// will catch it. So the prompt instructs the model to phrase insights from
-// non-Toast / non-aggregated sources qualitatively (direction/trend), reserving
-// precise figures for data we can stand behind.
-async function finishUploadAndAnalyze() {
-  closeUploadModal();
-  const hasLive = Object.values(uploadedData).some(Boolean);
-  if (!hasLive) return; // no real data uploaded — leave demo welcome as-is
-  await generateInsights();
-}
-
-function detectGrainContext() {
-  // Returns which uploaded POS systems are present and whether any are likely
-  // raw transaction-grain (Square/Clover) rather than period-aggregated (Toast).
-  const systems = [];
-  let hasRawGrain = false;
-  Object.values(resolvedSchemas).forEach(s => {
-    if (!s || !s.posSystem) return;
-    const pos = String(s.posSystem).toLowerCase();
-    if (!systems.includes(pos)) systems.push(pos);
-    if (pos.includes('square') || pos.includes('clover')) hasRawGrain = true;
-  });
-  return { systems, hasRawGrain };
-}
-
-// Cache of the last-generated insights so the header "Insights" chip can
-// reopen the popup without re-calling the API.
-let lastInsights = null;
-let lastInsightsGrain = null;
-
-function openInsightsModal() { document.getElementById('insightsModal').classList.add('open'); }
-function closeInsightsModal() { document.getElementById('insightsModal').classList.remove('open'); }
-
-async function generateInsights() {
-  const modal = document.getElementById('insightsModal');
-  const content = document.getElementById('imContent');
-  if (!modal || !content) return;
-
-  // reset to loading state and open the popup
-  content.innerHTML = `<div class="im-loading">
-      <div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
-      Analyzing your operations…
-    </div>`;
-  openInsightsModal();
-
-  const grain = detectGrainContext();
-  const grainNote = grain.hasRawGrain
-    ? 'IMPORTANT: Some uploaded data is from Square/Clover, which export raw per-transaction rows that may NOT be rolled up to location-week. For any insight based on that data, describe the direction/trend in plain language and DO NOT assert a precise aggregated percentage or dollar figure you cannot verify. Reserve exact figures for clearly period-aggregated data (e.g. Toast).'
-    : '';
-
-  // NOTE: For now the insight is a plain statement only. The "see what's driving
-  // it / click-to-chat drill-down" is intentionally removed (kept on the fix-list
-  // for a later session). We still ask the model for a "question" field so the
-  // drill-down can be re-enabled later without changing the prompt contract.
-  const insightPrompt = `Based on the uploaded restaurant data in your context, identify the 5 MOST ACTIONABLE insights an operator should act on now. Rank by business impact (dollars / urgency).
-
-${grainNote}
-
-Return ONLY a JSON array (no prose, no markdown fences) of exactly 5 objects with this shape:
-[{"severity":"high|med|low","insight":"<one clear sentence, name the specific location/item and the problem, <=18 words>","question":"<the question a user would ask to dig into this — reserved for future use>"}]
-
-Rules: severity reflects impact. "insight" must be specific and reference real values/locations from the data, not generic. No trailing commas.`;
-
-  let insights = null;
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 900, system: buildSystemPrompt(insightPrompt), messages: [{ role: 'user', content: insightPrompt }] })
-    });
-    const data = await res.json();
-    const raw = data.content?.map(b => b.text || '').filter(Boolean).join('') || '';
-    insights = parseInsightJson(raw);
-  } catch (err) {
-    console.warn('[OpticAI] Insight generation failed, using local fallback:', err.message);
-  }
-
-  if (!insights || !insights.length) insights = localFallbackInsights();
-  lastInsights = insights;
-  lastInsightsGrain = grain;
-  renderInsights(insights, grain);
-
-  // reveal the reopen affordance in the chat header
-  const chip = document.getElementById('insightsChip');
-  if (chip) chip.style.display = 'inline-flex';
-}
-
-function parseInsightJson(raw) {
-  if (!raw) return null;
-  // Strip any accidental markdown fences, then grab the first [...] block.
-  let s = raw.replace(/```json|```/g, '').trim();
-  const start = s.indexOf('['); const end = s.lastIndexOf(']');
-  if (start === -1 || end === -1) return null;
-  try {
-    const arr = JSON.parse(s.slice(start, end + 1));
-    if (!Array.isArray(arr)) return null;
-    return arr.filter(o => o && o.insight)
-      .slice(0, 5)
-      .map(o => ({ severity: ['high','med','low'].includes(o.severity) ? o.severity : 'med', insight: String(o.insight), question: o.question ? String(o.question) : '' }));
-  } catch { return null; }
-}
-
-function localFallbackInsights() {
-  // Deterministic insights derived from whatever summaries are loaded, so the
-  // demo always shows something sensible even if the API call fails.
-  const out = [];
-  const push = (severity, insight, question) => { if (out.length < 5) out.push({ severity, insight, question }); };
-  const k = type => uploadedData[type] && uploadedData[type].summary && uploadedData[type].summary.kpis;
-
-  const labor = k('labor'); const food = k('foodcost'); const sales = k('sales');
-  if (labor && labor.labor != null && labor.labor > 30)
-    push('high', `Labor is running ${labor.labor}% — above the 30% target.`, 'Why is labor high and what can I do to bring it down?');
-  if (food && food.foodcost != null && food.foodcost > 28)
-    push('high', `Food cost is ${food.foodcost}% — above the 28% benchmark.`, "What's driving food cost up and how do I fix it?");
-  if (sales && sales.check != null)
-    push('med', `Average check is $${sales.check} — check upsell opportunities.`, 'How can I raise average check across locations?');
-  push('med', 'Sales vary widely by location — the weakest site is dragging the group.', 'Which location is underperforming on sales and why?');
-  push('low', 'Day-of-week patterns suggest staffing may be mismatched to demand.', 'Are we overstaffed on slow days? Show labor vs sales by day of week.');
-  // pad to 5 with safe generic prompts if needed
-  while (out.length < 5) push('low', 'Review your week-over-week trends for emerging issues.', 'Summarize the biggest week-over-week changes in my data.');
-  return out.slice(0, 5);
-}
-
-function escapeHtml(str) {
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function renderInsights(insights, grain) {
-  const content = document.getElementById('imContent');
-  const sub = document.getElementById('imSub');
-  if (!content) return;
-  const sevClass = s => s === 'high' ? 'high' : s === 'low' ? 'low' : 'med';
-
-  if (sub) {
-    const srcLabel = grain && grain.systems.length ? grain.systems.join(' + ').toUpperCase() : null;
-    sub.innerHTML = 'The 5 most actionable items, ranked by business impact.' + (srcLabel ? `<span class="im-src">${srcLabel}</span>` : '');
-  }
-
-  const items = insights.map((it, i) => `
-    <div class="im-item">
-      <span class="im-rank">${i + 1}</span>
-      <span class="im-sev ${sevClass(it.severity)}"></span>
-      <span class="im-text">${escapeHtml(it.insight)}</span>
-    </div>`).join('');
-
-  content.innerHTML = `<div class="im-list">${items}</div>`;
-}
-
 async function sendMessage() {
   const text = inputEl.value.trim();
   if (!text) return;
@@ -1798,7 +1892,7 @@ async function sendMessage() {
   try {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system: buildSystemPrompt(text), messages: conversationHistory })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: buildSystemPrompt(text), messages: conversationHistory })
     });
     const data = await res.json();
     const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, I had trouble with that. Try again.';
@@ -1864,7 +1958,7 @@ Keep it direct, specific, and written for a GM — not an analyst. Use real numb
   try {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: conversationHistory })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: conversationHistory })
     });
     const data = await res.json();
     const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, could not generate briefing.';
@@ -1946,17 +2040,21 @@ function openCustomizePanel() {
     </label>`;
   }).join('');
 
-  // Build chart toggles — add IDs to chart cards first
-  document.querySelectorAll('.chart-card').forEach((card, i) => {
-    if (chartConfig[i]) card.id = chartConfig[i].id;
-  });
+  // Build chart toggles. Slots keep their original card-<slotId> IDs; after
+  // live reconciliation a slot may hold a different chart, so read the label
+  // from the card's current title and skip slots that are hidden/empty.
   const chartContainer = document.getElementById('chartToggles');
-  chartContainer.innerHTML = chartConfig.map(c => {
-    const card = document.getElementById(c.id);
-    const visible = card ? card.style.display !== 'none' : true;
+  chartContainer.innerHTML = DASH_SLOTS.map(slot => {
+    const card = document.getElementById('card-' + slot);
+    if (!card) return '';
+    const hidden = card.style.display === 'none';
+    if (hidden && hasAnyLive()) return ''; // no live data for this slot — don't offer a toggle
+    const titleEl = card.querySelector('.chart-title');
+    const label = titleEl && titleEl.childNodes.length ? titleEl.childNodes[0].textContent.trim() : slot;
+    const visible = !hidden;
     return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
-      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleChart('${c.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
-      ${c.label}
+      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleChart('card-${slot}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
+      ${label}
     </label>`;
   }).join('');
 
@@ -1989,7 +2087,10 @@ function toggleChart(id, show) {
 
 function resetDashboard() {
   kpiConfig.forEach(k => toggleKpi(k.id, true));
-  chartConfig.forEach(c => toggleChart(c.id, true));
+  DASH_SLOTS.forEach(slot => {
+    // only re-show a slot if it actually has a chart (don't un-hide empty slots in live mode)
+    if (!hasAnyLive() || slotCharts[slot]) toggleChart('card-' + slot, true);
+  });
   // Remove any custom charts
   document.querySelectorAll('.custom-chart-card').forEach(el => el.remove());
   closeCustomizePanel();
@@ -2506,14 +2607,19 @@ function filterByLocation(loc, el) {
 function applyLocationFilter() {
   const loc = activeLocation;
 
+  // After live reconciliation a slot may have been hidden or reassigned to a
+  // different chart type. Only filter line-series that are actually visible.
+  const salesVisible = !hasAnyLive() || (document.getElementById('card-salesChart')||{}).style?.display !== 'none';
+  const laborVisible = !hasAnyLive() || (document.getElementById('card-laborChart')||{}).style?.display !== 'none';
+
   // ── Sales chart ──
-  if (salesChart) {
+  if (salesChart && salesVisible && salesChart.config?.type === 'line') {
     salesChart.data.datasets.forEach(ds => { ds.hidden = loc ? ds.label !== loc : false; });
     salesChart.update();
   }
 
   // ── Labor chart ──
-  if (laborChart) {
+  if (laborChart && laborVisible && laborChart.config?.type === 'line') {
     laborChart.data.datasets.forEach(ds => { ds.hidden = loc ? ds.label !== loc : false; });
     laborChart.update();
   }
@@ -2554,7 +2660,10 @@ function updateDowChart(loc) {
       v === peak ? '#10b981' : v === Math.min(...ordered) ? '#ef4444' : '#3b82f6'
     );
   } else {
-    // Use DEMO data — filter by location index
+    // Live-only mode: never paint demo. If the DOW slot was reassigned to a
+    // different chart during reconciliation, leave it alone.
+    if (hasAnyLive()) return;
+    // Use DEMO data — filter by location index (only in pure demo session)
     const locMap = {
       'Downtown':         [1467,1456,1423,1532,1821,1940,1298],
       'Freedom Square':   [1245,1212,1267,1298,1489,1523,1034],
@@ -2619,6 +2728,9 @@ function updatePmixChart(loc) {
     pmixChart.data.datasets[0].backgroundColor = sorted.map((_, i) => COLORS[i % COLORS.length]);
     
   } else {
+    // Live-only mode: never paint demo PMIX. If reconciliation reassigned this
+    // slot to another chart, leave it untouched.
+    if (hasAnyLive()) return;
     // Demo data — add per-location variation to make filter feel useful
     const demoByLoc = {
       'Downtown':          { labels: ['Entree 81.2%','Beverage 9.8%','Appetizer 5.1%','Side 3.9%'], data: [81.2,9.8,5.1,3.9] },
