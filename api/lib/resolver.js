@@ -92,7 +92,7 @@ function resolveHeader(header, { posSystem, posDict, ontology, orgProfile }) {
   }
 
   // 3 + 4. Ontology synonyms (exact, contains, fuzzy)
-  const allDefs = { ...ontology.entities, ...ontology.metrics };
+  const allDefs = { ...ontology.entities, ...ontology.metrics, ...(ontology.identifiers || {}) };
   for (const [canonId, def] of Object.entries(allDefs)) {
     const syns = def.synonyms || [];
     // include POS-specific aliases stored in the ontology too
@@ -123,7 +123,7 @@ function resolveHeader(header, { posSystem, posDict, ontology, orgProfile }) {
   // Drop weak fuzzy hits that disagree on role with a much stronger candidate
   // (e.g. "revenue" should not surface the dimension "location" as an option).
   if (ranked.length > 1) {
-    const roleOf = (id) => (ontology.metrics[id] ? 'measure' : (ontology.entities[id] ? 'dimension' : 'unknown'));
+    const roleOf = (id) => (ontology.metrics[id] ? 'measure' : (ontology.entities[id] ? 'dimension' : ((ontology.identifiers || {})[id] ? 'identifier' : 'unknown')));
     const top = ranked[0];
     const topRole = roleOf(top.canonId);
     ranked = ranked.filter(r => {
@@ -144,8 +144,11 @@ function resolveSchema(headers, filename, { posDict, ontology, orgProfile }) {
   const posSystem = detectPos(headers, filename, posDict);
 
   const resolved = {};      // canonId -> { sourceColumn, confidence, via }
+  const identifiers = {};   // canonId -> [{ sourceColumn, confidence, via }]  (join keys/timestamps)
   const ambiguous = [];     // { column, top: [{canonId, confidence}], reason }
   const unmapped = [];      // columns we couldn't place
+
+  const idDefs = ontology.identifiers || {};
 
   for (const header of headers) {
     const ranked = resolveHeader(header, { posSystem, posDict, ontology, orgProfile });
@@ -153,6 +156,16 @@ function resolveSchema(headers, filename, { posDict, ontology, orgProfile }) {
 
     if (!top || top.confidence < SUGGEST_THRESHOLD) {
       unmapped.push(header);
+      continue;
+    }
+
+    // Identifiers (order/check/item/employee IDs, raw timestamps) are recognized
+    // join keys — capture them so they're never nagged as "unmapped", but keep
+    // them out of `resolved` so analytical field mapping stays clean. Multiple
+    // columns can map to the same identifier concept (e.g. several timestamps).
+    if (idDefs[top.canonId]) {
+      if (!identifiers[top.canonId]) identifiers[top.canonId] = [];
+      identifiers[top.canonId].push({ sourceColumn: header, confidence: top.confidence, via: top.via });
       continue;
     }
 
@@ -175,13 +188,13 @@ function resolveSchema(headers, filename, { posDict, ontology, orgProfile }) {
     } else {
       ambiguous.push({
         column: header,
-        top: ranked.slice(0, 3).map(r => ({ canonId: r.canonId, confidence: Math.round(r.confidence * 100) / 100, label: (ontology.metrics[r.canonId] || ontology.entities[r.canonId] || {}).label || r.canonId })),
+        top: ranked.slice(0, 3).map(r => ({ canonId: r.canonId, confidence: Math.round(r.confidence * 100) / 100, label: (ontology.metrics[r.canonId] || ontology.entities[r.canonId] || (ontology.identifiers || {})[r.canonId] || {}).label || r.canonId })),
         reason: explicitlyAmbiguous ? 'known_ambiguous_concept' : (tooClose ? 'close_candidates' : 'below_auto_threshold')
       });
     }
   }
 
-  return { posSystem, resolved, ambiguous, unmapped, headerCount: headers.length };
+  return { posSystem, resolved, identifiers, ambiguous, unmapped, headerCount: headers.length };
 }
 
 module.exports = { resolveSchema, detectPos, normalize, AUTO_MAP_THRESHOLD };
