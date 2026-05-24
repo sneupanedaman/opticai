@@ -1540,8 +1540,18 @@ function checkUnmappedColumnsFromSchema(unmappedCols, type, filename) {
   w.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(59,130,246,0.3);">
     <div style="color:#93c5fd;font-size:12px;margin-bottom:8px;">🆕 I found a column I don't recognize: <strong>"${col}"</strong> in ${filename}. What is it? (I'll remember for this session.)</div>
     <div style="display:flex;flex-wrap:wrap;gap:0;margin-bottom:6px;">${optionBtns}</div>
-    <button onclick="learnUnmappedColumn('${col}','__ignore__','${type}','${filename}',${JSON.stringify(remaining)})"
-      style="display:block;width:100%;text-align:center;padding:6px 10px;margin-top:4px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Something else / ignore this column</button>
+    <div style="margin-top:6px;border-top:1px solid rgba(255,255,255,0.07);padding-top:8px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:5px;">Or type a custom definition:</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="text" id="custom-def-${col}" placeholder="e.g. Delivery fee, Waste cost…"
+          style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;color:var(--text);font-size:11px;font-family:'DM Sans',sans-serif;outline:none;"
+          onkeydown="if(event.key==='Enter')learnUnmappedColumnCustom('${col}','${type}','${filename}',${JSON.stringify(remaining)})">
+        <button onclick="learnUnmappedColumnCustom('${col}','${type}','${filename}',${JSON.stringify(remaining)})"
+          style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Use this</button>
+      </div>
+      <button onclick="learnUnmappedColumn('${col}','__ignore__','${type}','${filename}',${JSON.stringify(remaining)})"
+        style="display:block;width:100%;text-align:center;padding:5px 10px;margin-top:5px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Ignore this column</button>
+    </div>
   </div>`;
   messagesEl.appendChild(w);
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -1570,6 +1580,32 @@ function learnUnmappedColumn(col, canonId, type, filename, remaining) {
     });
     if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Learned — <strong>"${col}"</strong> = ${canonId}. I'll recognize it for the rest of this session.</div>`;
   }
+  if (remaining && remaining.length > 0) checkUnmappedColumnsFromSchema(remaining, type, filename);
+}
+
+function learnUnmappedColumnCustom(col, type, filename, remaining) {
+  const input = document.getElementById('custom-def-' + col);
+  const text = input ? input.value.trim() : '';
+  if (!text) {
+    if (input) { input.style.borderColor = 'var(--red)'; input.focus(); }
+    return;
+  }
+  const canonId = 'custom_' + col.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  const schema = resolvedSchemas[type];
+  if (schema) {
+    schema.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_taught', customLabel: text };
+    if (Array.isArray(schema.unmapped)) schema.unmapped = schema.unmapped.filter(c => c !== col);
+  }
+  if (!learnedAliases[canonId]) learnedAliases[canonId] = [];
+  if (!learnedAliases[canonId].includes(col)) learnedAliases[canonId].push(col);
+  Object.values(resolvedSchemas).forEach(s => {
+    if (s && Array.isArray(s.unmapped) && s.unmapped.includes(col)) {
+      s.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_taught', customLabel: text };
+      s.unmapped = s.unmapped.filter(c => c !== col);
+    }
+  });
+  const el = document.getElementById('unmapped-' + col);
+  if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> = "${text}". I'll use this for the rest of the session.</div>`;
   if (remaining && remaining.length > 0) checkUnmappedColumnsFromSchema(remaining, type, filename);
 }
 
