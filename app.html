@@ -110,23 +110,33 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .sq-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; }
 .sq-btn { padding: 7px 10px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-size: 12px; cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: all 0.15s; line-height: 1.35; }
 .sq-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.07); }
-/* INSIGHTS FEED (top-5 actionable insights after data load) */
-.insights-feed { padding: 12px 12px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: rgba(59,130,246,0.03); }
-.if-header { display: flex; align-items: center; gap: 6px; margin-bottom: 9px; }
-.if-header i { color: var(--accent); font-size: 15px; }
-.if-title { font-size: 12px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-.if-sub { font-size: 10px; color: var(--text3); margin-left: auto; font-family: 'DM Mono', monospace; }
-.if-list { display: flex; flex-direction: column; gap: 6px; }
-.if-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; transition: all 0.15s; width: 100%; }
-.if-item:hover { border-color: var(--accent); background: rgba(59,130,246,0.07); }
-.if-item:hover .if-cta { color: var(--accent); }
-.if-sev { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-.if-sev.high { background: var(--red); } .if-sev.med { background: var(--amber); } .if-sev.low { background: var(--green); }
-.if-body { flex: 1; min-width: 0; }
-.if-text { font-size: 12px; color: var(--text); line-height: 1.4; }
-.if-cta { font-size: 11px; color: var(--text3); margin-top: 3px; display: flex; align-items: center; gap: 3px; transition: color 0.15s; }
-.if-loading { font-size: 12px; color: var(--text3); padding: 4px 2px; display: flex; align-items: center; gap: 7px; }
-.if-loading .typing-dot { width: 5px; height: 5px; }
+/* INSIGHTS POPUP (top-5 actionable insights, shown as a modal after data load) */
+.insights-modal { width: 540px; max-width: 95vw; padding: 0; overflow: hidden; }
+.im-head { padding: 22px 24px 18px; border-bottom: 1px solid var(--border); }
+.im-eyebrow { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+.im-eyebrow i { color: var(--accent); font-size: 18px; }
+.im-eyebrow span { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--accent); }
+.im-title { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); margin-bottom: 5px; }
+.im-sub { font-size: 13px; color: var(--text3); line-height: 1.5; }
+.im-src { display: inline-block; margin-left: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); background: var(--bg3); padding: 1px 7px; border-radius: 4px; }
+.im-list { padding: 14px 16px; display: flex; flex-direction: column; gap: 9px; max-height: 52vh; overflow-y: auto; }
+.im-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 11px; border: 1px solid var(--border); background: var(--bg3); transition: border-color 0.15s; }
+.im-rank { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text3); width: 18px; flex-shrink: 0; text-align: center; padding-top: 1px; }
+.im-sev { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.im-sev.high { background: var(--red); box-shadow: 0 0 0 3px rgba(239,68,68,0.14); }
+.im-sev.med { background: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,0.14); }
+.im-sev.low { background: var(--green); box-shadow: 0 0 0 3px rgba(16,185,129,0.14); }
+.im-text { flex: 1; min-width: 0; font-size: 14px; color: var(--text); line-height: 1.45; }
+.im-loading { padding: 30px 24px 34px; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--text3); font-size: 13px; }
+.im-foot { padding: 16px 24px 22px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.im-foot-note { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+.im-foot-note i { font-size: 14px; color: var(--text3); }
+.im-cta { padding: 9px 20px; border-radius: 9px; border: none; background: var(--accent); color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 7px; transition: background 0.15s; white-space: nowrap; }
+.im-cta:hover { background: var(--accent2); }
+/* reopen affordance in chat header */
+.insights-chip { margin-left: 8px; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; font-size: 11px; padding: 3px 9px; border-radius: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; display: none; align-items: center; gap: 4px; transition: all 0.15s; }
+.insights-chip:hover { background: rgba(59,130,246,0.2); color: #bfdbfe; }
+.insights-chip i { font-size: 12px; }
 .messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 .messages::-webkit-scrollbar { width: 4px; }
 .messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
@@ -473,6 +483,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           <i class="ti ti-message-bolt"></i>
           <span class="chat-header-text">AI Analyst</span>
           <span class="chat-header-badge">● Live</span>
+          <button class="insights-chip" id="insightsChip" onclick="openInsightsModal()" title="View top insights"><i class="ti ti-bulb"></i> Insights</button>
           <button onclick="clearChat()" title="Clear chat" style="margin-left:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:color 0.15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">
             <i class="ti ti-trash"></i>
           </button>
@@ -482,7 +493,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
             <i class="ti ti-file-analytics" style="font-size:15px"></i> Generate Weekly Ops Briefing
           </button>
         </div>
-        <div class="insights-feed" id="insightsFeed" style="display:none;"></div>
         <div class="suggested-qs" id="suggestedQs">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
             <div class="sq-label" style="margin-bottom:0">Try asking</div>
@@ -637,6 +647,27 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeUploadModal()">Close</button>
       <button class="btn-sm btn-primary" onclick="finishUploadAndAnalyze()"><i class="ti ti-check"></i> Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHTS POPUP -->
+<div class="modal-overlay" id="insightsModal" onclick="if(event.target===this)closeInsightsModal()">
+  <div class="modal insights-modal">
+    <div class="im-head">
+      <div class="im-eyebrow"><i class="ti ti-bulb"></i><span>Top insights</span></div>
+      <div class="im-title">Here's what stands out in your data</div>
+      <div class="im-sub" id="imSub">The 5 most actionable items, ranked by business impact.</div>
+    </div>
+    <div id="imContent">
+      <div class="im-loading">
+        <div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+        Analyzing your operations…
+      </div>
+    </div>
+    <div class="im-foot">
+      <span class="im-foot-note"><i class="ti ti-message-bolt"></i> Dismiss to start asking questions</span>
+      <button class="im-cta" onclick="closeInsightsModal()"><i class="ti ti-arrow-right"></i> Start exploring</button>
     </div>
   </div>
 </div>
@@ -1631,26 +1662,43 @@ function detectGrainContext() {
   return { systems, hasRawGrain };
 }
 
+// Cache of the last-generated insights so the header "Insights" chip can
+// reopen the popup without re-calling the API.
+let lastInsights = null;
+let lastInsightsGrain = null;
+
+function openInsightsModal() { document.getElementById('insightsModal').classList.add('open'); }
+function closeInsightsModal() { document.getElementById('insightsModal').classList.remove('open'); }
+
 async function generateInsights() {
-  const feed = document.getElementById('insightsFeed');
-  if (!feed) return;
-  feed.style.display = 'block';
-  feed.innerHTML = `<div class="if-header"><i class="ti ti-bulb"></i><span class="if-title">Top insights from your data</span></div>
-    <div class="if-loading"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div> Analyzing your operations…</div>`;
+  const modal = document.getElementById('insightsModal');
+  const content = document.getElementById('imContent');
+  if (!modal || !content) return;
+
+  // reset to loading state and open the popup
+  content.innerHTML = `<div class="im-loading">
+      <div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+      Analyzing your operations…
+    </div>`;
+  openInsightsModal();
 
   const grain = detectGrainContext();
   const grainNote = grain.hasRawGrain
     ? 'IMPORTANT: Some uploaded data is from Square/Clover, which export raw per-transaction rows that may NOT be rolled up to location-week. For any insight based on that data, describe the direction/trend in plain language and DO NOT assert a precise aggregated percentage or dollar figure you cannot verify. Reserve exact figures for clearly period-aggregated data (e.g. Toast).'
     : '';
 
+  // NOTE: For now the insight is a plain statement only. The "see what's driving
+  // it / click-to-chat drill-down" is intentionally removed (kept on the fix-list
+  // for a later session). We still ask the model for a "question" field so the
+  // drill-down can be re-enabled later without changing the prompt contract.
   const insightPrompt = `Based on the uploaded restaurant data in your context, identify the 5 MOST ACTIONABLE insights an operator should act on now. Rank by business impact (dollars / urgency).
 
 ${grainNote}
 
 Return ONLY a JSON array (no prose, no markdown fences) of exactly 5 objects with this shape:
-[{"severity":"high|med|low","insight":"<one sentence, name the specific location/item and the problem, <=18 words>","question":"<the question to ask you to get the full root-cause + recommended action, phrased as the user would type it>"}]
+[{"severity":"high|med|low","insight":"<one clear sentence, name the specific location/item and the problem, <=18 words>","question":"<the question a user would ask to dig into this — reserved for future use>"}]
 
-Rules: severity reflects impact. "insight" must be specific and reference real values/locations from the data, not generic. "question" must be answerable from the uploaded data. No trailing commas.`;
+Rules: severity reflects impact. "insight" must be specific and reference real values/locations from the data, not generic. No trailing commas.`;
 
   let insights = null;
   try {
@@ -1666,7 +1714,13 @@ Rules: severity reflects impact. "insight" must be specific and reference real v
   }
 
   if (!insights || !insights.length) insights = localFallbackInsights();
+  lastInsights = insights;
+  lastInsightsGrain = grain;
   renderInsights(insights, grain);
+
+  // reveal the reopen affordance in the chat header
+  const chip = document.getElementById('insightsChip');
+  if (chip) chip.style.display = 'inline-flex';
 }
 
 function parseInsightJson(raw) {
@@ -1678,9 +1732,9 @@ function parseInsightJson(raw) {
   try {
     const arr = JSON.parse(s.slice(start, end + 1));
     if (!Array.isArray(arr)) return null;
-    return arr.filter(o => o && o.insight && o.question)
+    return arr.filter(o => o && o.insight)
       .slice(0, 5)
-      .map(o => ({ severity: ['high','med','low'].includes(o.severity) ? o.severity : 'med', insight: String(o.insight), question: String(o.question) }));
+      .map(o => ({ severity: ['high','med','low'].includes(o.severity) ? o.severity : 'med', insight: String(o.insight), question: o.question ? String(o.question) : '' }));
   } catch { return null; }
 }
 
@@ -1705,31 +1759,29 @@ function localFallbackInsights() {
   return out.slice(0, 5);
 }
 
-function renderInsights(insights, grain) {
-  const feed = document.getElementById('insightsFeed');
-  if (!feed) return;
-  const srcLabel = grain && grain.systems.length ? grain.systems.join(' + ').toUpperCase() : 'YOUR DATA';
-  const sevClass = s => s === 'high' ? 'high' : s === 'low' ? 'low' : 'med';
-
-  const items = insights.map((it, i) => {
-    const q = it.question.replace(/"/g, '&quot;');
-    return `<button class="if-item" onclick="askInsight('${encodeURIComponent(it.question)}')">
-      <span class="if-sev ${sevClass(it.severity)}"></span>
-      <span class="if-body">
-        <span class="if-text">${it.insight}</span>
-        <span class="if-cta"><i class="ti ti-arrow-right" style="font-size:12px"></i> See what's driving it &amp; what to do</span>
-      </span>
-    </button>`;
-  }).join('');
-
-  feed.innerHTML = `<div class="if-header"><i class="ti ti-bulb"></i><span class="if-title">Top insights from your data</span><span class="if-sub">${srcLabel}</span></div>
-    <div class="if-list">${items}</div>`;
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function askInsight(encodedQuestion) {
-  const q = decodeURIComponent(encodedQuestion);
-  // Use the existing chat path so the user gets the full root-cause answer.
-  sendSuggested(q);
+function renderInsights(insights, grain) {
+  const content = document.getElementById('imContent');
+  const sub = document.getElementById('imSub');
+  if (!content) return;
+  const sevClass = s => s === 'high' ? 'high' : s === 'low' ? 'low' : 'med';
+
+  if (sub) {
+    const srcLabel = grain && grain.systems.length ? grain.systems.join(' + ').toUpperCase() : null;
+    sub.innerHTML = 'The 5 most actionable items, ranked by business impact.' + (srcLabel ? `<span class="im-src">${srcLabel}</span>` : '');
+  }
+
+  const items = insights.map((it, i) => `
+    <div class="im-item">
+      <span class="im-rank">${i + 1}</span>
+      <span class="im-sev ${sevClass(it.severity)}"></span>
+      <span class="im-text">${escapeHtml(it.insight)}</span>
+    </div>`).join('');
+
+  content.innerHTML = `<div class="im-list">${items}</div>`;
 }
 
 async function sendMessage() {
