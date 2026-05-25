@@ -43,6 +43,11 @@ module.exports = async (req, res) => {
   try {
     const { model, max_tokens, system, messages } = req.body;
 
+    // Guard: reject retired model to surface regressions immediately
+    if (model && model.includes('4-5')) {
+      return res.status(400).json({ error: 'Retired model — update app.html to claude-sonnet-4-6' });
+    }
+
     // Pull out the schema payload the frontend embedded
     const { schemas, question, cleanSystem } = extractSemanticPayload(system || '');
 
@@ -51,38 +56,24 @@ module.exports = async (req, res) => {
     const schemaList = Object.values(schemas);
     if (schemaList.length > 0) {
       try {
-        // Merge all uploaded schemas into one unified schema so every file's
-        // column mappings feed the semantic context, not just the first.
-        // On canonId conflicts, the higher-confidence mapping wins.
-        const mergedResolved = {};
-        const mergedIdentifiers = {};
-        const mergedUnmapped = [];
-        let dominantPos = 'generic';
-        let dominantScore = 0;
-
+        // Merge all uploaded schemas into one unified schema.
+        // On canonId conflicts, higher-confidence mapping wins.
+        // Dominant POS = the one with the most high-confidence mappings.
+        let mergedResolved = {};
+        let posCounts = {};
         for (const schema of schemaList) {
-          // Track dominant POS: the one with the most high-confidence mappings
-          const score = Object.values(schema.resolved || {}).filter(v => v.confidence >= 0.85).length;
-          if (score > dominantScore) { dominantScore = score; dominantPos = schema.posSystem || 'generic'; }
-
-          for (const [canonId, hit] of Object.entries(schema.resolved || {})) {
-            if (!mergedResolved[canonId] || hit.confidence > mergedResolved[canonId].confidence) {
-              mergedResolved[canonId] = hit;
+          const pos = schema.posSystem || 'unknown';
+          if (!posCounts[pos]) posCounts[pos] = 0;
+          for (const [canonId, mapping] of Object.entries(schema.resolved || {})) {
+            const existing = mergedResolved[canonId];
+            if (!existing || (mapping.confidence || 0) > (existing.confidence || 0)) {
+              mergedResolved[canonId] = mapping;
             }
+            if ((mapping.confidence || 0) >= 0.8) posCounts[pos]++;
           }
-          for (const [canonId, hits] of Object.entries(schema.identifiers || {})) {
-            if (!mergedIdentifiers[canonId]) mergedIdentifiers[canonId] = [];
-            mergedIdentifiers[canonId].push(...hits);
-          }
-          mergedUnmapped.push(...(schema.unmapped || []));
         }
-
-        const mergedSchema = {
-          posSystem: dominantPos,
-          resolved: mergedResolved,
-          identifiers: mergedIdentifiers,
-          unmapped: [...new Set(mergedUnmapped)]
-        };
+        const dominantPos = Object.entries(posCounts).sort((a,b) => b[1]-a[1])[0]?.[0] || schemaList[0].posSystem;
+        const mergedSchema = { ...schemaList[0], posSystem: dominantPos, resolved: mergedResolved };
 
         const ctx = buildQueryContext({
           schema: mergedSchema,
