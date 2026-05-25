@@ -161,6 +161,31 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 .floating-fb { position:fixed;bottom:80px;right:20px;z-index:50;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:8px 16px;color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:all 0.15s; }
 .floating-fb:hover { border-color:var(--accent);color:var(--text); }
 
+/* Insights modal */
+.insights-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:300; }
+.insights-overlay.open { display:flex; }
+.insights-modal { background:var(--bg2);border:1px solid var(--border2);border-radius:14px;width:min(540px,92vw);max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+.insights-header { display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px; border-bottom:1px solid var(--border); }
+.insights-badge { background:rgba(59,130,246,0.15);color:#93c5fd;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px; }
+.insights-subhead { padding:8px 18px 4px;font-size:12px;color:var(--text3); }
+.insights-list { padding:8px 12px 4px;overflow-y:auto;flex:1; }
+.insights-loading { display:flex;align-items:center;gap:10px;color:var(--text3);font-size:13px;padding:18px 6px; }
+.insights-spinner { width:16px;height:16px;border:2px solid var(--border2);border-top-color:#3b82f6;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.insight-item { display:flex;gap:12px;padding:11px 8px;border-radius:9px;cursor:pointer;transition:background 0.15s;align-items:flex-start; }
+.insight-item:hover { background:var(--bg3); }
+.insight-item:hover .insight-drill { opacity:1; }
+.insight-rank { font-size:11px;font-weight:700;color:var(--text3);min-width:18px;padding-top:2px; }
+.insight-dot { width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px; }
+.insight-dot.sev-high { background:#ef4444; }
+.insight-dot.sev-med  { background:#f59e0b; }
+.insight-dot.sev-low  { background:#10b981; }
+.insight-body { flex:1;font-size:13px;color:var(--text1);line-height:1.5; }
+.insight-drill { font-size:11px;color:#3b82f6;margin-top:4px;opacity:0;transition:opacity 0.15s; }
+.insights-footer { padding:12px 18px;border-top:1px solid var(--border); display:flex;justify-content:flex-end; }
+.insights-explore-btn { background:#3b82f6;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;padding:8px 18px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;transition:background 0.15s; }
+.insights-explore-btn:hover { background:#2563eb; }
+
 /* Chart grid toggle */
 .chart-toggle-btn { background: none; border: 1px solid var(--border); border-radius: 5px; color: var(--text3); cursor: pointer; font-size: 11px; padding: 2px 7px; display: flex; align-items: center; gap: 4px; transition: all 0.15s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
 .chart-toggle-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.07); }
@@ -456,6 +481,9 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           <i class="ti ti-message-bolt"></i>
           <span class="chat-header-text">AI Analyst</span>
           <span class="chat-header-badge">● Live</span>
+          <button id="insightsChip" onclick="reopenInsights()" title="View top insights" style="display:none;margin-left:auto;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.28);color:#93c5fd;font-size:12px;font-weight:500;padding:3px 9px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">
+            <i class="ti ti-brain" style="font-size:12px"></i> Insights
+          </button>
           <button onclick="clearChat()" title="Clear chat" style="margin-left:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:color 0.15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">
             <i class="ti ti-trash"></i>
           </button>
@@ -488,6 +516,27 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="ti ti-send"></i></button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHTS MODAL -->
+<div class="insights-overlay" id="insightsOverlay" onclick="if(event.target===this)closeInsights()">
+  <div class="insights-modal" id="insightsModal">
+    <div class="insights-header">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <i class="ti ti-brain" style="color:#3b82f6;font-size:18px"></i>
+        <span style="font-weight:600;font-size:15px;color:var(--text1)">Top Insights</span>
+        <span class="insights-badge" id="insightsBadge">—</span>
+      </div>
+      <button onclick="closeInsights()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:2px;line-height:1;"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="insights-subhead" id="insightsSubhead">Analyzing your data…</div>
+    <div class="insights-list" id="insightsList">
+      <div class="insights-loading"><span class="insights-spinner"></span> Generating insights…</div>
+    </div>
+    <div class="insights-footer">
+      <button class="insights-explore-btn" onclick="closeInsights()">Start exploring <i class="ti ti-arrow-right" style="font-size:13px"></i></button>
     </div>
   </div>
 </div>
@@ -713,6 +762,60 @@ function findCol(keys, aliases) {
   return null;
 }
 
+// Shared alias lists. Scope: Toast and Square exports that are already
+// aggregated BY LOCATION and BY DATE. Every file is expected to carry explicit
+// "location" and "date" columns, so we do NOT try to infer location from
+// POS-transactional fields (Revenue Center, Device Name, etc.) — that grain is
+// out of scope. findCol normalizes case/spacing, so "Location"/"location" and
+// "Net Sales"/"net_sales" all match.
+const ALIAS = {
+  sales: ['net sales','net_sales','gross sales','gross_sales','revenue','sales','total sales','total_sales','amount'],
+  location: ['location','store','site','restaurant','unit','branch'],
+  date: ['date','business date','business_date','day','week','period'],
+  laborPct: ['labor pct','labor_pct','labor percent','labor_percent','labor %','labor_%','labor cost %','labor_cost_pct'],
+  laborCost: ['labor cost','labor_cost','total labor','wages','wage cost','labor dollars'],
+  pmixCat: ['category','cat','sales category','sales_category','menu group','menu_group','group','section','menu category'],
+  pmixRev: ['net sales','net_sales','gross sales','gross_sales','revenue','item sales','sales','line total'],
+  pmixQty: ['quantity sold','quantity_sold','quantity','qty sold','qty_sold','qty','units'],
+  pmixPrice: ['price','unit price','unit_price','item price','menu price'],
+  pmixItem: ['item name','item_name','menu item','menu_item','item','product','dish','name'],
+};
+
+// Maps each dashboard concept (the keys of ALIAS) to the canonical metric/entity
+// id used by the backend semantic resolver (/api/resolve → resolved{canonId}).
+// Some concepts accept several canon ids in priority order.
+const CANON = {
+  sales:     ['net_sales','gross_sales','item_revenue'],
+  location:  ['location'],
+  date:      ['date'],
+  laborPct:  ['labor_pct'],
+  laborCost: ['direct_labor','labor_burden'],
+  foodcostPct: ['food_cost_pct','total_cogs_pct'],
+  pmixCat:   ['menu_category'],
+  pmixRev:   ['item_revenue','net_sales','gross_sales'],
+  pmixQty:   ['quantity_sold'],
+  pmixItem:  ['menu_item'],
+  pmixPrice: [], // no canonical price metric — derive from revenue/qty
+};
+
+// Resolve a column for a given dataset `type` and dashboard concept.
+// Priority: (1) the backend semantic resolver's mapping (the dictionary —
+// translates ANY header the dictionary knows, regardless of literal name),
+// then (2) the local ALIAS fallback via findCol. `keys` are the file's headers.
+function resolveCol(type, keys, conceptKey) {
+  const schema = (typeof resolvedSchemas !== 'undefined') ? resolvedSchemas[type] : null;
+  const resolved = schema && schema.resolved;
+  if (resolved) {
+    for (const canonId of (CANON[conceptKey] || [])) {
+      const hit = resolved[canonId];
+      if (hit && hit.sourceColumn && keys.includes(hit.sourceColumn)) return hit.sourceColumn;
+    }
+  }
+  // Fallback: local alias matching for files uploaded before the resolver
+  // responded, or columns the dictionary didn't map.
+  return findCol(keys, ALIAS[conceptKey] || []);
+}
+
 // Detect if numeric values are stored as decimals (0.30) vs percentages (30)
 function detectPercentFormat(vals) {
   const nums = vals.filter(v => !isNaN(v));
@@ -800,14 +903,22 @@ function renderDynamicLocations() {
   const container = document.getElementById('locationsList');
   if (!container) return;
 
-  // Use demo locations if none discovered yet
+  const isLive = Object.values(uploadedData).some(Boolean);
+
+  // Demo location pills ONLY in a pure demo session. Once live, use the real
+  // discovered locations; if the live data has none, hide the location filter.
+  if (isLive && locs.length === 0) {
+    container.innerHTML = `<div class="location-pill active"><div class="location-dot"></div> All data</div>`;
+    return;
+  }
+
   const displayLocs = locs.length > 0 ? locs :
     ['Downtown','Freedom Square','Government Square','Midtown','Westside'];
   const displayColors = locs.length > 0 ? colors :
     ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444'];
 
   container.innerHTML =
-    `<div class="location-pill active" onclick="filterByLocation(null, this)"><div class="location-dot"></div> All Locations</div>` +
+    `<div class="location-pill active" onclick="filterByLocation(null, this)"><div class="location-dot"></div> ${locs.length > 0 ? 'All Locations' : 'All Locations'}</div>` +
     displayLocs.map((loc, i) =>
       `<div class="location-pill" onclick="filterByLocation('${loc}', this)"><div class="location-dot" style="background:${displayColors[i % displayColors.length]}"></div> ${loc}</div>`
     ).join('');
@@ -824,9 +935,9 @@ function summarizeData(type, rows) {
   const keys = Object.keys(rows[0]);
 
   if (type === 'sales') {
-    const salesCol = findCol(keys, ['net sales','net_sales','revenue','gross sales','gross_sales','sales','amount','total sales','total_sales']);
-    const locationCol = findCol(keys, ['location','store','site','restaurant','unit','branch']);
-    const dateCol = findCol(keys, ['date','day','week','period','transaction_date','sale_date']);
+    const salesCol = resolveCol('sales', keys, 'sales');
+    const locationCol = resolveCol('sales', keys, 'location');
+    const dateCol = resolveCol('sales', keys, 'date');
     const checkCountCol = findCol(keys, ['check count','check_count','checks','ticket count','ticket_count','transactions','transaction count']);
     const avgCheckCol = findCol(keys, ['average check','average_check','avg check','avg_check','check average','per check','check_avg']);
 
@@ -871,10 +982,10 @@ function summarizeData(type, rows) {
   }
 
   if (type === 'labor') {
-    const locationCol = findCol(keys, ['location','store','site','restaurant','unit','branch']);
-    const dateCol = findCol(keys, ['date','day','week','period']);
-    const laborPctCol = findCol(keys, ['labor pct','labor_pct','labor percent','labor_percent','labor %','labor_%','labor cost %','labor_cost_pct']);
-    const laborCostCol = findCol(keys, ['labor cost','labor_cost','total labor','wages','wage cost','labor dollars']);
+    const locationCol = resolveCol('labor', keys, 'location');
+    const dateCol = resolveCol('labor', keys, 'date');
+    const laborPctCol = resolveCol('labor', keys, 'laborPct');
+    const laborCostCol = resolveCol('labor', keys, 'laborCost');
 
     updateGlobalMetadata(rows, locationCol, dateCol);
 
@@ -906,9 +1017,9 @@ function summarizeData(type, rows) {
   }
 
   if (type === 'foodcost') {
-    const locationCol = findCol(keys, ['location','store','site','restaurant','unit']);
-    const dateCol = findCol(keys, ['date','day','week','period']);
-    const fcPctCol = findCol(keys, ['food cost %','food_cost_pct','food cost percent','food cost percentage','fc pct','fc_pct','cogs pct','cogs_pct','food %']);
+    const locationCol = resolveCol('foodcost', keys, 'location');
+    const dateCol = resolveCol('foodcost', keys, 'date');
+    const fcPctCol = resolveCol('foodcost', keys, 'foodcostPct') || findCol(keys, ['food cost %','food_cost_pct','food cost percent','food cost percentage','fc pct','fc_pct','cogs pct','cogs_pct','food %']);
     const fcCostCol = findCol(keys, ['actual food cost','food cost','food_cost','cogs','actual cost','food costs']);
 
     updateGlobalMetadata(rows, locationCol, dateCol);
@@ -928,27 +1039,37 @@ function summarizeData(type, rows) {
   }
 
   if (type === 'pmix') {
-    const itemCol = findCol(keys, ['menu item','menu_item','item name','item_name','item','product','dish','name']);
-    const catCol = findCol(keys, ['category','cat','group','type','section','menu section']);
-    const qtyCol = findCol(keys, ['quantity sold','quantity_sold','qty sold','qty_sold','quantity','qty','count','sold','units']);
-    const revCol = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount','total','item sales']);
+    const itemCol = resolveCol('pmix', keys, 'pmixItem');
+    const catCol = resolveCol('pmix', keys, 'pmixCat');
+    const qtyCol = resolveCol('pmix', keys, 'pmixQty');
+    const revCol = resolveCol('pmix', keys, 'pmixRev');
+    const priceCol = resolveCol('pmix', keys, 'pmixPrice');
     const marginCol = findCol(keys, ['margin','profit','contribution']);
 
+    // Revenue per row: direct revenue column, else quantity × price as fallback.
+    const rowRev = r => {
+      if (revCol) { const v = parseFloat(r[revCol]); if (!isNaN(v)) return v; }
+      if (qtyCol && priceCol) { const q = parseFloat(r[qtyCol]); const p = parseFloat(r[priceCol]); if (!isNaN(q) && !isNaN(p)) return q * p; }
+      return 0;
+    };
+    const canValue = !!(revCol || (qtyCol && priceCol));
+
     const categories = catCol ? [...new Set(rows.map(r => r[catCol]).filter(Boolean))] : [];
-    const topItems = itemCol && revCol ? rows
+    const topItems = itemCol && canValue ? rows
       .reduce((acc, r) => {
         const name = r[itemCol];
-        acc[name] = (acc[name]||0) + (parseFloat(r[revCol])||0);
+        acc[name] = (acc[name]||0) + rowRev(r);
         return acc;
       }, {}) : {};
     const top5 = Object.entries(topItems).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k])=>k).join(', ');
 
-    const catData = buildPmixChart(rows, catCol, revCol);
+    const catData = buildPmixChart(rows, catCol, rowRev, canValue);
     return {
-      summary: `PMIX: ${rows.length} line items, ${[...new Set(rows.map(r=>itemCol?r[itemCol]:null).filter(Boolean))].length} unique items.${categories.length ? ` Categories: ${categories.join(', ')}.` : ''}${top5 ? ` Top items by revenue: ${top5}.` : ''}`,
+      summary: `PMIX: ${rows.length} line items, ${[...new Set(rows.map(r=>itemCol?r[itemCol]:null).filter(Boolean))].length} unique items.${categories.length ? ` Categories: ${categories.join(', ')}.` : ''}${top5 ? ` Top items by revenue: ${top5}.` : ''}${!revCol && qtyCol && priceCol ? ' (Revenue derived from quantity × price.)' : ''}`,
       kpis: {},
       chartData: catData,
-      metricCols: [qtyCol, revCol, marginCol].filter(Boolean)
+      pmixCatCol: catCol, pmixItemCol: itemCol, pmixRevCol: revCol, pmixQtyCol: qtyCol, pmixPriceCol: priceCol,
+      metricCols: [qtyCol, revCol, priceCol, marginCol].filter(Boolean)
     };
   }
 
@@ -1117,14 +1238,15 @@ function buildLaborChart(rows, laborPctCol, locationCol, dateCol, fmt) {
   return { labels, datasets: [{ label:'Labor %', data:rows.map(r=>getValue(r)), borderColor:'#3b82f6', tension:0.4, pointRadius:2, borderWidth:1.5, fill:false }] };
 }
 
-function buildPmixChart(rows, catCol, revCol) {
-  if (!catCol || !revCol) return null;
+function buildPmixChart(rows, catCol, rowRev, canValue) {
+  if (!catCol || !canValue || typeof rowRev !== 'function') return null;
   const cats = {};
   rows.forEach(r => {
     const cat = r[catCol] || 'Other';
-    cats[cat] = (cats[cat] || 0) + (parseFloat(r[revCol]) || 0);
+    cats[cat] = (cats[cat] || 0) + (rowRev(r) || 0);
   });
   const total = Object.values(cats).reduce((a,b) => a+b, 0);
+  if (total === 0) return null;
   const sorted = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0, 6);
   return {
     labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
@@ -1141,11 +1263,12 @@ function handleFileUpload(event, type) {
     try {
       const rows = parseCSV(e.target.result);
       if (rows.length === 0) { appendMsg('ai', `The file ${file.name} appears to be empty or has no data rows.`); return; }
-      const summary = summarizeData(type, rows);
-      if (!summary) { appendMsg('ai', `Could not parse ${file.name}. Please check the file format.`); return; }
-      uploadedData[type] = { rows, summary, filename: file.name };
 
-      // ---- SEMANTIC LAYER: resolve columns against POS dictionary ----
+      // ---- SEMANTIC LAYER FIRST: resolve columns against the POS dictionary
+      // BEFORE summarizing, so KPIs, the chart, and the AI context are all
+      // dictionary-first. The dictionary can translate any header it knows,
+      // regardless of its literal name; ALIAS is only a fallback if resolve
+      // fails or doesn't map a column. ----
       try {
         const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
         const resolveRes = await fetch('/api/resolve', {
@@ -1159,7 +1282,7 @@ function handleFileUpload(event, type) {
           if (schema.ambiguous && schema.ambiguous.length > 0) {
             checkAmbiguousColumnsFromSchema(schema.ambiguous, file.name);
           }
-          // NEW: surface genuinely-new (unmapped) columns so we can learn them
+          // surface genuinely-new (unmapped) columns so we can learn them
           if (schema.unmapped && schema.unmapped.length > 0) {
             checkUnmappedColumnsFromSchema(schema.unmapped, type, file.name);
           }
@@ -1167,16 +1290,21 @@ function handleFileUpload(event, type) {
           console.log(`[OpticAI] ${file.name} → POS: ${schema.posSystem}, resolved: ${Object.keys(schema.resolved).join(', ')}${idKeys.length ? ', join-keys: ' + idKeys.join(', ') : ''}${schema.unmapped && schema.unmapped.length ? ', unmapped: ' + schema.unmapped.join(', ') : ''}`);
         }
       } catch(schemaErr) {
-        console.warn('[OpticAI] Schema resolve failed (non-fatal):', schemaErr.message);
+        console.warn('[OpticAI] Schema resolve failed (non-fatal) — using local alias fallback:', schemaErr.message);
       }
       // ---- END SEMANTIC LAYER ----
+
+      // Now summarize — resolveCol() inside will use the dictionary mapping
+      // that was just stored above.
+      const summary = summarizeData(type, rows);
+      if (!summary) { appendMsg('ai', `Could not parse ${file.name}. Please check the file format.`); return; }
+      uploadedData[type] = { rows, summary, filename: file.name };
 
       // Notify if missing required columns
       if (summary.error === 'no_sales_col') {
         appendMsg('ai', `⚠️ ${file.name} loaded but I couldn't detect a sales/revenue column.\n\n${summary.summary}\n\nCould you tell me which column contains your sales figures?`);
       } else {
         let msg = `✓ ${file.name} loaded — ${rows.length} records parsed.\n\n${summary.summary}`;
-        // Warn about columns that stayed on demo
         const missingKpis = [];
         if (type === 'sales' && !summary.kpis.check) missingKpis.push('Avg Check (no check count or average check column found)');
         if (type === 'labor' && !summary.kpis.labor) missingKpis.push('Labor % (no direct % column — will calculate once sales data is also uploaded)');
@@ -1311,10 +1439,10 @@ function liveSalesParts() {
   const d = uploadedData.sales;
   if (!d?.rows?.length) return null;
   const keys = Object.keys(d.rows[0]);
-  const salesCol = findCol(keys, ['net sales','net_sales','revenue','gross sales','gross_sales','sales','amount','total sales','total_sales']);
+  const salesCol = resolveCol('sales', keys, 'sales');
   if (!salesCol) return null;
-  const locationCol = findCol(keys, ['location','store','site','restaurant','unit','branch']);
-  const dateCol = findCol(keys, ['date','day','week','period','transaction_date','sale_date']);
+  const locationCol = resolveCol('sales', keys, 'location');
+  const dateCol = resolveCol('sales', keys, 'date');
   return { rows: d.rows, salesCol, locationCol, dateCol, filename: d.filename };
 }
 
@@ -1445,14 +1573,19 @@ function chartCatalog() {
       available: () => {
         const d = uploadedData.pmix; if (!d?.rows?.length) return false;
         const keys = Object.keys(d.rows[0]);
-        return !!(findCol(keys,['category','cat','group','type','section','menu category']) && findCol(keys,['gross sales','gross_sales','revenue','sales','amount','total sales','item sales']));
+        const cat = resolveCol('pmix', keys, 'pmixCat');
+        const rev = resolveCol('pmix', keys, 'pmixRev');
+        const qty = resolveCol('pmix', keys, 'pmixQty'), price = resolveCol('pmix', keys, 'pmixPrice');
+        return !!(cat && (rev || (qty && price)));
       },
       paint: (slot) => {
         const d = uploadedData.pmix, keys = Object.keys(d.rows[0]);
-        const catCol = findCol(keys,['category','cat','group','type','section','menu category']);
-        const revCol = findCol(keys,['gross sales','gross_sales','revenue','sales','amount','total sales','item sales']);
+        const catCol = resolveCol('pmix', keys, 'pmixCat');
+        const revCol = resolveCol('pmix', keys, 'pmixRev');
+        const qtyCol = resolveCol('pmix', keys, 'pmixQty'), priceCol = resolveCol('pmix', keys, 'pmixPrice');
+        const rowRev = r => { if (revCol){const v=parseFloat(r[revCol]); if(!isNaN(v))return v;} if(qtyCol&&priceCol){const q=parseFloat(r[qtyCol]),p=parseFloat(r[priceCol]); if(!isNaN(q)&&!isNaN(p))return q*p;} return 0; };
         const totals = {}; let total = 0;
-        d.rows.forEach(r => { const c = r[catCol]||'Other'; const v = parseFloat(r[revCol])||0; totals[c]=(totals[c]||0)+v; total+=v; });
+        d.rows.forEach(r => { const c = r[catCol]||'Other'; const v = rowRev(r); totals[c]=(totals[c]||0)+v; total+=v; });
         const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]).slice(0,6);
         paintInto(slot, { type: 'doughnut', data: { labels: sorted.map(([k,v])=>`${k} ${(v/total*100).toFixed(1)}%`),
             datasets: [{ data: sorted.map(([,v])=>v/total*100), backgroundColor: sorted.map((_,i)=>PALETTE[i%PALETTE.length]), borderWidth: 0, hoverOffset: 6 }] },
@@ -1506,14 +1639,19 @@ function chartCatalog() {
       available: () => {
         const d = uploadedData.pmix; if (!d?.rows?.length) return false;
         const keys = Object.keys(d.rows[0]);
-        return !!(findCol(keys,['menu item','menu_item','item name','item_name','item','product','dish','name']) && findCol(keys,['gross sales','gross_sales','revenue','sales','amount','total','item sales']));
+        const item = resolveCol('pmix', keys, 'pmixItem');
+        const rev = resolveCol('pmix', keys, 'pmixRev');
+        const qty = resolveCol('pmix', keys, 'pmixQty'), price = resolveCol('pmix', keys, 'pmixPrice');
+        return !!(item && (rev || (qty && price)));
       },
       paint: (slot) => {
         const d = uploadedData.pmix, keys = Object.keys(d.rows[0]);
-        const itemCol = findCol(keys,['menu item','menu_item','item name','item_name','item','product','dish','name']);
-        const revCol = findCol(keys,['gross sales','gross_sales','revenue','sales','amount','total','item sales']);
+        const itemCol = resolveCol('pmix', keys, 'pmixItem');
+        const revCol = resolveCol('pmix', keys, 'pmixRev');
+        const qtyCol = resolveCol('pmix', keys, 'pmixQty'), priceCol = resolveCol('pmix', keys, 'pmixPrice');
+        const rowRev = r => { if (revCol){const v=parseFloat(r[revCol]); if(!isNaN(v))return v;} if(qtyCol&&priceCol){const q=parseFloat(r[qtyCol]),p=parseFloat(r[priceCol]); if(!isNaN(q)&&!isNaN(p))return q*p;} return 0; };
         const totals = {};
-        d.rows.forEach(r => { const n = r[itemCol]||'—'; totals[n] = (totals[n]||0) + (parseFloat(r[revCol])||0); });
+        d.rows.forEach(r => { const n = r[itemCol]||'—'; totals[n] = (totals[n]||0) + rowRev(r); });
         const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]).slice(0,7);
         paintInto(slot, { type: 'bar', data: { labels: sorted.map(([k])=>k.length>14?k.slice(0,13)+'…':k),
             datasets: [{ data: sorted.map(([,v])=>v/1000), backgroundColor: '#8b5cf6', borderRadius: 5, borderWidth: 0 }] },
@@ -1528,6 +1666,21 @@ function chartCatalog() {
 
 function reconcileDashboard() {
   if (!hasAnyLive()) return; // pure demo session — leave the demo dashboard untouched
+
+  // SAFETY NET for resolve timing: if a file's /api/resolve was slow or failed
+  // during upload, its cached summary may have used the local alias fallback
+  // instead of the dictionary. By now the dictionary has had time to load (and
+  // any retries to land), so recompute each live summary dictionary-first and
+  // refresh the KPI tiles. This keeps KPIs, charts, and AI context consistent.
+  Object.keys(uploadedData).forEach(type => {
+    const d = uploadedData[type];
+    if (d && d.rows) {
+      try {
+        const fresh = summarizeData(type, d.rows);
+        if (fresh) { d.summary = fresh; updateDashboard(type, fresh, d.filename); }
+      } catch(e) { console.warn('[OpticAI] summary recompute failed for', type, e); }
+    }
+  });
 
   const catalog = chartCatalog();
   // Pick every renderable chart, dedupe, sort by weight desc, cap at slot count.
@@ -1564,6 +1717,9 @@ function reconcileDashboard() {
   // Demo location-filter fallbacks should never run now that we're live-only.
   // (updateDowChart / updatePmixChart still key off uploadedData and are safe.)
   refreshChartToggleList();
+  renderDynamicLocations();
+  questionPoolIndex = 0;
+  refreshSuggestedQuestions();
 }
 
 // Keep the Customize panel's chart toggle list honest about what's actually shown.
@@ -1572,10 +1728,173 @@ function refreshChartToggleList() {
 }
 
 // Called by the Done button.
+// ================================================================
+// INSIGHTS SYSTEM
+// On Done: generates top-5 actionable insights from live data.
+// Shows a popup modal, caches results, re-opens via header chip.
+// Each insight is clickable — sends its follow-up question to chat.
+// ================================================================
+
+let lastInsights = null; // cached so reopen never re-calls the API
+
+function openInsights() {
+  document.getElementById('insightsOverlay').classList.add('open');
+}
+function closeInsights() {
+  document.getElementById('insightsOverlay').classList.remove('open');
+}
+function reopenInsights() {
+  if (lastInsights) renderInsights(lastInsights);
+  openInsights();
+}
+
+// Deterministic fallback — computes sensible insights from live summaries
+// when the API call fails or returns unparseable output.
+function localFallbackInsights() {
+  const insights = [];
+  const sales = uploadedData.sales?.summary;
+  const labor = uploadedData.labor?.summary;
+  const fc    = uploadedData.foodcost?.summary;
+  const pmix  = uploadedData.pmix?.summary;
+
+  if (labor?.kpis?.labor) {
+    const lv = parseFloat(labor.kpis.labor);
+    if (!isNaN(lv) && lv > 32) insights.push({ severity:'high', insight:`Labor is running at ${lv.toFixed(1)}%, which is ${(lv-30).toFixed(1)}pts above the 30% industry target. Scheduling and overtime are the most common drivers.`, question:`Why is labor running at ${lv.toFixed(1)}% and what are the specific drivers?` });
+  }
+  if (fc?.kpis?.foodcost) {
+    const fv = parseFloat(fc.kpis.foodcost);
+    if (!isNaN(fv) && fv > 30) insights.push({ severity:'high', insight:`Food cost is at ${fv.toFixed(1)}%, above the typical 28–30% target. Check portion control, waste, and invoicing against theoretical cost.`, question:`What is driving food cost to ${fv.toFixed(1)}% and where is the biggest variance?` });
+  }
+  if (sales?.kpis?.sales) insights.push({ severity:'med', insight:`Sales data is loaded. Review week-over-week trend for any locations falling behind — early dips compound quickly over a quarter.`, question:`What is the sales trend over the last 4 weeks and which location is softest?` });
+  if (pmix?.summary)       insights.push({ severity:'med', insight:`PMIX data is loaded. High-margin items often underperform on mix — checking category contribution can reveal upsell opportunities.`, question:`Which menu categories have the best margin contribution and which are underperforming?` });
+
+  while (insights.length < 3) insights.push({ severity:'low', insight:`Upload the remaining datasets (labor, food cost, PMIX, guest satisfaction) to unlock full root-cause analysis.`, question:`What data would you recommend I upload next to get the most useful analysis?` });
+  return insights.slice(0, 5);
+}
+
+// Robustly parse the model's JSON response — handles markdown fences,
+// preamble text, and malformed severity values.
+function parseInsightJson(text) {
+  if (!text) return null;
+  // Strip markdown code fences
+  let clean = text.replace(/```json|```/g, '').trim();
+  // Find first [ … ] block
+  const start = clean.indexOf('['), end = clean.lastIndexOf(']');
+  if (start === -1 || end === -1) return null;
+  try {
+    const arr = JSON.parse(clean.slice(start, end + 1));
+    if (!Array.isArray(arr)) return null;
+    return arr.slice(0, 5).map(item => ({
+      severity: ['high','med','low'].includes(item.severity) ? item.severity : 'med',
+      insight:  String(item.insight || '').slice(0, 400),
+      question: String(item.question || '').slice(0, 200)
+    })).filter(i => i.insight.length > 10);
+  } catch { return null; }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderInsights(insights) {
+  const locs = [...discoveredLocations].sort();
+  const locLabel = locs.length > 0 ? locs.join(', ') : 'your locations';
+  const types = Object.keys(uploadedData).filter(k => uploadedData[k]);
+  document.getElementById('insightsBadge').textContent = insights.length + ' findings';
+  document.getElementById('insightsSubhead').textContent = `From your uploaded ${types.join(', ')} data — ${locLabel}`;
+
+  document.getElementById('insightsList').innerHTML = insights.map((ins, i) => `
+    <div class="insight-item" onclick="askInsight(${i})" title="Click to explore in chat">
+      <div class="insight-rank">${i + 1}</div>
+      <div class="insight-dot sev-${escapeHtml(ins.severity)}"></div>
+      <div class="insight-body">
+        ${escapeHtml(ins.insight)}
+        ${ins.question ? `<div class="insight-drill"><i class="ti ti-arrow-right" style="font-size:10px"></i> Ask: "${escapeHtml(ins.question)}"</div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+// Drill-down: clicking an insight sends its question to chat and closes popup.
+function askInsight(index) {
+  if (!lastInsights || !lastInsights[index]) return;
+  const q = lastInsights[index].question;
+  if (!q) return;
+  closeInsights();
+  sendSuggested(q);
+}
+
+async function generateInsights() {
+  if (!hasAnyLive()) return; // demo session — skip
+
+  // Show popup immediately with a spinner
+  document.getElementById('insightsList').innerHTML = '<div class="insights-loading"><span class="insights-spinner"></span> Generating insights…</div>';
+  document.getElementById('insightsBadge').textContent = '…';
+  document.getElementById('insightsSubhead').textContent = 'Analyzing your uploaded data…';
+  openInsights();
+  document.getElementById('insightsChip').style.display = '';
+
+  // Collect live summaries for the prompt
+  const summaryLines = Object.entries(uploadedData)
+    .filter(([, v]) => v)
+    .map(([t, v]) => `${t.toUpperCase()} (${v.filename}): ${v.summary?.summary || ''}`)
+    .join('\n\n');
+
+  // Grain-safety note: if multiple POS types detected, phrase cross-POS
+  // metrics qualitatively to avoid asserting rolled-up numbers we can't verify.
+  const posSystems = [...new Set(Object.values(resolvedSchemas).map(s => s?.posSystem).filter(Boolean))];
+  const grainNote = posSystems.length > 1
+    ? 'NOTE: data comes from multiple POS systems. Phrase any cross-system comparisons qualitatively (direction/trend) rather than asserting specific combined percentages.'
+    : '';
+
+  const insightPrompt = `You are an expert restaurant operations analyst. Given the following uploaded data summaries, identify the 5 most actionable operational insights a multi-location restaurant operator should act on this week.
+
+${grainNote}
+
+DATA SUMMARIES:
+${summaryLines}
+
+Return ONLY a JSON array of exactly 5 objects. Each object must have:
+- "severity": one of "high", "med", or "low"  
+- "insight": 1-2 sentence actionable finding with specific numbers where available (max 300 chars)
+- "question": a short follow-up question the operator should ask to dig deeper (max 150 chars)
+
+Return ONLY the JSON array. No preamble, no markdown fences.`;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: 'You are an expert restaurant operations analyst. Return only valid JSON as instructed.',
+        messages: [{ role: 'user', content: insightPrompt }]
+      })
+    });
+
+    let parsed = null;
+    if (res.ok) {
+      const data = await res.json();
+      const text = (data.content || []).map(b => b.text || '').join('');
+      parsed = parseInsightJson(text);
+    }
+
+    const insights = parsed || localFallbackInsights();
+    lastInsights = insights;
+    renderInsights(insights);
+  } catch (e) {
+    console.warn('[OpticAI] Insights API call failed, using local fallback:', e.message);
+    const insights = localFallbackInsights();
+    lastInsights = insights;
+    renderInsights(insights);
+  }
+}
+
 function finishUploadAndAnalyze() {
   closeUploadModal();
   reconcileDashboard();
   updateStatusBar();
+  if (hasAnyLive()) generateInsights();
 }
 
 function recalcPrimeCost() {
@@ -1732,6 +2051,14 @@ ANOMALIES: 1) Midtown Tue-Wed labor spike 3 consecutive weeks. 2) Tuesday struct
 
 Respond as a sharp, direct restaurant ops analyst. Specific numbers, actionable recommendations, concise (3–6 sentences unless full briefing requested). Bullet points for recs. No markdown headers.`;
 
+// Persona/instructions only — NO demo data. Used to build the live-only prompt
+// so the model never sees demo locations or demo numbers once real data exists.
+const ANALYST_PERSONA = `You are OpticAI, an expert restaurant operations analyst AI.
+
+Respond as a sharp, direct restaurant ops analyst. Use specific numbers from the data provided. Give actionable recommendations, stay concise (3–6 sentences unless a full briefing is requested), use bullet points for recommendations, and avoid markdown headers.
+
+IMPORTANT: Base every answer ONLY on the LIVE UPLOADED DATA below. Do not invent location names, figures, date ranges, or trends. If the uploaded data doesn't contain something the user asks about (for example a per-location breakdown when the file has no location column), say so plainly rather than guessing or using example data. Refer to locations, items, and dates exactly as they appear in the uploaded data.`;
+
 let conversationHistory = [];
 let liveDataContext = '';
 let resolvedSchemas = {}; // stores semantic schema per uploaded file type
@@ -1743,13 +2070,19 @@ function buildSystemPrompt(userQuestion) {
   const hasLive = Object.values(uploadedData).some(Boolean);
   if (!hasLive) return DEMO_CONTEXT;
 
-  let liveSection = '\n\nLIVE UPLOADED DATA (use this instead of demo data where applicable):\n';
+  let liveSection = '\n\nLIVE UPLOADED DATA — this is the ONLY data you may reference:\n';
+  const discovered = [...discoveredLocations].sort();
+  if (discovered.length) {
+    liveSection += `\nLocations present in the data: ${discovered.join(', ')}.\n`;
+  } else {
+    liveSection += `\nNote: the uploaded data has no location column — treat it as a single location and do not name multiple locations.\n`;
+  }
   Object.entries(uploadedData).forEach(([type, data]) => {
     if (data) liveSection += `\n${type.toUpperCase()} (from ${data.filename}):\n${data.summary.summary}\n`;
   });
 
   const missingTypes = Object.entries(uploadedData).filter(([,v]) => !v).map(([k]) => k);
-  if (missingTypes.length > 0) liveSection += `\nNote: ${missingTypes.join(', ')} data was not uploaded — say it's not available rather than citing any demo figures for those.`;
+  if (missingTypes.length > 0) liveSection += `\nNot uploaded: ${missingTypes.join(', ')}. If asked about these, say the data wasn't uploaded — do NOT use example or demo figures.`;
 
   // Attach resolved schemas for server-side semantic context injection
   if (Object.keys(resolvedSchemas).length > 0) {
@@ -1757,7 +2090,9 @@ function buildSystemPrompt(userQuestion) {
   }
   liveSection += '\n__USER_QUESTION__:' + (userQuestion || '');
 
-  return DEMO_CONTEXT + liveSection;
+  // Live-only: persona + uploaded data. DEMO_CONTEXT is never included here so
+  // the model can't fall back to demo locations or demo numbers.
+  return ANALYST_PERSONA + liveSection;
 }
 
 // Semantic ambiguity UI — driven by resolver output instead of hardcoded list
@@ -1892,7 +2227,7 @@ async function sendMessage() {
   try {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: buildSystemPrompt(text), messages: conversationHistory })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system: buildSystemPrompt(text), messages: conversationHistory })
     });
     const data = await res.json();
     const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, I had trouble with that. Try again.';
@@ -1958,7 +2293,7 @@ Keep it direct, specific, and written for a GM — not an analyst. Use real numb
   try {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: conversationHistory })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: conversationHistory })
     });
     const data = await res.json();
     const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, could not generate briefing.';
@@ -2164,46 +2499,55 @@ let questionPoolIndex = 0;
 
 function buildQuestionPool() {
   const pool = [];
-  const locs = [...discoveredLocations].sort();
-  const locCount = locs.length || 5;
-  const locNames = locs.length ? locs : ['Downtown','Freedom Square','Government Square','Midtown','Westside'];
-  const worstSales = findWorstSalesLocation() || locNames[locNames.length - 1];
-  const highLabor = findHighLaborLocation() || locNames[0];
-  const laborKpi = parseFloat(document.getElementById('val-labor')?.textContent) || 39.7;
-  const primeKpi = parseFloat(document.getElementById('val-prime')?.textContent) || 70.1;
-  const fcKpi = parseFloat(document.getElementById('val-foodcost')?.textContent) || 30.4;
-  const activeLoc = activeLocation;
-  const locContext = activeLoc ? ` at ${activeLoc}` : ` across all ${locCount} locations`;
-
   const loadedCount = Object.values(uploadedData).filter(Boolean).length;
+  const isLive = loadedCount > 0;
+
+  const locs = [...discoveredLocations].sort();
+  // Demo location names are ONLY allowed in a pure demo session. Once live,
+  // we use real discovered locations, or none if the data has no location.
+  const locNames = isLive ? locs : ['Downtown','Freedom Square','Government Square','Midtown','Westside'];
+  const hasLocs = locNames.length > 0;
+  const locCount = locNames.length || 1;
+
+  const worstSales = findWorstSalesLocation() || (isLive ? null : locNames[locNames.length - 1]);
+  const highLabor = findHighLaborLocation() || (isLive ? null : locNames[0]);
+
+  // KPI fallbacks: demo numbers only in demo session; live reads actual tiles.
+  const laborKpi = parseFloat(document.getElementById('val-labor')?.textContent) || (isLive ? null : 39.7);
+  const primeKpi = parseFloat(document.getElementById('val-prime')?.textContent) || (isLive ? null : 70.1);
+  const fcKpi = parseFloat(document.getElementById('val-foodcost')?.textContent) || (isLive ? null : 30.4);
+  const activeLoc = activeLocation;
+  const locContext = activeLoc ? ` at ${activeLoc}` : (hasLocs && locCount > 1 ? ` across all ${locCount} locations` : '');
 
   // ── SALES pool ──
   if (uploadedData.sales || loadedCount === 0) {
     pool.push(`Compare sales performance${locContext}`);
     pool.push(`What is the sales trend over the last 4 weeks${locContext}?`);
     pool.push(`Which day of the week generates the most revenue${locContext}?`);
-    pool.push(`Why is ${worstSales} the lowest-revenue location?`);
+    if (worstSales) pool.push(`Why is ${worstSales} the lowest-revenue location?`);
     pool.push(`What would it take to grow sales by 10%${locContext}?`);
     pool.push(`How does weekend performance compare to weekday${locContext}?`);
-    pool.push(`What is the revenue gap between the best and worst location?`);
-    if (!activeLoc) pool.push(`Which location is growing fastest over the last 4 weeks?`);
+    if (hasLocs && locCount > 1) pool.push(`What is the revenue gap between the best and worst location?`);
+    if (!activeLoc && hasLocs && locCount > 1) pool.push(`Which location is growing fastest over the last 4 weeks?`);
   }
 
   // ── LABOR pool ──
   if (uploadedData.labor || loadedCount === 0) {
-    pool.push(`Why is labor running at ${laborKpi.toFixed(1)}%${locContext} — above the 30% target?`);
-    pool.push(`Which location has the best labor efficiency?`);
+    if (laborKpi != null) pool.push(`Why is labor running at ${laborKpi.toFixed(1)}%${locContext} — above the 30% target?`);
+    else pool.push(`How is labor tracking against the 30% target${locContext}?`);
+    if (hasLocs && locCount > 1) pool.push(`Which location has the best labor efficiency?`);
     pool.push(`Where can we cut labor hours without impacting service${locContext}?`);
     pool.push(`What does the labor trend look like over the last 8 weeks${locContext}?`);
-    pool.push(`How much would prime cost improve if labor dropped to 32%${locContext}?`);
-    pool.push(`Is ${highLabor} consistently the highest-labor location?`);
-    if (!activeLoc) pool.push(`Which location has improved labor % the most recently?`);
+    if (primeKpi != null || laborKpi != null) pool.push(`How much would prime cost improve if labor dropped to 32%${locContext}?`);
+    if (highLabor) pool.push(`Is ${highLabor} consistently the highest-labor location?`);
+    if (!activeLoc && hasLocs && locCount > 1) pool.push(`Which location has improved labor % the most recently?`);
   }
 
   // ── FOOD COST pool ──
   if (uploadedData.foodcost || loadedCount === 0) {
-    pool.push(`Food cost is at ${fcKpi.toFixed(1)}% — what is driving it above target?`);
-    pool.push(`Which location has the best food cost control${locContext}?`);
+    if (fcKpi != null) pool.push(`Food cost is at ${fcKpi.toFixed(1)}% — what is driving it above target?`);
+    else pool.push(`What is driving food cost and how does it compare to target?`);
+    if (hasLocs && locCount > 1) pool.push(`Which location has the best food cost control${locContext}?`);
     pool.push(`What is the relationship between food cost and prime cost${locContext}?`);
     pool.push(`Where is the biggest food cost variance week over week${locContext}?`);
   }
@@ -2218,7 +2562,7 @@ function buildQuestionPool() {
   }
 
   // ── PRIME COST pool ──
-  if (primeKpi > 62) {
+  if (primeKpi != null && primeKpi > 62) {
     pool.push(`Prime cost is ${primeKpi.toFixed(1)}% — what is the fastest lever to bring it down?`);
     pool.push(`If we fixed labor alone, where would prime cost land${locContext}?`);
     pool.push(`What is a realistic prime cost target for this group and how do we get there?`);
@@ -2237,25 +2581,25 @@ function buildQuestionPool() {
     metricCols.forEach(col => {
       const n = col.toLowerCase();
       if (n.includes('satisfaction') || n.includes('score')) {
-        pool.push(`Which location has the lowest guest satisfaction score?`);
+        if (hasLocs && locCount > 1) pool.push(`Which location has the lowest guest satisfaction score?`);
         pool.push(`Is there a correlation between guest satisfaction and sales?`);
         pool.push(`Has guest satisfaction improved or declined over the period?`);
       }
       if (n.includes('nps')) {
-        pool.push(`What is driving NPS differences between locations?`);
-        pool.push(`Which location has the best NPS and what are they doing right?`);
+        if (hasLocs && locCount > 1) pool.push(`What is driving NPS differences between locations?`);
+        if (hasLocs && locCount > 1) pool.push(`Which location has the best NPS and what are they doing right?`);
         pool.push(`What NPS score should we be targeting and how far are we?`);
       }
       if (n.includes('complaint')) {
-        pool.push(`Which location generates the most complaints${locContext}?`);
+        if (hasLocs && locCount > 1) pool.push(`Which location generates the most complaints${locContext}?`);
         pool.push(`Is there a pattern to when complaints spike?`);
       }
       if (n.includes('wait')) {
         pool.push(`Does longer wait time correlate with lower guest satisfaction?`);
-        pool.push(`Which location has the longest avg wait time and why?`);
+        if (hasLocs && locCount > 1) pool.push(`Which location has the longest avg wait time and why?`);
       }
       if (n.includes('review')) {
-        pool.push(`Which location has the best review rate and what can others learn?`);
+        if (hasLocs && locCount > 1) pool.push(`Which location has the best review rate and what can others learn?`);
       }
     });
   }
@@ -2264,7 +2608,7 @@ function buildQuestionPool() {
   if (loadedCount >= 2) {
     pool.push(`Give me a full weekly ops briefing across all loaded data`);
     pool.push(`What are the top 3 things I should focus on this week?`);
-    pool.push(`Which location needs the most attention right now and why?`);
+    if (hasLocs && locCount > 1) pool.push(`Which location needs the most attention right now and why?`);
   }
 
   // ── DEMO fallback pool ──
@@ -2296,23 +2640,25 @@ function findWorstSalesLocation() {
   if (!uploadedData.sales?.rows) return null;
   const rows = uploadedData.sales.rows;
   const keys = Object.keys(rows[0]);
-  const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
-  const locationCol = findCol(keys, ['location','store','site','restaurant']);
+  const salesCol = resolveCol('sales', keys, 'sales');
+  const locationCol = resolveCol('sales', keys, 'location');
   if (!salesCol || !locationCol) return null;
   const totals = {};
   rows.forEach(r => {
     const loc = r[locationCol];
     totals[loc] = (totals[loc]||0) + (parseFloat(r[salesCol])||0);
   });
-  return Object.entries(totals).sort((a,b)=>a[1]-b[1])[0]?.[0] || null;
+  const entries = Object.entries(totals).filter(([k]) => k);
+  if (entries.length < 2) return null; // need at least 2 locations to call one "worst"
+  return entries.sort((a,b)=>a[1]-b[1])[0]?.[0] || null;
 }
 
 function findHighLaborLocation() {
   if (!uploadedData.labor?.rows) return null;
   const rows = uploadedData.labor.rows;
   const keys = Object.keys(rows[0]);
-  const laborPctCol = findCol(keys, ['labor pct','labor_pct','labor percent','labor %']);
-  const locationCol = findCol(keys, ['location','store','site']);
+  const laborPctCol = resolveCol('labor', keys, 'laborPct');
+  const locationCol = resolveCol('labor', keys, 'location');
   if (!laborPctCol || !locationCol) return null;
   const fmt = detectPercentFormat(rows.map(r=>parseFloat(r[laborPctCol])).filter(v=>!isNaN(v)));
   const totals = {};
@@ -2322,7 +2668,8 @@ function findHighLaborLocation() {
     const val = normalizePct(r[laborPctCol], fmt);
     if (val !== null) { totals[loc] = (totals[loc]||0) + val; counts[loc] = (counts[loc]||0) + 1; }
   });
-  const avgs = Object.entries(totals).map(([loc, sum]) => [loc, sum/counts[loc]]);
+  const avgs = Object.entries(totals).filter(([k]) => k).map(([loc, sum]) => [loc, sum/counts[loc]]);
+  if (avgs.length < 2) return null;
   return avgs.sort((a,b)=>b[1]-a[1])[0]?.[0] || null;
 }
 
@@ -2636,14 +2983,21 @@ function applyLocationFilter() {
 
 function updateDowChart(loc) {
   if (!dowChart) return;
+  // In live mode, the dowChart slot may have been reassigned to a different
+  // chart by reconcileDashboard(). Only update it if it's still a day-of-week
+  // bar chart sourced from live sales.
   const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   if (uploadedData.sales?.rows) {
+    if (hasAnyLive()) {
+      const isNativeDow = JSON.stringify(dowChart.data?.labels) === JSON.stringify(days);
+      if (!isNativeDow) return; // slot now holds something else — don't clobber it
+    }
     const rows = uploadedData.sales.rows;
     const keys = Object.keys(rows[0]);
-    const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
-    const locationCol = findCol(keys, ['location','store','site','restaurant']);
-    const dateCol = findCol(keys, ['date','day','week','period']);
+    const salesCol = resolveCol('sales', keys, 'sales');
+    const locationCol = resolveCol('sales', keys, 'location');
+    const dateCol = resolveCol('sales', keys, 'date');
     if (!salesCol || !dateCol) return;
 
     const locRows = (loc && locationCol) ? rows.filter(r => r[locationCol] === loc) : rows;
@@ -2691,14 +3045,17 @@ function updatePmixChart(loc) {
   const COLORS = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4'];
 
   if (uploadedData.pmix?.rows) {
+    if (hasAnyLive() && pmixChart.config?.type !== 'doughnut') return; // slot reassigned
     const rows = uploadedData.pmix.rows;
     const keys = Object.keys(rows[0]);
-    const catCol = findCol(keys, ['category','cat','group','type','section','menu category']);
-    const revCol = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount','total sales','item sales']);
-    const locationCol = findCol(keys, ['location','store','site','restaurant','unit']);
-    
-    if (!catCol || !revCol) {
-      console.warn('PMIX: could not find category or revenue column. Keys:', keys);
+    const catCol = resolveCol('pmix', keys, 'pmixCat');
+    const revCol = resolveCol('pmix', keys, 'pmixRev');
+    const qtyCol = resolveCol('pmix', keys, 'pmixQty'), priceCol = resolveCol('pmix', keys, 'pmixPrice');
+    const locationCol = resolveCol('pmix', keys, 'location');
+    const rowRev = r => { if (revCol){const v=parseFloat(r[revCol]); if(!isNaN(v))return v;} if(qtyCol&&priceCol){const q=parseFloat(r[qtyCol]),p=parseFloat(r[priceCol]); if(!isNaN(q)&&!isNaN(p))return q*p;} return 0; };
+
+    if (!catCol || !(revCol || (qtyCol && priceCol))) {
+      console.warn('PMIX: could not find category and a revenue (or qty+price) source. Keys:', keys);
       return;
     }
 
@@ -2713,7 +3070,7 @@ function updatePmixChart(loc) {
     let total = 0;
     locRows.forEach(r => {
       const cat = r[catCol] || 'Other';
-      const val = parseFloat(r[revCol]) || 0;
+      const val = rowRev(r);
       catTotals[cat] = (catTotals[cat] || 0) + val;
       total += val;
     });
@@ -2763,7 +3120,7 @@ function updateFilteredKPIs(loc) {
     if (uploadedData.sales) {
       const rows = uploadedData.sales.rows;
       const keys = Object.keys(rows[0]);
-      const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
+      const salesCol = resolveCol('sales', keys, 'sales');
       const checkCountCol = findCol(keys, ['check count','check_count','checks','transactions']);
       const avgCheckCol = findCol(keys, ['average check','avg check','avg_check']);
       const total = rows.reduce((s,r) => s+(parseFloat(r[salesCol])||0), 0);
@@ -2778,6 +3135,8 @@ function updateFilteredKPIs(loc) {
 
   // Filter to single location
   if (!uploadedData.sales) {
+    // Demo per-location KPIs — ONLY in a pure demo session (no live data).
+    if (hasAnyLive()) return;
     // Use DEMO per-location KPIs
     const demoKpis = {
       'Downtown':          { sales: '$1.99M', labor: '39.0%', foodcost: '30.4%', prime: '69.4%', check: '$27.80' },
@@ -2799,8 +3158,8 @@ function updateFilteredKPIs(loc) {
   if (uploadedData.sales) {
     const rows = uploadedData.sales.rows;
     const keys = Object.keys(rows[0]);
-    const salesCol = findCol(keys, ['net sales','net_sales','revenue','sales','gross sales']);
-    const locationCol = findCol(keys, ['location','store','site','restaurant']);
+    const salesCol = resolveCol('sales', keys, 'sales');
+    const locationCol = resolveCol('sales', keys, 'location');
     const checkCountCol = findCol(keys, ['check count','check_count','checks','transactions']);
     const avgCheckCol = findCol(keys, ['average check','avg check','avg_check']);
 
@@ -2815,9 +3174,9 @@ function updateFilteredKPIs(loc) {
   if (uploadedData.labor) {
     const rows = uploadedData.labor.rows;
     const keys = Object.keys(rows[0]);
-    const locationCol = findCol(keys, ['location','store','site']);
-    const laborCostCol = findCol(keys, ['labor cost','labor_cost','wages']);
-    const laborPctCol = findCol(keys, ['labor pct','labor_pct','labor percent','labor %']);
+    const locationCol = resolveCol('labor', keys, 'location');
+    const laborCostCol = resolveCol('labor', keys, 'laborCost');
+    const laborPctCol = resolveCol('labor', keys, 'laborPct');
     const locRows = locationCol ? rows.filter(r => r[locationCol] === loc) : rows;
 
     if (laborPctCol) {
@@ -2829,8 +3188,8 @@ function updateFilteredKPIs(loc) {
       // Cross-calculate for this location
       const sRows = uploadedData.sales.rows;
       const sKeys = Object.keys(sRows[0]);
-      const sCol = findCol(sKeys, ['net sales','net_sales','revenue','sales']);
-      const sLocCol = findCol(sKeys, ['location','store','site','restaurant']);
+      const sCol = resolveCol('sales', sKeys, 'sales');
+      const sLocCol = resolveCol('sales', sKeys, 'location');
       const locSales = sLocCol ? sRows.filter(r=>r[sLocCol]===loc).reduce((s,r)=>s+(parseFloat(r[sCol])||0),0) : 0;
       const locLabor = locRows.reduce((s,r)=>s+(parseFloat(r[laborCostCol])||0),0);
       if (locSales > 0) updateKpi('labor', (locLabor/locSales*100).toFixed(1)+'%', loc, true);
@@ -2840,7 +3199,7 @@ function updateFilteredKPIs(loc) {
   if (uploadedData.foodcost) {
     const rows = uploadedData.foodcost.rows;
     const keys = Object.keys(rows[0]);
-    const locationCol = findCol(keys, ['location','store','site']);
+    const locationCol = resolveCol('foodcost', keys, 'location');
     const fcPctCol = findCol(keys, ['food cost %','food_cost_pct','food cost percent','fc pct']);
     const locRows = locationCol ? rows.filter(r=>r[locationCol]===loc) : rows;
     if (fcPctCol && locRows.length) {
