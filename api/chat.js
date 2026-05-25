@@ -51,19 +51,47 @@ module.exports = async (req, res) => {
     const schemaList = Object.values(schemas);
     if (schemaList.length > 0) {
       try {
-        // Use the first resolved schema as primary context.
-        // When multiple files are uploaded we pick the one most relevant
-        // to the question — for now, first one is fine for v1.
-        const primarySchema = schemaList[0];
+        // Merge all uploaded schemas into one unified schema so every file's
+        // column mappings feed the semantic context, not just the first.
+        // On canonId conflicts, the higher-confidence mapping wins.
+        const mergedResolved = {};
+        const mergedIdentifiers = {};
+        const mergedUnmapped = [];
+        let dominantPos = 'generic';
+        let dominantScore = 0;
+
+        for (const schema of schemaList) {
+          // Track dominant POS: the one with the most high-confidence mappings
+          const score = Object.values(schema.resolved || {}).filter(v => v.confidence >= 0.85).length;
+          if (score > dominantScore) { dominantScore = score; dominantPos = schema.posSystem || 'generic'; }
+
+          for (const [canonId, hit] of Object.entries(schema.resolved || {})) {
+            if (!mergedResolved[canonId] || hit.confidence > mergedResolved[canonId].confidence) {
+              mergedResolved[canonId] = hit;
+            }
+          }
+          for (const [canonId, hits] of Object.entries(schema.identifiers || {})) {
+            if (!mergedIdentifiers[canonId]) mergedIdentifiers[canonId] = [];
+            mergedIdentifiers[canonId].push(...hits);
+          }
+          mergedUnmapped.push(...(schema.unmapped || []));
+        }
+
+        const mergedSchema = {
+          posSystem: dominantPos,
+          resolved: mergedResolved,
+          identifiers: mergedIdentifiers,
+          unmapped: [...new Set(mergedUnmapped)]
+        };
 
         const ctx = buildQueryContext({
-          schema: primarySchema,
+          schema: mergedSchema,
           question,
           ontology,
           calcRules,
           diagnostics,
           posDict,
-          orgProfile: null   // no org profile in v1
+          orgProfile: null
         });
 
         semanticBlock = '\n\n' + contextToSystemBlock(ctx);
