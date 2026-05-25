@@ -1485,6 +1485,69 @@
       "unit": "count",
       "format": "#,##0",
       "role": "measure"
+    },
+    "on_hand": {
+      "label": "On Hand",
+      "description": "Exact quantity of an inventory item currently in your building, physically available to be prepared or sold to customers. Snapshot count taken during a physical inventory count.",
+      "sane_range": {
+        "min": 0
+      },
+      "notes": "Compare against par_level to identify items running low. Variance = on_hand minus theoretical_qty."
+    },
+    "par_level": {
+      "label": "Par Level",
+      "description": "Target stock quantity for an inventory item \u2014 the minimum amount you want on hand before triggering a reorder. Set by operators based on usage rate and lead time.",
+      "sane_range": {
+        "min": 0
+      },
+      "notes": "Items where on_hand < par_level need to be ordered. Items consistently far above par_level may be over-ordered."
+    },
+    "inventory_unit_cost": {
+      "label": "Unit Cost",
+      "description": "Cost per unit of an inventory item (e.g. cost per pound, per case, per each). Used to calculate total inventory value and theoretical food cost.",
+      "sane_range": {
+        "min": 0
+      },
+      "notes": "Multiply by on_hand or usage to calculate dollar value of stock or variance."
+    },
+    "inventory_variance_pct": {
+      "label": "Inventory Variance %",
+      "description": "Percentage difference between theoretical usage (based on recipe and sales) and actual usage (based on physical counts). High variance indicates waste, theft, or portioning issues.",
+      "sane_range": {
+        "min": -50,
+        "max": 50
+      },
+      "benchmark": {
+        "casual_dining": [
+          -3,
+          3
+        ],
+        "qsr": [
+          -2,
+          2
+        ]
+      },
+      "notes": "Positive variance = used more than expected (waste/theft/over-portioning). Negative variance = used less than expected (under-portioning or count error)."
+    },
+    "actual_usage": {
+      "label": "Actual Usage",
+      "description": "Actual quantity of an item consumed during a period, calculated from physical inventory counts: beginning_on_hand + purchases - ending_on_hand.",
+      "notes": "Compare to theoretical_usage to compute variance."
+    },
+    "theoretical_usage": {
+      "label": "Theoretical Usage",
+      "description": "Expected quantity of an item that should have been consumed based on menu sales volume and standard recipe yield, assuming perfect portioning with no waste.",
+      "notes": "Derived from PMIX \u00d7 recipe yield. Variance from actual_usage reveals operational inefficiencies."
+    },
+    "inventory_item": {
+      "label": "Inventory Item",
+      "description": "Name of an ingredient or supply item tracked in inventory (e.g. Chicken Breast, House Blend Coffee, Paper Cups).",
+      "notes": "Identifier \u2014 do not aggregate or sum. Use as a dimension for filtering and grouping."
+    },
+    "inventory_unit": {
+      "label": "Unit of Measure",
+      "description": "The unit in which an inventory item is counted or purchased (e.g. lbs, oz, each, case, gallon).",
+      "notes": "Identifier \u2014 context for on_hand and usage numbers. Never compare on_hand values across different units without conversion."
     }
   },
   "identifiers": {
