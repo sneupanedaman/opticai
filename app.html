@@ -345,7 +345,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
       <span class="date-range" id="dateRangeLabel">Feb 2 – Jun 22, 2026 · 21 weeks · 5 Locations</span>
       <div class="topbar-right">
         <button id="insightsChip" onclick="openInsights()" style="display:none;padding:5px 12px;border-radius:6px;border:1px solid rgba(59,130,246,0.4);background:rgba(59,130,246,0.1);color:#93c5fd;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;display:none;align-items:center;gap:5px;"><i class="ti ti-bulb" style="font-size:13px"></i> View Insights</button>
-        <button class="btn-sm" onclick="openCustomizePanel()"><i class="ti ti-layout-dashboard"></i> Customize</button>
         <button class="btn-sm btn-primary" onclick="openUploadModal()"><i class="ti ti-upload"></i> Upload CSV</button>
       </div>
     </div>
@@ -415,7 +414,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
             </div>
             <div class="chart-card narrow" id="card-pmixChart">
               <div class="chart-title">
-                PMIX — margin by category
+                PMIX — sales mix
                 <div style="display:flex;align-items:center;gap:6px">
                   <span style="font-size:10px;color:var(--text3)" id="pmixSrc">demo</span>
                   <button class="chart-toggle-btn" onclick="toggleChartGrid('pmixChart')" id="toggle-pmixChart"><i class="ti ti-table"></i> Grid</button>
@@ -524,42 +523,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 </button>
 
 <!-- CUSTOMIZE MODAL -->
-<div class="modal-overlay" id="customizeModal">
-  <div class="modal" style="width:540px;max-height:85vh;overflow-y:auto;">
-    <div class="modal-title">Customize Dashboard</div>
-    <div class="modal-sub">Show, hide, or reorder your KPI tiles and charts.</div>
-
-    <div style="margin-bottom:16px;">
-      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">KPI Tiles</div>
-      <div id="kpiToggles" style="display:flex;flex-direction:column;gap:6px;"></div>
-    </div>
-
-    <div style="margin-bottom:20px;">
-      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Charts</div>
-      <div id="chartToggles" style="display:flex;flex-direction:column;gap:6px;"></div>
-    </div>
-
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">Build a custom chart from your uploaded columns</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <select id="customChartCol" style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;">
-          <option value="">Select a metric column...</option>
-        </select>
-        <select id="customChartType" style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;">
-          <option value="bar">Bar chart</option>
-          <option value="line">Line chart</option>
-        </select>
-        <button onclick="buildCustomChart()" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">Add Chart</button>
-      </div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-sm" onclick="closeCustomizePanel()">Close</button>
-      <button class="btn-sm btn-primary" onclick="resetDashboard()"><i class="ti ti-refresh"></i> Reset to Default</button>
-    </div>
-  </div>
-</div>
-
 <!-- UPLOAD MODAL -->
 <div class="modal-overlay" id="uploadModal">
   <div class="modal">
@@ -1153,8 +1116,129 @@ function buildPmixChart(rows, catCol, revCol) {
   const sorted = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0, 6);
   return {
     labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
-    data: sorted.map(([,v]) => (v/total)*100)
+    data: sorted.map(([,v]) => (v/total)*100),
+    mode: 'category'
   };
+}
+
+// Build the best possible PMIX chart from whatever columns exist in the file.
+// Priority: category+revenue > item+revenue (top 8 items) > item+quantity (top 8 items).
+// Returns { labels, data, mode, chartTitle, srcLabel } or null.
+function buildPmixChartBest(rows, keys) {
+  const COLORS = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#ec4899','#14b8a6'];
+  const catCol  = findCol(keys, ['category','cat','group','type','section','menu section','menu category']);
+  const itemCol = findCol(keys, ['menu item','menu_item','item name','item_name','item','product','dish','name']);
+  const revCol  = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount','total','item sales','item revenue','net sales']);
+  const qtyCol  = findCol(keys, ['quantity sold','quantity_sold','qty sold','qty_sold','quantity','qty','count','sold','units']);
+
+  // Mode 1: category × revenue (ideal)
+  if (catCol && revCol) {
+    const cats = {};
+    rows.forEach(r => {
+      const cat = r[catCol] || 'Other';
+      cats[cat] = (cats[cat] || 0) + (parseFloat(r[revCol]) || 0);
+    });
+    const total = Object.values(cats).reduce((a,b) => a+b, 0);
+    if (total > 0) {
+      const sorted = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0, 6);
+      return {
+        labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
+        data: sorted.map(([,v]) => (v/total)*100),
+        colors: COLORS.slice(0, sorted.length),
+        mode: 'category_rev',
+        chartTitle: 'Sales mix by category',
+        srcLabel: 'live — category revenue'
+      };
+    }
+  }
+
+  // Mode 2: item × revenue (top 8 items)
+  if (itemCol && revCol) {
+    const items = {};
+    rows.forEach(r => {
+      const item = r[itemCol] || 'Unknown';
+      items[item] = (items[item] || 0) + (parseFloat(r[revCol]) || 0);
+    });
+    const total = Object.values(items).reduce((a,b) => a+b, 0);
+    if (total > 0) {
+      const sorted = Object.entries(items).sort((a,b) => b[1]-a[1]).slice(0, 8);
+      return {
+        labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
+        data: sorted.map(([,v]) => (v/total)*100),
+        colors: COLORS.slice(0, sorted.length),
+        mode: 'item_rev',
+        chartTitle: 'Top items by revenue',
+        srcLabel: 'live — item revenue'
+      };
+    }
+  }
+
+  // Mode 3: item × quantity (top 8 items by units sold)
+  if (itemCol && qtyCol) {
+    const items = {};
+    rows.forEach(r => {
+      const item = r[itemCol] || 'Unknown';
+      items[item] = (items[item] || 0) + (parseFloat(r[qtyCol]) || 0);
+    });
+    const total = Object.values(items).reduce((a,b) => a+b, 0);
+    if (total > 0) {
+      const sorted = Object.entries(items).sort((a,b) => b[1]-a[1]).slice(0, 8);
+      return {
+        labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
+        data: sorted.map(([,v]) => (v/total)*100),
+        colors: COLORS.slice(0, sorted.length),
+        mode: 'item_qty',
+        chartTitle: 'Top items by units sold',
+        srcLabel: 'live — item qty'
+      };
+    }
+  }
+
+  return null; // truly nothing usable
+}
+
+// Called after a PMIX upload — picks best available chart and updates title + source label.
+function updatePmixChartFromSummary(summary, filename) {
+  const pmixData = uploadedData.pmix;
+  if (!pmixData) return;
+
+  const rows = pmixData.rows;
+  const keys = Object.keys(rows[0]);
+  const best = buildPmixChartBest(rows, keys);
+
+  const titleEl = document.querySelector('#card-pmixChart .chart-title');
+  const srcEl   = document.getElementById('pmixSrc');
+
+  if (!best) {
+    // Nothing renderable — show a text placeholder inside the chart area
+    if (titleEl) titleEl.childNodes[0].textContent = 'PMIX data';
+    if (srcEl)   srcEl.textContent = 'live — no chart columns detected';
+    const wrap = document.getElementById('wrap-pmixChart');
+    if (wrap) {
+      wrap.style.display = 'flex';
+      wrap.style.alignItems = 'center';
+      wrap.style.justifyContent = 'center';
+      wrap.innerHTML = `<div style="text-align:center;color:var(--text3);font-size:12px;padding:20px;">PMIX file loaded — no category or revenue column detected.<br>Columns found: ${keys.join(', ')}</div>`;
+    }
+    return;
+  }
+
+  // Update chart title text node (first text node in the title div)
+  if (titleEl) {
+    const firstNode = titleEl.firstChild;
+    if (firstNode && firstNode.nodeType === Node.TEXT_NODE) {
+      firstNode.textContent = best.chartTitle + ' ';
+    } else {
+      titleEl.insertBefore(document.createTextNode(best.chartTitle + ' '), titleEl.firstChild);
+    }
+  }
+  if (srcEl) srcEl.textContent = best.srcLabel;
+
+  // Push data into chart
+  pmixChart.data.labels = best.labels;
+  pmixChart.data.datasets[0].data = best.data;
+  pmixChart.data.datasets[0].backgroundColor = best.colors;
+  pmixChart.update('active');
 }
 
 // ---- FILE UPLOAD HANDLER ----
@@ -1250,6 +1334,8 @@ function updateDashboard(type, summary, filename) {
     salesChart.data.datasets = cd.datasets;
     salesChart.update();
     document.getElementById('salesChartSrc').textContent = 'live data — ' + filename;
+    // DOW chart is derived from the same sales file — mark it live too
+    document.getElementById('dowSrc').textContent = 'live — ' + filename;
     if (cd.locations) {
       const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
       const legend = document.getElementById('salesLegend');
@@ -1266,11 +1352,14 @@ function updateDashboard(type, summary, filename) {
     laborChart.update();
     document.getElementById('laborSrc').textContent = 'live data — ' + filename;
   }
-  if (type === 'pmix' && summary.chartData) {
-    pmixChart.data.labels = summary.chartData.labels;
-    pmixChart.data.datasets[0].data = summary.chartData.data;
-    pmixChart.update();
-    document.getElementById('pmixSrc').textContent = 'live';
+  if (type === 'pmix') {
+    if (summary.chartData) {
+      pmixChart.data.labels = summary.chartData.labels;
+      pmixChart.data.datasets[0].data = summary.chartData.data;
+      pmixChart.update();
+    }
+    // Always update source label and title for PMIX — even when chart data is item-based not category-based
+    updatePmixChartFromSummary(summary, filename);
   }
 
   // Handle custom CSV — add to sidebar and notify
@@ -1909,144 +1998,6 @@ function appendBriefingMsg(text) {
 }
 
 // ── CUSTOMIZE PANEL ──
-const kpiConfig = [
-  { id: 'sales',    label: 'Total Sales' },
-  { id: 'labor',    label: 'Labor %' },
-  { id: 'foodcost', label: 'Food Cost %' },
-  { id: 'prime',    label: 'Prime Cost' },
-  { id: 'check',    label: 'Avg Check' },
-];
-const chartConfig = [
-  { id: 'salesChartCard',  label: 'Weekly Sales by Location' },
-  { id: 'pmixChartCard',   label: 'PMIX — Margin by Category' },
-  { id: 'laborChartCard',  label: 'Labor % by Location' },
-  { id: 'dowChartCard',    label: 'Avg Daily Sales by Day of Week' },
-];
-
-function openCustomizePanel() {
-  // Build KPI toggles
-  const kpiContainer = document.getElementById('kpiToggles');
-  kpiContainer.innerHTML = kpiConfig.map(k => {
-    const card = document.getElementById('kpi-' + k.id);
-    const visible = card ? card.style.display !== 'none' : true;
-    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
-      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleKpi('${k.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
-      ${k.label}
-    </label>`;
-  }).join('');
-
-  // Build chart toggles — add IDs to chart cards first
-  document.querySelectorAll('.chart-card').forEach((card, i) => {
-    if (chartConfig[i]) card.id = chartConfig[i].id;
-  });
-  const chartContainer = document.getElementById('chartToggles');
-  chartContainer.innerHTML = chartConfig.map(c => {
-    const card = document.getElementById(c.id);
-    const visible = card ? card.style.display !== 'none' : true;
-    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
-      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleChart('${c.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
-      ${c.label}
-    </label>`;
-  }).join('');
-
-  // Populate custom chart column selector
-  const colSelect = document.getElementById('customChartCol');
-  colSelect.innerHTML = '<option value="">Select a metric column...</option>';
-  Object.entries(uploadedData).forEach(([type, data]) => {
-    if (data && data.summary?.metricCols) {
-      data.summary.metricCols.forEach(col => {
-        colSelect.innerHTML += `<option value="${type}:${col}">${col} (from ${type})</option>`;
-      });
-    }
-  });
-
-  document.getElementById('customizeModal').classList.add('open');
-}
-
-function closeCustomizePanel() { document.getElementById('customizeModal').classList.remove('open'); }
-document.getElementById('customizeModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCustomizePanel(); });
-
-function toggleKpi(id, show) {
-  const card = document.getElementById('kpi-' + id);
-  if (card) card.style.display = show ? '' : 'none';
-}
-
-function toggleChart(id, show) {
-  const card = document.getElementById(id);
-  if (card) card.style.display = show ? '' : 'none';
-}
-
-function resetDashboard() {
-  kpiConfig.forEach(k => toggleKpi(k.id, true));
-  chartConfig.forEach(c => toggleChart(c.id, true));
-  // Remove any custom charts
-  document.querySelectorAll('.custom-chart-card').forEach(el => el.remove());
-  closeCustomizePanel();
-}
-
-function buildCustomChart() {
-  const colSelect = document.getElementById('customChartCol');
-  const chartType = document.getElementById('customChartType').value;
-  const val = colSelect.value;
-  if (!val) return;
-
-  const [type, col] = val.split(':');
-  const data = uploadedData[type];
-  if (!data) return;
-
-  const rows = data.rows;
-  const keys = Object.keys(rows[0]);
-  const locationCol = keys.find(k => ['location','store','site'].includes(k));
-  const dateCol = keys.find(k => ['date','week','period'].includes(k));
-
-  let chartData;
-  if (locationCol) {
-    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].slice(0,4);
-    const labels = rows.filter(r => r[locationCol]===locs[0]).map((_,i)=>'W'+(i+1));
-    const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981'];
-    const datasets = locs.map((loc,i) => ({
-      label: loc,
-      data: rows.filter(r=>r[locationCol]===loc).map(r=>parseFloat(r[col])||0),
-      backgroundColor: chartType==='bar' ? colors[i] : undefined,
-      borderColor: colors[i], borderWidth: 2, tension: 0.4,
-      fill: false, pointRadius: 3
-    }));
-    chartData = { labels, datasets };
-  } else {
-    const labels = rows.map((_,i)=>'W'+(i+1));
-    chartData = { labels, datasets: [{ label: col, data: rows.map(r=>parseFloat(r[col])||0), backgroundColor:'#3b82f6', borderColor:'#3b82f6', borderWidth:2, tension:0.4 }] };
-  }
-
-  // Add chart card to chart section
-  const chartSection = document.querySelector('.chart-section');
-  const wrapper = document.createElement('div');
-  wrapper.className = 'chart-row custom-chart-card';
-  wrapper.style.cssText = 'flex:0 0 180px;';
-  wrapper.innerHTML = `
-    <div class="chart-card" style="flex:1;position:relative;">
-      <div class="chart-title">${col} <button onclick="this.closest('.custom-chart-card').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 4px;" title="Remove">✕</button></div>
-      <div class="chart-wrap"><canvas id="custom-chart-${Date.now()}"></canvas></div>
-    </div>`;
-  chartSection.appendChild(wrapper);
-
-  const canvas = wrapper.querySelector('canvas');
-  new Chart(canvas, {
-    type: chartType,
-    data: chartData,
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: locationCol ? true : false, labels: { color:'#8b909e', font:{size:11} } } },
-      scales: {
-        x: { grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#555b6a',font:{size:10}} },
-        y: { grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#555b6a',font:{size:10}} }
-      }
-    }
-  });
-
-  closeCustomizePanel();
-  appendMsg('ai', `Custom chart added for "${col}" from your ${type} data. You can see it at the bottom of the dashboard. Remove it anytime using the ✕ button.`);
-}
-
 // ── DYNAMIC SUGGESTED QUESTIONS — pool-based rotating system ──
 let questionPoolIndex = 0;
 
@@ -2576,36 +2527,18 @@ function updatePmixChart(loc) {
     const catCol = findCol(keys, ['category','cat','group','type','section','menu category']);
     const revCol = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount','total sales','item sales']);
     const locationCol = findCol(keys, ['location','store','site','restaurant','unit']);
-    
-    if (!catCol || !revCol) {
-      console.warn('PMIX: could not find category or revenue column. Keys:', keys);
-      return;
-    }
 
     const locRows = (loc && locationCol) ? rows.filter(r => r[locationCol] === loc) : rows;
-    
-    if (locRows.length === 0) {
-      console.warn('PMIX: no rows for location', loc);
-      return;
+    if (locRows.length === 0) { pmixChart.update(); return; }
+
+    // Use the smart best-chart builder on the filtered rows
+    const locKeys = Object.keys(locRows[0]);
+    const best = buildPmixChartBest(locRows, locKeys);
+    if (best) {
+      pmixChart.data.labels = best.labels;
+      pmixChart.data.datasets[0].data = best.data;
+      pmixChart.data.datasets[0].backgroundColor = best.colors;
     }
-
-    const catTotals = {};
-    let total = 0;
-    locRows.forEach(r => {
-      const cat = r[catCol] || 'Other';
-      const val = parseFloat(r[revCol]) || 0;
-      catTotals[cat] = (catTotals[cat] || 0) + val;
-      total += val;
-    });
-
-    if (total === 0) return;
-
-    const sorted = Object.entries(catTotals).sort((a,b) => b[1] - a[1]).slice(0, 6);
-    
-    // Update labels, data, AND colors together to keep them in sync
-    pmixChart.data.labels = sorted.map(([k,v]) => `${k} ${(v/total*100).toFixed(1)}%`);
-    pmixChart.data.datasets[0].data = sorted.map(([,v]) => v/total*100);
-    pmixChart.data.datasets[0].backgroundColor = sorted.map((_, i) => COLORS[i % COLORS.length]);
     
   } else {
     // Demo data — add per-location variation to make filter feel useful
