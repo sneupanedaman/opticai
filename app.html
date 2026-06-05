@@ -17,7 +17,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; overflow: hidden; }
 .app { display: flex; height: 100vh; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 /* SIDEBAR */
 .sidebar { width: 240px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
@@ -258,6 +257,26 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
   .kpi-value { font-size: 16px; }
   .upload-grid { grid-template-columns: 1fr; }
 }
+/* ===================== FINANCIAL / MODE-TOGGLE / UPLOAD STYLES ===================== */
+.mode-switch{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:3px;margin-bottom:16px}
+.mode-btn{flex:1;padding:7px 6px;border:none;background:transparent;color:var(--text2);font-size:11.5px;font-weight:500;cursor:pointer;border-radius:6px;font-family:'DM Sans',sans-serif;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px}
+.mode-btn.active{background:var(--accent);color:#fff}
+.domain-tabs{display:flex;gap:6px;margin-bottom:14px}
+.domain-tab{flex:1;padding:9px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;border-radius:8px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
+.domain-tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.dropzone{border:2px dashed var(--border2);border-radius:12px;padding:26px 18px;text-align:center;cursor:pointer;transition:all .15s;background:rgba(59,130,246,.03)}
+.dropzone:hover,.dropzone.drag{border-color:var(--accent);background:rgba(59,130,246,.07)}
+.dropzone i{font-size:28px;color:var(--accent)}
+.dz-title{font-weight:500;margin:8px 0 3px;font-size:13px}
+.dz-sub{font-size:11px;color:var(--text3)}
+.file-list{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.file-item{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px}
+.file-item .fi-ico{font-size:16px}
+.fi-meta{flex:1;min-width:0}
+.fi-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi-detect{font-size:10.5px;color:var(--text2);font-family:'DM Mono',monospace}
+.fi-ok{color:var(--green)}.fi-bad{color:var(--red)}
+.fin-kpi-up{color:var(--green)}.fin-kpi-warn{color:var(--amber)}.fin-kpi-down{color:var(--red)}
 </style>
 </head>
 <body>
@@ -284,7 +303,12 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
       </div>
     </div>
 
-    <div class="sidebar-section">
+    <div class="mode-switch" id="modeSwitch">
+      <button class="mode-btn active" id="mode-operational" onclick="setMode('operational')"><i class="ti ti-activity"></i> Operational</button>
+      <button class="mode-btn" id="mode-financial" onclick="setMode('financial')"><i class="ti ti-report-money"></i> Financial</button>
+    </div>
+
+    <div class="sidebar-section" id="opsLocSection">
       <div class="sidebar-label">Locations</div>
       <div id="locationsList">
         <div class="location-pill active" onclick="filterByLocation(null, this)"><div class="location-dot"></div> All Locations</div>
@@ -296,7 +320,12 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
       </div>
     </div>
 
-    <div class="dataset-list">
+    <div class="sidebar-section" id="finLocSection" style="display:none">
+      <div class="sidebar-label">Entities</div>
+      <div id="finEntityList"></div>
+    </div>
+
+    <div class="dataset-list" id="datasetList">
       <div class="sidebar-label">Datasets</div>
       <div class="ds-item" id="ds-sales" onclick="openUploadModal()">
         <div class="ds-dot demo" id="dot-sales"></div>
@@ -340,11 +369,11 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
   <!-- MAIN -->
   <div class="main">
     <div class="topbar">
-      <span class="topbar-title">Operations Dashboard</span>
+      <span class="topbar-title" id="dashTitle">Operations Dashboard</span>
       <span class="topbar-sep">·</span>
       <span class="date-range" id="dateRangeLabel">Feb 2 – Jun 22, 2026 · 21 weeks · 5 Locations</span>
       <div class="topbar-right">
-        <button id="insightsChip" onclick="openInsights()" style="display:none;padding:5px 12px;border-radius:6px;border:1px solid rgba(59,130,246,0.4);background:rgba(59,130,246,0.1);color:#93c5fd;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;display:none;align-items:center;gap:5px;"><i class="ti ti-bulb" style="font-size:13px"></i> View Insights</button>
+        <button class="btn-sm" onclick="openCustomizePanel()"><i class="ti ti-layout-dashboard"></i> Customize</button>
         <button class="btn-sm btn-primary" onclick="openUploadModal()"><i class="ti ti-upload"></i> Upload CSV</button>
       </div>
     </div>
@@ -356,7 +385,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     </div>
 
     <div class="content">
-      <div class="left-panel">
+      <div class="left-panel" id="opsPanel">
         <!-- KPI ROW -->
         <div class="kpi-row">
           <div class="kpi-card demo-card" id="kpi-sales">
@@ -414,7 +443,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
             </div>
             <div class="chart-card narrow" id="card-pmixChart">
               <div class="chart-title">
-                PMIX — sales mix
+                PMIX — margin by category
                 <div style="display:flex;align-items:center;gap:6px">
                   <span style="font-size:10px;color:var(--text3)" id="pmixSrc">demo</span>
                   <button class="chart-toggle-btn" onclick="toggleChartGrid('pmixChart')" id="toggle-pmixChart"><i class="ti ti-table"></i> Grid</button>
@@ -446,6 +475,37 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
               </div>
               <div class="chart-wrap" id="wrap-dowChart"><canvas id="dowChart"></canvas></div>
               <div class="chart-grid-wrap" id="grid-dowChart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCIAL DASHBOARD PANEL -->
+      <div class="left-panel" id="finPanel" style="display:none">
+        <div class="kpi-row" id="finKpiRow"></div>
+        <div class="chart-section">
+          <div class="chart-row">
+            <div class="chart-card" style="flex:1" id="card-finPrime">
+              <div class="chart-title">Prime cost by location
+                <span style="font-size:10px;color:var(--text3)" id="finSrcPrime">sample</span></div>
+              <div class="chart-wrap"><canvas id="finPrimeChart"></canvas></div>
+            </div>
+            <div class="chart-card" style="flex:1" id="card-finMix">
+              <div class="chart-title">Revenue mix
+                <span style="font-size:10px;color:var(--text3)" id="finSrcMix">sample</span></div>
+              <div class="chart-wrap"><canvas id="finMixChart"></canvas></div>
+            </div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-card wide" id="card-finWf">
+              <div class="chart-title">P&amp;L margin waterfall
+                <span style="font-size:10px;color:var(--text3)" id="finSrcWf">sample</span></div>
+              <div class="chart-wrap"><canvas id="finWfChart"></canvas></div>
+            </div>
+            <div class="chart-card narrow" id="card-finTrail">
+              <div class="chart-title">Trailing-13 sales &amp; EBITDA
+                <span style="font-size:10px;color:var(--text3)" id="finSrcTrail">sample</span></div>
+              <div class="chart-wrap"><canvas id="finTrailChart"></canvas></div>
             </div>
           </div>
         </div>
@@ -523,13 +583,63 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 </button>
 
 <!-- CUSTOMIZE MODAL -->
+<div class="modal-overlay" id="customizeModal">
+  <div class="modal" style="width:540px;max-height:85vh;overflow-y:auto;">
+    <div class="modal-title">Customize Dashboard</div>
+    <div class="modal-sub">Show, hide, or reorder your KPI tiles and charts.</div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">KPI Tiles</div>
+      <div id="kpiToggles" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Charts</div>
+      <div id="chartToggles" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">Build a custom chart from your uploaded columns</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <select id="customChartCol" style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;">
+          <option value="">Select a metric column...</option>
+        </select>
+        <select id="customChartType" style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;">
+          <option value="bar">Bar chart</option>
+          <option value="line">Line chart</option>
+        </select>
+        <button onclick="buildCustomChart()" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">Add Chart</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeCustomizePanel()">Close</button>
+      <button class="btn-sm btn-primary" onclick="resetDashboard()"><i class="ti ti-refresh"></i> Reset to Default</button>
+    </div>
+  </div>
+</div>
+
 <!-- UPLOAD MODAL -->
 <div class="modal-overlay" id="uploadModal">
   <div class="modal">
-    <div class="modal-title">Upload your restaurant data</div>
-    <div class="modal-sub">Upload any combination of datasets. Uploaded data updates the dashboard and AI analysis instantly. Demo data stays for anything not yet uploaded.</div>
+    <div class="modal-title">Upload your data</div>
+    <div class="modal-sub">Drop multiple files at once by domain. OpticAI detects each file's type from its contents. Demo data stays for anything not uploaded. Max 500 rows per file in this preview.</div>
 
-    <div class="modal-cols-hint">
+    <div class="domain-tabs">
+      <button class="domain-tab active" id="domtab-operational" onclick="switchUploadDomain('operational')"><i class="ti ti-activity"></i> Operational (CSV)</button>
+      <button class="domain-tab" id="domtab-financial" onclick="switchUploadDomain('financial')"><i class="ti ti-report-money"></i> Financial (Excel)</button>
+    </div>
+
+    <!-- OPERATIONAL UPLOAD PANE -->
+    <div id="opsUploadPane">
+      <div class="dropzone" id="opsDropzone" onclick="document.getElementById('opsMultiInput').click()">
+        <i class="ti ti-file-upload"></i>
+        <div class="dz-title">Drop Sales / Labor / Food Cost / PMIX / Inventory CSVs</div>
+        <div class="dz-sub">Multiple files OK · I'll detect each type by its columns</div>
+        <input type="file" id="opsMultiInput" accept=".csv" multiple style="display:none" onchange="Operational.ingestFiles(this.files)">
+      </div>
+      <div class="file-list" id="opsFileList"></div>
+      <div class="modal-cols-hint" style="margin-top:14px">
       <strong>Accepted columns (flexible):</strong><br>
       Sales: <code>date, location, sales, revenue, net_sales, covers, checks</code><br>
       Labor: <code>date, location, labor_cost, labor_pct, hours, wages</code><br>
@@ -577,41 +687,33 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
       </div>
     </div>
 
-    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;margin-bottom:14px;">
+    </div><!-- /opsUploadPane -->
+
+    <!-- FINANCIAL UPLOAD PANE -->
+    <div id="finUploadPane" style="display:none">
+      <div class="dropzone" id="finDropzone" onclick="document.getElementById('finMultiInput').click()">
+        <i class="ti ti-file-spreadsheet"></i>
+        <div class="dz-title">Drop up to 5 financial statements (.xlsx)</div>
+        <div class="dz-sub">Balance Sheet · P&amp;L Side-by-Side · P&amp;L Trailing-13 · type/entity/period read from inside each file</div>
+        <input type="file" id="finMultiInput" accept=".xlsx,.xls" multiple style="display:none" onchange="Financial.stageFiles(this.files)">
+      </div>
+      <div class="file-list" id="finFileList"></div>
+      <button class="btn-sm btn-primary" style="margin-top:12px" onclick="Financial.applyStaged()"><i class="ti ti-check"></i> Apply statements to dashboard</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;margin-bottom:14px;margin-top:14px;">
       <i class="ti ti-shield-check" style="color:#10b981;font-size:15px;flex-shrink:0"></i>
       <span style="font-size:12px;color:#8b909e;line-height:1.5"><strong style="color:#e8eaf0">Your data is private and protected.</strong> Files are encrypted in transit and at rest, isolated to your organization, never used to train AI models, and deletable on request.</span>
     </div>
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeUploadModal()">Close</button>
-      <button class="btn-sm btn-primary" onclick="finishUploadAndAnalyze()"><i class="ti ti-check"></i> Done</button>
-    </div>
-  </div>
-</div>
-
-<!-- INSIGHTS OVERLAY -->
-<div id="insightsOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;">
-  <div id="insightsModal" style="background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:520px;max-width:94vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
-    <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-      <div>
-        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;">Top Findings from Your Data</div>
-        <div style="font-size:12px;color:var(--text3);" id="insightsSubtitle">Analyzing your uploaded data…</div>
-      </div>
-      <button onclick="closeInsights()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1;flex-shrink:0;" title="Close">✕</button>
-    </div>
-    <div id="insightsList" style="flex:1;overflow-y:auto;padding:12px 16px 8px;">
-      <!-- spinner shown until insights load -->
-      <div id="insightsSpinner" style="display:flex;align-items:center;justify-content:center;padding:36px 0;gap:10px;color:var(--text3);font-size:13px;">
-        <div style="width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-        Generating insights…
-      </div>
-    </div>
-    <div style="padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0;display:flex;justify-content:flex-end;">
-      <button onclick="closeInsights()" style="padding:7px 20px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Start exploring →</button>
+      <button class="btn-sm btn-primary" onclick="closeUploadModal()"><i class="ti ti-check"></i> Done</button>
     </div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // ---- STATE ----
 const uploadedData = { sales: null, labor: null, foodcost: null, pmix: null, inventory: null, custom: null };
@@ -753,10 +855,15 @@ function formatDateRange(dates) {
   return `${start} – ${end} · ${weeks.size} weeks`;
 }
 
+const MAX_ROWS = 500; // hard cap per uploaded file (Operational + Financial)
+let lastParseTruncated = false;
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-  return lines.slice(1).filter(l => l.trim()).map(line => {
+  let dataLines = lines.slice(1).filter(l => l.trim());
+  lastParseTruncated = dataLines.length > MAX_ROWS;
+  if (lastParseTruncated) dataLines = dataLines.slice(0, MAX_ROWS);
+  return dataLines.map(line => {
     const vals = [];
     let cur = '', inQuote = false;
     for (let i = 0; i < line.length; i++) {
@@ -1116,129 +1223,8 @@ function buildPmixChart(rows, catCol, revCol) {
   const sorted = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0, 6);
   return {
     labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
-    data: sorted.map(([,v]) => (v/total)*100),
-    mode: 'category'
+    data: sorted.map(([,v]) => (v/total)*100)
   };
-}
-
-// Build the best possible PMIX chart from whatever columns exist in the file.
-// Priority: category+revenue > item+revenue (top 8 items) > item+quantity (top 8 items).
-// Returns { labels, data, mode, chartTitle, srcLabel } or null.
-function buildPmixChartBest(rows, keys) {
-  const COLORS = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#ec4899','#14b8a6'];
-  const catCol  = findCol(keys, ['category','cat','group','type','section','menu section','menu category']);
-  const itemCol = findCol(keys, ['menu item','menu_item','item name','item_name','item','product','dish','name']);
-  const revCol  = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount','total','item sales','item revenue','net sales']);
-  const qtyCol  = findCol(keys, ['quantity sold','quantity_sold','qty sold','qty_sold','quantity','qty','count','sold','units']);
-
-  // Mode 1: category × revenue (ideal)
-  if (catCol && revCol) {
-    const cats = {};
-    rows.forEach(r => {
-      const cat = r[catCol] || 'Other';
-      cats[cat] = (cats[cat] || 0) + (parseFloat(r[revCol]) || 0);
-    });
-    const total = Object.values(cats).reduce((a,b) => a+b, 0);
-    if (total > 0) {
-      const sorted = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0, 6);
-      return {
-        labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
-        data: sorted.map(([,v]) => (v/total)*100),
-        colors: COLORS.slice(0, sorted.length),
-        mode: 'category_rev',
-        chartTitle: 'Sales mix by category',
-        srcLabel: 'live — category revenue'
-      };
-    }
-  }
-
-  // Mode 2: item × revenue (top 8 items)
-  if (itemCol && revCol) {
-    const items = {};
-    rows.forEach(r => {
-      const item = r[itemCol] || 'Unknown';
-      items[item] = (items[item] || 0) + (parseFloat(r[revCol]) || 0);
-    });
-    const total = Object.values(items).reduce((a,b) => a+b, 0);
-    if (total > 0) {
-      const sorted = Object.entries(items).sort((a,b) => b[1]-a[1]).slice(0, 8);
-      return {
-        labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
-        data: sorted.map(([,v]) => (v/total)*100),
-        colors: COLORS.slice(0, sorted.length),
-        mode: 'item_rev',
-        chartTitle: 'Top items by revenue',
-        srcLabel: 'live — item revenue'
-      };
-    }
-  }
-
-  // Mode 3: item × quantity (top 8 items by units sold)
-  if (itemCol && qtyCol) {
-    const items = {};
-    rows.forEach(r => {
-      const item = r[itemCol] || 'Unknown';
-      items[item] = (items[item] || 0) + (parseFloat(r[qtyCol]) || 0);
-    });
-    const total = Object.values(items).reduce((a,b) => a+b, 0);
-    if (total > 0) {
-      const sorted = Object.entries(items).sort((a,b) => b[1]-a[1]).slice(0, 8);
-      return {
-        labels: sorted.map(([k,v]) => `${k} ${((v/total)*100).toFixed(0)}%`),
-        data: sorted.map(([,v]) => (v/total)*100),
-        colors: COLORS.slice(0, sorted.length),
-        mode: 'item_qty',
-        chartTitle: 'Top items by units sold',
-        srcLabel: 'live — item qty'
-      };
-    }
-  }
-
-  return null; // truly nothing usable
-}
-
-// Called after a PMIX upload — picks best available chart and updates title + source label.
-function updatePmixChartFromSummary(summary, filename) {
-  const pmixData = uploadedData.pmix;
-  if (!pmixData) return;
-
-  const rows = pmixData.rows;
-  const keys = Object.keys(rows[0]);
-  const best = buildPmixChartBest(rows, keys);
-
-  const titleEl = document.querySelector('#card-pmixChart .chart-title');
-  const srcEl   = document.getElementById('pmixSrc');
-
-  if (!best) {
-    // Nothing renderable — show a text placeholder inside the chart area
-    if (titleEl) titleEl.childNodes[0].textContent = 'PMIX data';
-    if (srcEl)   srcEl.textContent = 'live — no chart columns detected';
-    const wrap = document.getElementById('wrap-pmixChart');
-    if (wrap) {
-      wrap.style.display = 'flex';
-      wrap.style.alignItems = 'center';
-      wrap.style.justifyContent = 'center';
-      wrap.innerHTML = `<div style="text-align:center;color:var(--text3);font-size:12px;padding:20px;">PMIX file loaded — no category or revenue column detected.<br>Columns found: ${keys.join(', ')}</div>`;
-    }
-    return;
-  }
-
-  // Update chart title text node (first text node in the title div)
-  if (titleEl) {
-    const firstNode = titleEl.firstChild;
-    if (firstNode && firstNode.nodeType === Node.TEXT_NODE) {
-      firstNode.textContent = best.chartTitle + ' ';
-    } else {
-      titleEl.insertBefore(document.createTextNode(best.chartTitle + ' '), titleEl.firstChild);
-    }
-  }
-  if (srcEl) srcEl.textContent = best.srcLabel;
-
-  // Push data into chart
-  pmixChart.data.labels = best.labels;
-  pmixChart.data.datasets[0].data = best.data;
-  pmixChart.data.datasets[0].backgroundColor = best.colors;
-  pmixChart.update('active');
 }
 
 // ---- FILE UPLOAD HANDLER ----
@@ -1284,7 +1270,7 @@ function handleFileUpload(event, type) {
       if (summary.error === 'no_sales_col') {
         appendMsg('ai', `⚠️ ${file.name} loaded but I couldn't detect a sales/revenue column.\n\n${summary.summary}\n\nCould you tell me which column contains your sales figures?`);
       } else {
-        let msg = `✓ ${file.name} loaded — ${rows.length} records parsed.\n\n${summary.summary}`;
+        let msg = `✓ ${file.name} loaded — ${rows.length} records parsed.${lastParseTruncated ? ' (capped at the first '+MAX_ROWS+' rows for this preview)' : ''}\n\n${summary.summary}`;
         // Warn about columns that stayed on demo
         const missingKpis = [];
         if (type === 'sales' && !summary.kpis.check) missingKpis.push('Avg Check (no check count or average check column found)');
@@ -1334,8 +1320,6 @@ function updateDashboard(type, summary, filename) {
     salesChart.data.datasets = cd.datasets;
     salesChart.update();
     document.getElementById('salesChartSrc').textContent = 'live data — ' + filename;
-    // DOW chart is derived from the same sales file — mark it live too
-    document.getElementById('dowSrc').textContent = 'live — ' + filename;
     if (cd.locations) {
       const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
       const legend = document.getElementById('salesLegend');
@@ -1352,14 +1336,11 @@ function updateDashboard(type, summary, filename) {
     laborChart.update();
     document.getElementById('laborSrc').textContent = 'live data — ' + filename;
   }
-  if (type === 'pmix') {
-    if (summary.chartData) {
-      pmixChart.data.labels = summary.chartData.labels;
-      pmixChart.data.datasets[0].data = summary.chartData.data;
-      pmixChart.update();
-    }
-    // Always update source label and title for PMIX — even when chart data is item-based not category-based
-    updatePmixChartFromSummary(summary, filename);
+  if (type === 'pmix' && summary.chartData) {
+    pmixChart.data.labels = summary.chartData.labels;
+    pmixChart.data.datasets[0].data = summary.chartData.data;
+    pmixChart.update();
+    document.getElementById('pmixSrc').textContent = 'live';
   }
 
   // Handle custom CSV — add to sidebar and notify
@@ -1521,179 +1502,12 @@ function updateStatusBar() {
 }
 
 // ---- MODAL ----
-function openUploadModal() { document.getElementById('uploadModal').classList.add('open'); }
+function openUploadModal() {
+  if (typeof switchUploadDomain === 'function') switchUploadDomain(currentMode === 'financial' ? 'financial' : 'operational');
+  document.getElementById('uploadModal').classList.add('open');
+}
 function closeUploadModal() { document.getElementById('uploadModal').classList.remove('open'); }
 document.getElementById('uploadModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUploadModal(); });
-
-// ---- DONE → reconcile dashboard first, then insights ----
-let lastInsights = null;
-
-function finishUploadAndAnalyze() {
-  // Always close upload modal immediately — dashboard must be visible
-  closeUploadModal();
-
-  const hasLive = Object.values(uploadedData).some(Boolean);
-  if (!hasLive) return; // pure demo — nothing to analyse
-
-  // Show insights overlay with spinner right away
-  openInsightsSpinner();
-
-  // Fire insights generation (async — dashboard is already visible behind it)
-  generateInsights();
-}
-
-function openInsightsSpinner() {
-  const overlay = document.getElementById('insightsOverlay');
-  const spinner = document.getElementById('insightsSpinner');
-  const list    = document.getElementById('insightsList');
-  const subtitle = document.getElementById('insightsSubtitle');
-  overlay.style.display = 'flex';
-  if (spinner) spinner.style.display = 'flex';
-  if (list) { list.innerHTML = ''; list.appendChild(spinner); spinner.style.display = 'flex'; }
-  if (subtitle) subtitle.textContent = 'Analyzing your uploaded data…';
-}
-
-function openInsights() {
-  if (!lastInsights) return;
-  const overlay = document.getElementById('insightsOverlay');
-  overlay.style.display = 'flex';
-  renderInsights(lastInsights);
-}
-
-function closeInsights() {
-  const overlay = document.getElementById('insightsOverlay');
-  overlay.style.display = 'none';
-}
-document.getElementById('insightsOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('insightsOverlay')) closeInsights();
-});
-
-async function generateInsights() {
-  // Build a summary of live KPIs to send to the model
-  const liveSummaries = Object.entries(uploadedData)
-    .filter(([,v]) => v)
-    .map(([type, data]) => `${type.toUpperCase()}: ${data.summary?.summary || '(no summary)'}`)
-    .join('\n\n');
-
-  const prompt = `You are OpticAI, a restaurant operations analyst. Based on the following live data summaries, generate exactly 5 prioritised findings.
-
-DATA:
-${liveSummaries}
-
-Return ONLY a valid JSON array — no preamble, no markdown, no explanation. Each object must have:
-  "severity": one of "high", "med", or "low"
-  "insight": a concise 1-2 sentence finding with a specific number or trend (max 140 chars)
-  "question": a short follow-up question the operator should ask (max 80 chars)
-
-Example format:
-[{"severity":"high","insight":"Labor % is 39.7% vs 30% target — systemic overstaffing across all 5 locations.","question":"Which location has the worst labor % trend?"},...]
-
-Return exactly 5 items. Most impactful first.`;
-
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 600,
-        system: 'You are a JSON-only API. Return only a raw JSON array, no markdown, no prose.',
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content?.map(b => b.text || '').filter(Boolean).join('') || '';
-    const insights = parseInsightJson(raw);
-    lastInsights = insights;
-    renderInsights(insights);
-  } catch(err) {
-    const fallback = localFallbackInsights();
-    lastInsights = fallback;
-    renderInsights(fallback);
-  }
-}
-
-function parseInsightJson(raw) {
-  try {
-    const clean = raw.replace(/```json|```/g, '').trim();
-    // Find the first '[' to handle any preamble
-    const start = clean.indexOf('[');
-    const end   = clean.lastIndexOf(']');
-    if (start === -1 || end === -1) throw new Error('No array found');
-    const parsed = JSON.parse(clean.slice(start, end + 1));
-    const valid = ['high','med','low'];
-    return parsed.slice(0, 5).map(i => ({
-      severity: valid.includes(i.severity) ? i.severity : 'med',
-      insight:  String(i.insight  || '').slice(0, 200),
-      question: String(i.question || '').slice(0, 120)
-    }));
-  } catch(e) {
-    return localFallbackInsights();
-  }
-}
-
-function localFallbackInsights() {
-  const items = [];
-  if (uploadedData.labor) {
-    const s = uploadedData.labor.summary;
-    items.push({ severity: 'high', insight: `Labor data uploaded — check if labor % is within target range.`, question: 'What is labor % by location this period?' });
-  }
-  if (uploadedData.sales) {
-    items.push({ severity: 'med', insight: `Sales data loaded — compare top and bottom performing locations.`, question: 'Which location had the highest sales growth?' });
-  }
-  if (uploadedData.foodcost) {
-    items.push({ severity: 'med', insight: `Food cost data loaded — verify food cost % vs target.`, question: 'Is food cost % trending up or down?' });
-  }
-  if (uploadedData.pmix) {
-    items.push({ severity: 'low', insight: `PMIX data available — review category mix and margin contribution.`, question: 'Which category drives the most revenue?' });
-  }
-  // Pad to 5
-  while (items.length < 5) {
-    items.push({ severity: 'low', insight: `Upload additional datasets for deeper cross-metric analysis.`, question: 'What datasets are still missing?' });
-  }
-  return items.slice(0, 5);
-}
-
-function renderInsights(insights) {
-  const list = document.getElementById('insightsList');
-  const subtitle = document.getElementById('insightsSubtitle');
-  if (!list) return;
-
-  const dotColor = { high: '#ef4444', med: '#f59e0b', low: '#10b981' };
-  const dotLabel = { high: 'High priority', med: 'Medium', low: 'Low' };
-
-  list.innerHTML = insights.map((item, i) => `
-    <div onclick="askInsight(${i})" style="display:flex;gap:12px;padding:12px 10px;border-radius:10px;cursor:pointer;transition:background 0.15s;margin-bottom:6px;"
-      onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
-      <div style="flex-shrink:0;margin-top:3px;">
-        <div style="width:9px;height:9px;border-radius:50%;background:${dotColor[item.severity] || '#f59e0b'};box-shadow:0 0 6px ${dotColor[item.severity] || '#f59e0b'}44;" title="${dotLabel[item.severity] || 'Med'}"></div>
-      </div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:var(--text);line-height:1.5;margin-bottom:4px;">${item.insight}</div>
-        <div style="font-size:11px;color:var(--accent);display:flex;align-items:center;gap:4px;">
-          <i class="ti ti-arrow-right" style="font-size:11px"></i> ${item.question}
-        </div>
-      </div>
-    </div>
-  `).join('');
-
-  if (subtitle) subtitle.textContent = '5 findings ranked by business impact — click any to explore';
-
-  // Show the header chip
-  const chip = document.getElementById('insightsChip');
-  if (chip) chip.style.display = 'flex';
-}
-
-function askInsight(index) {
-  if (!lastInsights || !lastInsights[index]) return;
-  closeInsights();
-  const q = lastInsights[index].question;
-  // Inject question into chat
-  const inputEl = document.getElementById('chatInput');
-  if (inputEl) {
-    inputEl.value = q;
-    sendMessage();
-  }
-}
 
 // ---- AI CHAT ----
 const DEMO_CONTEXT = `You are OpticAI, an expert restaurant operations analyst AI. You have access to 12 weeks of operational data (Feb 3 – Apr 27, 2025) for a 3-location casual dining restaurant group.
@@ -1717,6 +1531,8 @@ ANOMALIES: 1) Midtown Tue-Wed labor spike 3 consecutive weeks. 2) Tuesday struct
 Respond as a sharp, direct restaurant ops analyst. Specific numbers, actionable recommendations, concise (3–6 sentences unless full briefing requested). Bullet points for recs. No markdown headers.`;
 
 let conversationHistory = [];
+// Shared brevity guidance (requirement: brief, to the point, accurate)
+const BREVITY = `\n\nRESPONSE STYLE: Be brief and direct. Lead with the answer or the key number, then at most 1-2 sentences of why. 2-4 sentences total unless a full briefing is explicitly requested. Use real numbers from the data, never invent figures, and say so if the data doesn't cover something. No markdown headers.`;
 let liveDataContext = '';
 let resolvedSchemas = {}; // stores semantic schema per uploaded file type
 const messagesEl = document.getElementById('messages');
@@ -1724,8 +1540,12 @@ const inputEl = document.getElementById('chatInput');
 const sendBtn = document.getElementById('sendBtn');
 
 function buildSystemPrompt(userQuestion) {
+  // FINANCIAL mode delegates to the Financial namespace context builder
+  if (typeof currentMode !== 'undefined' && currentMode === 'financial') {
+    return Financial.buildContext(userQuestion);
+  }
   const hasLive = Object.values(uploadedData).some(Boolean);
-  if (!hasLive) return DEMO_CONTEXT;
+  if (!hasLive) return DEMO_CONTEXT + BREVITY;
 
   let liveSection = '\n\nLIVE UPLOADED DATA (use this instead of demo data where applicable):\n';
   Object.entries(uploadedData).forEach(([type, data]) => {
@@ -1741,7 +1561,7 @@ function buildSystemPrompt(userQuestion) {
   }
   liveSection += '\n__USER_QUESTION__:' + (userQuestion || '');
 
-  return DEMO_CONTEXT + liveSection;
+  return DEMO_CONTEXT + liveSection + BREVITY;
 }
 
 // Semantic ambiguity UI — driven by resolver output instead of hardcoded list
@@ -1801,86 +1621,38 @@ const LEARNABLE_CONCEPTS = [
   ['labor_hours','Labor Hours'], ['overtime_hours','Overtime Hours'], ['food_cost','Food Cost'],
   ['beverage_cost','Beverage Cost'], ['total_cogs','Total COGS'], ['paper_packaging','Paper/Packaging'],
   ['quantity_sold','Quantity Sold'], ['item_revenue','Item Revenue'], ['inventory_variance','Inventory Variance'],
-  ['on_hand','On Hand (current stock qty)'], ['par_level','Par Level (target stock qty)'],
-  ['inventory_unit_cost','Unit Cost'], ['inventory_variance_pct','Variance %'],
-  ['actual_usage','Actual Usage'], ['theoretical_usage','Theoretical Usage'],
   ['employee','Employee / Server'], ['order_source','Order Source'], ['revenue_center','Revenue Center']
 ];
 
 function checkUnmappedColumnsFromSchema(unmappedCols, type, filename) {
   if (!unmappedCols || unmappedCols.length === 0) return;
+  // Skip pure identifier-ish columns we already capture elsewhere
   const col = unmappedCols[0];
   const remaining = unmappedCols.slice(1);
-  // Escape col for use in inline JS strings
-  const colEsc = col.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-  const remainingJson = JSON.stringify(remaining).replace(/'/g, "\\'");
 
   const optionBtns = LEARNABLE_CONCEPTS.map(([id,label]) =>
-    `<button onclick="learnUnmappedColumn('${colEsc}','${id}','${type}','${filename}',${JSON.stringify(remaining)})"
+    `<button onclick="learnUnmappedColumn('${col}','${id}','${type}','${filename}',${JSON.stringify(remaining)})"
       style="display:inline-block;text-align:left;padding:5px 9px;margin:2px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;"
       onmouseover="this.style.borderColor='#3b82f6';this.style.color='#93c5fd'"
       onmouseout="this.style.borderColor='';this.style.color='var(--text2)'"
     >${label}</button>`
   ).join('');
 
-  const uid = 'unmapped-' + col.replace(/[^a-z0-9]/gi, '_');
-
   const w = document.createElement('div');
   w.className = 'msg msg-ai';
-  w.id = uid;
+  w.id = 'unmapped-' + col;
   w.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(59,130,246,0.3);">
     <div style="color:#93c5fd;font-size:12px;margin-bottom:8px;">🆕 I found a column I don't recognize: <strong>"${col}"</strong> in ${filename}. What is it? (I'll remember for this session.)</div>
-    <div style="display:flex;flex-wrap:wrap;gap:0;margin-bottom:8px;">${optionBtns}</div>
-    <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px;">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:5px;">Or describe it in your own words:</div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <input id="custom-desc-${uid}" type="text" placeholder="e.g. current quantity on shelf…"
-          style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:5px 9px;color:var(--text);font-size:11px;font-family:'DM Sans',sans-serif;outline:none;"
-          onkeydown="if(event.key==='Enter'){learnUnmappedColumnCustom('${colEsc}','${uid}','${type}','${filename}',${JSON.stringify(remaining)})}"
-          onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor=''">
-        <button onclick="learnUnmappedColumnCustom('${colEsc}','${uid}','${type}','${filename}',${JSON.stringify(remaining)})"
-          style="padding:5px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Remember this</button>
-      </div>
-    </div>
-    <button onclick="learnUnmappedColumn('${colEsc}','__ignore__','${type}','${filename}',${JSON.stringify(remaining)})"
-      style="display:block;width:100%;text-align:center;padding:5px 10px;margin-top:8px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Ignore this column</button>
+    <div style="display:flex;flex-wrap:wrap;gap:0;margin-bottom:6px;">${optionBtns}</div>
+    <button onclick="learnUnmappedColumn('${col}','__ignore__','${type}','${filename}',${JSON.stringify(remaining)})"
+      style="display:block;width:100%;text-align:center;padding:6px 10px;margin-top:4px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Something else / ignore this column</button>
   </div>`;
   messagesEl.appendChild(w);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-// Handles the free-text "describe it yourself" path
-function learnUnmappedColumnCustom(col, uid, type, filename, remaining) {
-  const inputEl = document.getElementById('custom-desc-' + uid);
-  const description = inputEl ? inputEl.value.trim() : '';
-  if (!description) { if (inputEl) inputEl.focus(); return; }
-
-  // Store as a custom canon ID derived from the description
-  // We use a __custom__ prefix so the model can see the human label
-  const canonId = '__custom__:' + description;
-  const schema = resolvedSchemas[type];
-  if (schema) {
-    schema.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_described', label: description };
-    if (Array.isArray(schema.unmapped)) schema.unmapped = schema.unmapped.filter(c => c !== col);
-  }
-  // Also remember for future files this session
-  if (!learnedAliases[canonId]) learnedAliases[canonId] = [];
-  if (!learnedAliases[canonId].includes(col)) learnedAliases[canonId].push(col);
-  // Apply retroactively to any other loaded schema
-  Object.values(resolvedSchemas).forEach(s => {
-    if (s && Array.isArray(s.unmapped) && s.unmapped.includes(col)) {
-      s.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_described', label: description };
-      s.unmapped = s.unmapped.filter(c => c !== col);
-    }
-  });
-  const el = document.getElementById(uid);
-  if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> = "${description}". I'll use that description for the rest of this session.</div>`;
-  if (remaining && remaining.length > 0) checkUnmappedColumnsFromSchema(remaining, type, filename);
-}
-
 function learnUnmappedColumn(col, canonId, type, filename, remaining) {
-  const uid = 'unmapped-' + col.replace(/[^a-z0-9]/gi, '_');
-  const el = document.getElementById(uid);
+  const el = document.getElementById('unmapped-' + col);
   if (canonId === '__ignore__') {
     if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid var(--border);font-size:12px;color:var(--text3);">Okay — I'll leave <strong>"${col}"</strong> out of the analysis.</div>`;
   } else {
@@ -1900,8 +1672,7 @@ function learnUnmappedColumn(col, canonId, type, filename, remaining) {
         s.unmapped = s.unmapped.filter(c => c !== col);
       }
     });
-    const label = LEARNABLE_CONCEPTS.find(([id]) => id === canonId)?.[1] || canonId;
-    if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Learned — <strong>"${col}"</strong> = ${label}. I'll recognize it for the rest of this session.</div>`;
+    if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Learned — <strong>"${col}"</strong> = ${canonId}. I'll recognize it for the rest of this session.</div>`;
   }
   if (remaining && remaining.length > 0) checkUnmappedColumnsFromSchema(remaining, type, filename);
 }
@@ -1925,7 +1696,7 @@ async function sendMessage() {
   try {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system: buildSystemPrompt(text), messages: conversationHistory })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: buildSystemPrompt(text), messages: conversationHistory })
     });
     const data = await res.json();
     const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, I had trouble with that. Try again.';
@@ -1960,7 +1731,9 @@ async function generateBriefing() {
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader" style="font-size:15px;animation:spin 1s linear infinite"></i> Generating briefing...';
 
-  const briefingPrompt = `Generate a comprehensive Weekly Operations Briefing for this restaurant group. Format it clearly with these exact sections:
+  const briefingPrompt = (typeof currentMode !== 'undefined' && currentMode === 'financial')
+    ? Financial.briefingPrompt()
+    : `Generate a comprehensive Weekly Operations Briefing for this restaurant group. Format it clearly with these exact sections:
 
 WEEKLY OPS BRIEFING
 ===================
@@ -1991,7 +1764,7 @@ Keep it direct, specific, and written for a GM — not an analyst. Use real numb
   try {
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: conversationHistory })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: conversationHistory })
     });
     const data = await res.json();
     const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, could not generate briefing.';
@@ -2006,7 +1779,7 @@ Keep it direct, specific, and written for a GM — not an analyst. Use real numb
   }
 
   btn.disabled = false;
-  btn.innerHTML = '<i class="ti ti-file-analytics" style="font-size:15px"></i> Generate Weekly Ops Briefing';
+  btn.innerHTML = '<i class="ti ti-file-analytics" style="font-size:15px"></i> ' + ((typeof currentMode!=='undefined'&&currentMode==='financial') ? 'Generate Financial Briefing' : 'Generate Weekly Ops Briefing');
 }
 
 function appendBriefingMsg(text) {
@@ -2047,6 +1820,144 @@ function appendBriefingMsg(text) {
 }
 
 // ── CUSTOMIZE PANEL ──
+const kpiConfig = [
+  { id: 'sales',    label: 'Total Sales' },
+  { id: 'labor',    label: 'Labor %' },
+  { id: 'foodcost', label: 'Food Cost %' },
+  { id: 'prime',    label: 'Prime Cost' },
+  { id: 'check',    label: 'Avg Check' },
+];
+const chartConfig = [
+  { id: 'salesChartCard',  label: 'Weekly Sales by Location' },
+  { id: 'pmixChartCard',   label: 'PMIX — Margin by Category' },
+  { id: 'laborChartCard',  label: 'Labor % by Location' },
+  { id: 'dowChartCard',    label: 'Avg Daily Sales by Day of Week' },
+];
+
+function openCustomizePanel() {
+  // Build KPI toggles
+  const kpiContainer = document.getElementById('kpiToggles');
+  kpiContainer.innerHTML = kpiConfig.map(k => {
+    const card = document.getElementById('kpi-' + k.id);
+    const visible = card ? card.style.display !== 'none' : true;
+    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
+      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleKpi('${k.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
+      ${k.label}
+    </label>`;
+  }).join('');
+
+  // Build chart toggles — add IDs to chart cards first
+  document.querySelectorAll('.chart-card').forEach((card, i) => {
+    if (chartConfig[i]) card.id = chartConfig[i].id;
+  });
+  const chartContainer = document.getElementById('chartToggles');
+  chartContainer.innerHTML = chartConfig.map(c => {
+    const card = document.getElementById(c.id);
+    const visible = card ? card.style.display !== 'none' : true;
+    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
+      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleChart('${c.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
+      ${c.label}
+    </label>`;
+  }).join('');
+
+  // Populate custom chart column selector
+  const colSelect = document.getElementById('customChartCol');
+  colSelect.innerHTML = '<option value="">Select a metric column...</option>';
+  Object.entries(uploadedData).forEach(([type, data]) => {
+    if (data && data.summary?.metricCols) {
+      data.summary.metricCols.forEach(col => {
+        colSelect.innerHTML += `<option value="${type}:${col}">${col} (from ${type})</option>`;
+      });
+    }
+  });
+
+  document.getElementById('customizeModal').classList.add('open');
+}
+
+function closeCustomizePanel() { document.getElementById('customizeModal').classList.remove('open'); }
+document.getElementById('customizeModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCustomizePanel(); });
+
+function toggleKpi(id, show) {
+  const card = document.getElementById('kpi-' + id);
+  if (card) card.style.display = show ? '' : 'none';
+}
+
+function toggleChart(id, show) {
+  const card = document.getElementById(id);
+  if (card) card.style.display = show ? '' : 'none';
+}
+
+function resetDashboard() {
+  kpiConfig.forEach(k => toggleKpi(k.id, true));
+  chartConfig.forEach(c => toggleChart(c.id, true));
+  // Remove any custom charts
+  document.querySelectorAll('.custom-chart-card').forEach(el => el.remove());
+  closeCustomizePanel();
+}
+
+function buildCustomChart() {
+  const colSelect = document.getElementById('customChartCol');
+  const chartType = document.getElementById('customChartType').value;
+  const val = colSelect.value;
+  if (!val) return;
+
+  const [type, col] = val.split(':');
+  const data = uploadedData[type];
+  if (!data) return;
+
+  const rows = data.rows;
+  const keys = Object.keys(rows[0]);
+  const locationCol = keys.find(k => ['location','store','site'].includes(k));
+  const dateCol = keys.find(k => ['date','week','period'].includes(k));
+
+  let chartData;
+  if (locationCol) {
+    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].slice(0,4);
+    const labels = rows.filter(r => r[locationCol]===locs[0]).map((_,i)=>'W'+(i+1));
+    const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981'];
+    const datasets = locs.map((loc,i) => ({
+      label: loc,
+      data: rows.filter(r=>r[locationCol]===loc).map(r=>parseFloat(r[col])||0),
+      backgroundColor: chartType==='bar' ? colors[i] : undefined,
+      borderColor: colors[i], borderWidth: 2, tension: 0.4,
+      fill: false, pointRadius: 3
+    }));
+    chartData = { labels, datasets };
+  } else {
+    const labels = rows.map((_,i)=>'W'+(i+1));
+    chartData = { labels, datasets: [{ label: col, data: rows.map(r=>parseFloat(r[col])||0), backgroundColor:'#3b82f6', borderColor:'#3b82f6', borderWidth:2, tension:0.4 }] };
+  }
+
+  // Add chart card to chart section
+  const chartSection = document.querySelector('.chart-section');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chart-row custom-chart-card';
+  wrapper.style.cssText = 'flex:0 0 180px;';
+  wrapper.innerHTML = `
+    <div class="chart-card" style="flex:1;position:relative;">
+      <div class="chart-title">${col} <button onclick="this.closest('.custom-chart-card').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 4px;" title="Remove">✕</button></div>
+      <div class="chart-wrap"><canvas id="custom-chart-${Date.now()}"></canvas></div>
+    </div>`;
+  chartSection.appendChild(wrapper);
+
+  const canvas = wrapper.querySelector('canvas');
+  new Chart(canvas, {
+    type: chartType,
+    data: chartData,
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: locationCol ? true : false, labels: { color:'#8b909e', font:{size:11} } } },
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#555b6a',font:{size:10}} },
+        y: { grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#555b6a',font:{size:10}} }
+      }
+    }
+  });
+
+  closeCustomizePanel();
+  appendMsg('ai', `Custom chart added for "${col}" from your ${type} data. You can see it at the bottom of the dashboard. Remove it anytime using the ✕ button.`);
+}
+
 // ── DYNAMIC SUGGESTED QUESTIONS — pool-based rotating system ──
 let questionPoolIndex = 0;
 
@@ -2215,6 +2126,7 @@ function findHighLaborLocation() {
 }
 
 function refreshSuggestedQuestions() {
+  if (typeof currentMode !== 'undefined' && currentMode === 'financial') { Financial.renderSuggested(); return; }
   questionPoolIndex += 4; // advance by 4 so next refresh shows next batch
   const container = document.getElementById('suggestedQs');
   if (!container) return;
@@ -2576,18 +2488,36 @@ function updatePmixChart(loc) {
     const catCol = findCol(keys, ['category','cat','group','type','section','menu category']);
     const revCol = findCol(keys, ['gross sales','gross_sales','revenue','sales','amount','total sales','item sales']);
     const locationCol = findCol(keys, ['location','store','site','restaurant','unit']);
+    
+    if (!catCol || !revCol) {
+      console.warn('PMIX: could not find category or revenue column. Keys:', keys);
+      return;
+    }
 
     const locRows = (loc && locationCol) ? rows.filter(r => r[locationCol] === loc) : rows;
-    if (locRows.length === 0) { pmixChart.update(); return; }
-
-    // Use the smart best-chart builder on the filtered rows
-    const locKeys = Object.keys(locRows[0]);
-    const best = buildPmixChartBest(locRows, locKeys);
-    if (best) {
-      pmixChart.data.labels = best.labels;
-      pmixChart.data.datasets[0].data = best.data;
-      pmixChart.data.datasets[0].backgroundColor = best.colors;
+    
+    if (locRows.length === 0) {
+      console.warn('PMIX: no rows for location', loc);
+      return;
     }
+
+    const catTotals = {};
+    let total = 0;
+    locRows.forEach(r => {
+      const cat = r[catCol] || 'Other';
+      const val = parseFloat(r[revCol]) || 0;
+      catTotals[cat] = (catTotals[cat] || 0) + val;
+      total += val;
+    });
+
+    if (total === 0) return;
+
+    const sorted = Object.entries(catTotals).sort((a,b) => b[1] - a[1]).slice(0, 6);
+    
+    // Update labels, data, AND colors together to keep them in sync
+    pmixChart.data.labels = sorted.map(([k,v]) => `${k} ${(v/total*100).toFixed(1)}%`);
+    pmixChart.data.datasets[0].data = sorted.map(([,v]) => v/total*100);
+    pmixChart.data.datasets[0].backgroundColor = sorted.map((_, i) => COLORS[i % COLORS.length]);
     
   } else {
     // Demo data — add per-location variation to make filter feel useful
@@ -2717,7 +2647,405 @@ function updateFilteredKPIs(loc) {
   }
 }
 
+/* =====================================================================
+   ===============  MODE CONTROLLER  (Operational | Financial)  ========
+   ===================================================================== */
+let currentMode = 'operational';
+
+function setMode(mode){
+  currentMode = mode;
+  const fin = mode === 'financial';
+  document.getElementById('mode-operational').classList.toggle('active', !fin);
+  document.getElementById('mode-financial').classList.toggle('active', fin);
+  // dashboards
+  document.getElementById('opsPanel').style.display = fin ? 'none' : '';
+  document.getElementById('finPanel').style.display = fin ? '' : 'none';
+  // sidebar sections
+  document.getElementById('opsLocSection').style.display = fin ? 'none' : '';
+  document.getElementById('datasetList').style.display = fin ? 'none' : '';
+  document.getElementById('finLocSection').style.display = fin ? '' : 'none';
+  // topbar + briefing label
+  document.getElementById('dashTitle').textContent = fin ? 'Financial Dashboard' : 'Operations Dashboard';
+  const briefBtn = document.getElementById('briefingBtn');
+  if (briefBtn) briefBtn.innerHTML = '<i class="ti ti-file-analytics" style="font-size:15px"></i> ' + (fin ? 'Generate Financial Briefing' : 'Generate Weekly Ops Briefing');
+  const chatInput = document.getElementById('chatInput');
+  if (chatInput) chatInput.placeholder = fin ? 'Ask about the financials…' : 'Ask about your operations...';
+  // status bar
+  updateModeStatusBar();
+  if (fin) { Financial.render(); }
+  else { [salesChart,laborChart,pmixChart,dowChart].forEach(c=>{try{c&&c.resize();}catch(e){}}); }
+  refreshSuggestedQuestions();
+}
+
+function updateModeStatusBar(){
+  const bar = document.getElementById('statusBar'); const txt = document.getElementById('statusText');
+  if (!bar||!txt) return;
+  if (currentMode === 'financial'){
+    const live = !!Financial.state.data;
+    bar.classList.toggle('demo-mode', !live);
+    txt.innerHTML = live
+      ? `<strong>Live financials</strong> — ${Financial.state.fileCount} statement(s) parsed. ${Financial.activeData().when}.`
+      : `Financial mode on <strong>sample data</strong> (demo) — upload P&L / Balance Sheet exports (.xlsx) to go live.`;
+  } else {
+    const live = Object.values(uploadedData).some(Boolean);
+    bar.classList.toggle('demo-mode', !live);
+    txt.innerHTML = live
+      ? `Operational mode — analyzing your uploaded data. Datasets not uploaded still show demo data.`
+      : `Running on <strong>demo data</strong> — 5 locations, 21 weeks (Feb–Jun 2026). Upload your own CSVs to analyze your real restaurant data.`;
+  }
+}
+
+function switchUploadDomain(domain){
+  document.getElementById('domtab-operational').classList.toggle('active', domain==='operational');
+  document.getElementById('domtab-financial').classList.toggle('active', domain==='financial');
+  document.getElementById('opsUploadPane').style.display = domain==='operational' ? '' : 'none';
+  document.getElementById('finUploadPane').style.display = domain==='financial' ? '' : 'none';
+}
+
+/* =====================================================================
+   ===============  OPERATIONAL — multi-file drop helper  ==============
+   (keeps existing per-type tiles + handleFileUpload untouched)
+   ===================================================================== */
+const Operational = {
+  detectType(keys){
+    const has = (al)=>!!findCol(keys, al);
+    if (has(['on hand','on_hand','par','variance']) && !has(['date'])) return 'inventory';
+    if (has(['labor pct','labor_pct','labor_cost','labor cost','hours','wages'])) return 'labor';
+    if (has(['food cost','food_cost','food_cost_pct','cogs'])) return 'foodcost';
+    if (has(['item','menu item']) && has(['category','quantity','qty','item sales'])) return 'pmix';
+    if (has(['net sales','net_sales','revenue','sales','gross sales']) && has(['date','week','day','period'])) return 'sales';
+    return 'custom';
+  },
+  ingestFiles(files){
+    const list = Array.from(files).slice(0,5);
+    const fl = document.getElementById('opsFileList'); fl.innerHTML='';
+    list.forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = e=>{
+        let type='custom';
+        try{
+          const firstLine=(e.target.result.split(/\r?\n/)[0]||'');
+          const keys=firstLine.split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+          type=this.detectType(keys);
+        }catch(err){}
+        const row=document.createElement('div'); row.className='file-item';
+        row.innerHTML=`<i class="ti ti-circle-check fi-ok fi-ico"></i><div class="fi-meta"><div class="fi-name">${file.name}</div><div class="fi-detect">detected: ${type}</div></div>`;
+        fl.appendChild(row);
+        // route through the existing, unchanged operational pipeline
+        handleFileUpload({ target:{ files:[file] } }, type);
+      };
+      reader.readAsText(file);
+    });
+  }
+};
+// drag-drop wiring for operational dropzone
+(function(){
+  const dz=document.getElementById('opsDropzone'); if(!dz) return;
+  ['dragover','dragenter'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag');}));
+  dz.addEventListener('drop',e=>Operational.ingestFiles(e.dataTransfer.files));
+})();
+
+/* =====================================================================
+   ====================  FINANCIAL  namespace  =========================
+   ===================================================================== */
+const Financial = (function(){
+  /* ---- statement parser (validated against real exports; reads internal labels, ignores filename) ---- */
+  function normLabel(s){return (s==null?'':String(s)).replace(/\s+/g,' ').trim();}
+  function n(v){if(v==null||v==='')return null;if(typeof v==='number')return v;
+    const x=parseFloat(String(v).replace(/[$,()]/g,m=>m==='('?'-':'').replace(/[^0-9.\-]/g,''));return isNaN(x)?null:x;}
+  function detectEntity(rows){for(let r=0;r<Math.min(rows.length,8);r++)for(const c of rows[r]||[]){
+    const m=normLabel(c).match(/(?:Location:\s*)?(\d{3})\s*-\s*(.+)/);if(m)return{code:m[1],name:normLabel(m[2])};}return null;}
+  function classify(rows){const a1=normLabel((rows[0]||[])[0]).toLowerCase();const a2=normLabel((rows[1]||[])[0]);
+    if(a1.includes('balance sheet'))return{type:'balance_sheet',when:a2};
+    if(a1.includes('trailing'))return{type:'pnl_trailing',when:a2};
+    if(a1.includes('side by side')||a1.includes('profit'))return{type:'pnl_side_by_side',when:a2};
+    return{type:'unknown',when:a2};}
+  function findGroups(rows,mode){for(let r=0;r<Math.min(rows.length,8);r++){const row=rows[r]||[];const labels=[];
+    for(let c=1;c<row.length;c++){const v=normLabel(row[c]);if(!v)continue;
+      if(mode==='pnl_side_by_side'&&/corporate|HT |total/i.test(v))labels.push({col:c,name:v});
+      if(mode==='pnl_trailing'&&/period/i.test(v))labels.push({col:c,name:v});}
+    if(labels.length>=2)return{headerRow:r,groups:labels.map(g=>({name:g.name,dollarCol:g.col,pctCol:g.col+1}))};}
+    return null;}
+  const PNL_METRICS={'Total Sales':'total_sales','Food Sales':'food_sales','Total Alcohol Sales':'alcohol_sales',
+    'Soft Beverage Sales':'soft_bev_sales','Total Comps & Discounts':'comps_discounts','Total Food Cost':'food_cost',
+    'Total Cost of Goods Sold':'total_cogs','Total Labor':'labor','Total Prime Cost':'prime_cost','Gross Profit':'gross_profit',
+    'Total Controllable Expenses':'controllable_exp','Total Non-Controllable Expenses':'noncontrollable_exp',
+    'EBITDA':'ebitda','Net Profit':'net_profit'};
+  const BS_METRICS={'Total Bank Accounts':'bank','Total Intercompany':'intercompany','Total Current Assets':'current_assets',
+    'Total Assets':'total_assets','Total Liabilities':'total_liabilities','Total Equity':'total_equity','Total Inventory':'inventory'};
+  function parsePnl(rows,cls){const hg=findGroups(rows,cls.type);if(!hg)return null;
+    const out={type:cls.type,when:cls.when,columns:hg.groups.map(g=>g.name),metrics:{}};
+    let count=0;
+    for(let r=hg.headerRow+1;r<rows.length&&count<MAX_ROWS;r++){const label=normLabel((rows[r]||[])[0]);if(!label)continue;count++;
+      const vals={};hg.groups.forEach(g=>{const d=n((rows[r]||[])[g.dollarCol]);const p=n((rows[r]||[])[g.pctCol]);
+        vals[g.name]={dollars:d,pct:(p!=null&&Math.abs(p)<=1.5)?p:null};});
+      const k=PNL_METRICS[label];if(k)out.metrics[k]=vals;}
+    return out;}
+  function parseBalanceSheet(rows,cls){let valCol=2;
+    for(let r=0;r<Math.min(rows.length,8);r++)for(let c=1;c<(rows[r]||[]).length;c++)if(/ytd/i.test(normLabel(rows[r][c])))valCol=c;
+    const out={type:'balance_sheet',when:cls.when,metrics:{}};let count=0;
+    for(let r=0;r<rows.length&&count<MAX_ROWS;r++){const label=normLabel((rows[r]||[])[0]);if(!label)continue;count++;
+      const v=n((rows[r]||[])[valCol]);const k=BS_METRICS[label];if(k&&v!=null)out.metrics[k]=v;}
+    return out;}
+  function parseSheet(rows){const cls=classify(rows);const entity=detectEntity(rows);let body=null;
+    if(cls.type==='balance_sheet')body=parseBalanceSheet(rows,cls);
+    else if(cls.type!=='unknown')body=parsePnl(rows,cls);
+    return{reportType:cls.type,when:cls.when,entity,...(body||{})};}
+
+  /* ---- sample data (derived from the real 3-location group, Period 5) ---- */
+  const SAMPLE={
+    when:'Period 5, 2026 · As of 5/17/2026',
+    consolidated:{total_sales:814625,food_cost_pct:.327,labor_pct:.377,prime_pct:.697,gross_pct:.303,
+      controllable_pct:.064,noncontrollable_pct:.148,ebitda_pct:.091,net_pct:.077,
+      mix:{Food:647856,Alcohol:204577,'Soft Bev':16093}},
+    locations:[
+      {name:'HT Gilbert',code:'100',sales:333784,food_pct:.323,labor_pct:.322,prime_pct:.639,gross_pct:.361,
+        controllable_pct:.060,noncontrollable_pct:.112,ebitda_pct:.189,bank:445247,intercompany:649953,inventory:55283,
+        mix:{Food:265000,Alcohol:62000,'Soft Bev':6784}},
+      {name:'HT Chandler',code:'200',sales:241374,food_pct:.327,labor_pct:.377,prime_pct:.704,gross_pct:.296,
+        controllable_pct:.066,noncontrollable_pct:.140,ebitda_pct:.090,bank:371639,intercompany:331363,inventory:55244,
+        mix:{Food:191000,Alcohol:45000,'Soft Bev':5374}},
+      {name:'HT Goodyear',code:'400',sales:239467,food_pct:.332,labor_pct:.410,prime_pct:.740,gross_pct:.260,
+        controllable_pct:.070,noncontrollable_pct:.150,ebitda_pct:.040,bank:79508,intercompany:-570949,inventory:61583,
+        mix:{Food:191000,Alcohol:44000,'Soft Bev':4467}}],
+    trailing:{periods:['P6','P7','P8','P9','P10','P11','P12','P13','P1','P2','P3','P4','P5'],
+      sales:[742,701,768,720,795,810,788,765,802,818,799,807,815].map(x=>x*1000),
+      ebitda:[.071,.062,.080,.069,.085,.090,.088,.082,.091,.093,.089,.090,.091]}
+  };
+
+  const state={ data:null, activeEntity:null, fileCount:0, staged:[] };
+  const charts={};
+  const COLORS=['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444'];
+  const fmtMoney=v=> v>=1e6 ? '$'+(v/1e6).toFixed(2)+'M' : '$'+Math.round(v/1e3)+'K';
+  const pct=v=>(v*100).toFixed(1)+'%';
+
+  function activeData(){ return state.data || SAMPLE; }
+  function locByCode(code){ return activeData().locations.find(l=>l.code===code); }
+
+  /* scoped view: consolidated when no entity selected, else the location */
+  function scoped(){
+    const d=activeData();
+    if(!state.activeEntity) return {
+      label:'Consolidated', sales:d.consolidated.total_sales, food_pct:d.consolidated.food_cost_pct,
+      labor_pct:d.consolidated.labor_pct, prime_pct:d.consolidated.prime_pct, gross_pct:d.consolidated.gross_pct,
+      controllable_pct:d.consolidated.controllable_pct, noncontrollable_pct:d.consolidated.noncontrollable_pct,
+      ebitda_pct:d.consolidated.ebitda_pct, mix:d.consolidated.mix };
+    const l=locByCode(state.activeEntity)||d.locations[0];
+    return { label:l.name, sales:l.sales, food_pct:l.food_pct, labor_pct:l.labor_pct, prime_pct:l.prime_pct,
+      gross_pct:l.gross_pct, controllable_pct:l.controllable_pct, noncontrollable_pct:l.noncontrollable_pct,
+      ebitda_pct:l.ebitda_pct, mix:l.mix||d.consolidated.mix };
+  }
+
+  /* ---- sidebar entities ---- */
+  function renderEntities(){
+    const d=activeData(); const el=document.getElementById('finEntityList'); if(!el) return;
+    let html=`<div class="location-pill ${state.activeEntity===null?'active':''}" onclick="Financial.selectEntity(null,this)"><div class="location-dot"></div> All (Consolidated)</div>`;
+    d.locations.forEach((l,i)=>{html+=`<div class="location-pill ${state.activeEntity===l.code?'active':''}" onclick="Financial.selectEntity('${l.code}',this)"><div class="location-dot" style="background:${COLORS[i%COLORS.length]}"></div> ${l.name}</div>`;});
+    el.innerHTML=html;
+  }
+  function selectEntity(code,el){
+    state.activeEntity=code;
+    document.querySelectorAll('#finEntityList .location-pill').forEach(p=>p.classList.remove('active'));
+    if(el) el.classList.add('active');
+    renderKpis(); renderCharts();           // <-- fix: filtering now updates ALL visuals, not just KPIs
+    document.getElementById('dashTitle').textContent = 'Financial Dashboard' + (code ? ' · '+(locByCode(code)||{}).name : '');
+  }
+
+  /* ---- KPIs ---- */
+  function renderKpis(){
+    const s=scoped(); const live=!!state.data;
+    const srcTag=live?`<span class="kpi-source" style="color:var(--green)">Live</span>`:`<span class="kpi-source demo-src">Demo</span>`;
+    const primeCls=s.prime_pct>0.70?'fin-kpi-down':(s.prime_pct>0.65?'fin-kpi-warn':'fin-kpi-up');
+    const cards=[
+      {l:'Total Sales',v:fmtMoney(s.sales),d:s.label,cls:''},
+      {l:'Prime Cost',v:pct(s.prime_pct),d:'target ≤ 65%',cls:primeCls},
+      {l:'Food Cost %',v:pct(s.food_pct),d:'target ≤ 32%',cls:s.food_pct>0.32?'fin-kpi-warn':'fin-kpi-up'},
+      {l:'Labor %',v:pct(s.labor_pct),d:'fully burdened',cls:s.labor_pct>0.35?'fin-kpi-down':'fin-kpi-up'},
+      {l:'EBITDA %',v:pct(s.ebitda_pct),d:'operating margin',cls:s.ebitda_pct<0.08?'fin-kpi-warn':'fin-kpi-up'}
+    ];
+    document.getElementById('finKpiRow').innerHTML = cards.map(c=>
+      `<div class="kpi-card ${live?'':'demo-card'}">${srcTag}<div class="kpi-label">${c.l}</div><div class="kpi-value">${c.v}</div><div class="kpi-delta ${c.cls}">${c.d}</div></div>`).join('');
+  }
+
+  /* ---- charts ---- */
+  const grid='rgba(255,255,255,0.05)', tick='#555b6a';
+  const opts=(extra={})=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b909e',font:{size:10},boxWidth:10}}},...extra});
+  function ensureCharts(){
+    if(charts.built) return;
+    charts.prime=new Chart(document.getElementById('finPrimeChart'),{type:'bar',data:{labels:[],datasets:[
+      {label:'Food %',data:[],backgroundColor:'#3b82f6'},{label:'Labor %',data:[],backgroundColor:'#f59e0b'}]},
+      options:opts({scales:{x:{stacked:true,ticks:{color:tick,font:{size:10}},grid:{display:false}},y:{stacked:true,suggestedMax:80,ticks:{color:tick,callback:v=>v+'%'},grid:{color:grid}}}})});
+    charts.mix=new Chart(document.getElementById('finMixChart'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:COLORS,borderColor:'#13161b',borderWidth:2}]},
+      options:opts({cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#8b909e',font:{size:10},boxWidth:10,padding:8}}}})});
+    charts.wf=new Chart(document.getElementById('finWfChart'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[]}]},
+      options:opts({plugins:{legend:{display:false}},scales:{x:{ticks:{color:tick,font:{size:10}},grid:{display:false}},y:{ticks:{color:tick,callback:v=>v+'%'},grid:{color:grid}}}})});
+    charts.trail=new Chart(document.getElementById('finTrailChart'),{type:'bar',data:{labels:[],datasets:[
+      {type:'bar',label:'Sales ($K)',data:[],backgroundColor:'rgba(59,130,246,.5)',yAxisID:'y'},
+      {type:'line',label:'EBITDA %',data:[],borderColor:'#10b981',tension:.4,pointRadius:2,yAxisID:'y1'}]},
+      options:opts({scales:{x:{ticks:{color:tick,font:{size:9}},grid:{display:false}},y:{ticks:{color:tick,callback:v=>'$'+v+'K'},grid:{color:grid}},y1:{position:'right',ticks:{color:'#10b981',callback:v=>v+'%'},grid:{display:false}}}})});
+    charts.built=true;
+  }
+  function renderCharts(){
+    ensureCharts();
+    const d=activeData(); const s=scoped(); const src=state.data?'your data':'sample';
+    // Prime by location — all locations, or just the selected one
+    const locs = state.activeEntity ? d.locations.filter(l=>l.code===state.activeEntity) : d.locations;
+    charts.prime.data.labels=locs.map(l=>l.name);
+    charts.prime.data.datasets[0].data=locs.map(l=>+(l.food_pct*100).toFixed(1));
+    charts.prime.data.datasets[1].data=locs.map(l=>+(l.labor_pct*100).toFixed(1));
+    charts.prime.update();
+    // Mix — scoped
+    const mix=Object.entries(s.mix||{}).filter(([,v])=>v>0);
+    charts.mix.data.labels=mix.map(([k])=>k);
+    charts.mix.data.datasets[0].data=mix.map(([,v])=>v);
+    charts.mix.update();
+    // Waterfall — scoped
+    const stages=[['Sales',100],['– Prime',-(s.prime_pct*100)],['Gross',s.gross_pct*100],
+      ['– Ctrl',-(s.controllable_pct*100)],['– Non-Ctrl',-(s.noncontrollable_pct*100)],['EBITDA',s.ebitda_pct*100]];
+    charts.wf.data.labels=stages.map(x=>x[0]);
+    charts.wf.data.datasets[0].data=stages.map(x=>+x[1].toFixed(1));
+    charts.wf.data.datasets[0].backgroundColor=stages.map(x=>x[1]<0?'#ef4444':(x[0]==='EBITDA'?'#10b981':'#3b82f6'));
+    charts.wf.update();
+    // Trailing — per-location if selected (scaled share when only consolidated available), else consolidated
+    const t=d.trailing; let salesArr=t.sales, ebitdaArr=t.ebitda;
+    if(state.activeEntity){ const l=locByCode(state.activeEntity); const share=l? l.sales/d.consolidated.total_sales : 1;
+      salesArr=t.sales.map(v=>v*share); ebitdaArr=t.ebitda.map(()=> (l?l.ebitda_pct:t.ebitda[0])); }
+    charts.trail.data.labels=t.periods;
+    charts.trail.data.datasets[0].data=salesArr.map(v=>Math.round(v/1000));
+    charts.trail.data.datasets[1].data=ebitdaArr.map(v=>+(v*100).toFixed(1));
+    charts.trail.update();
+    ['finSrcPrime','finSrcMix','finSrcWf','finSrcTrail'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=src;});
+  }
+
+  /* ---- suggested questions (financial, on-topic) ---- */
+  function suggestedPool(){
+    const d=activeData();
+    const worst=[...d.locations].sort((a,b)=>b.prime_pct-a.prime_pct)[0];
+    const best=[...d.locations].sort((a,b)=>b.ebitda_pct-a.ebitda_pct)[0];
+    return [
+      `Which location has the worst prime cost and what is driving it?`,
+      `Compare EBITDA margin across all three locations.`,
+      `Why is ${worst?worst.name:'the lagging site'}'s prime cost so high?`,
+      `What is the consolidated food cost % and which site is the outlier?`,
+      `What is ${best?best.name:'the strongest site'} doing right on margin?`,
+      `Flag balance-sheet risks, including intercompany exposure.`,
+      `Summarize the consolidated P&L for this period.`
+    ];
+  }
+  let sqIdx=0;
+  function renderSuggested(){
+    const el=document.getElementById('suggestedQs'); if(!el) return;
+    const pool=suggestedPool(); sqIdx=(sqIdx+0); const start=sqIdx%pool.length;
+    const picks=[]; for(let i=0;i<4;i++) picks.push(pool[(start+i)%pool.length]);
+    sqIdx+=4;
+    el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="sq-label" style="margin-bottom:0">Try asking</div>
+        <button onclick="refreshSuggestedQuestions()" title="Refresh" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;"><i class="ti ti-refresh" style="font-size:13px"></i></button>
+      </div>` + picks.map(q=>`<button class="sq-btn" onclick="sendSuggested(this.textContent)">${q}</button>`).join('');
+  }
+
+  /* ---- AI context + briefing (brief, accurate) ---- */
+  function buildContext(userQ){
+    const d=activeData(); const c=d.consolidated;
+    let ctx=`You are OpticAI, an expert restaurant FINANCIAL analyst looking at ${d.data?'uploaded':'sample'} statements for a multi-entity restaurant group on a 13-period (4-week) fiscal calendar.\n\nPERIOD: ${d.when}\n`;
+    ctx+=`CONSOLIDATED P&L: Sales ${fmtMoney(c.total_sales)}; Food Cost ${pct(c.food_cost_pct)}; Labor ${pct(c.labor_pct)} (fully burdened); Prime Cost ${pct(c.prime_pct)} (benchmark 55-65%); Gross Profit ${pct(c.gross_pct)}; EBITDA ${pct(c.ebitda_pct)}; Net ${pct(c.net_pct)}.\n\nBY LOCATION:\n`;
+    d.locations.forEach(l=>{ctx+=`- ${l.name} (${l.code}): Sales ${fmtMoney(l.sales)}, Prime ${pct(l.prime_pct)} (food ${pct(l.food_pct)}, labor ${pct(l.labor_pct)}), EBITDA ${pct(l.ebitda_pct)}; bank ${fmtMoney(l.bank)}, inventory ${fmtMoney(l.inventory)}, intercompany ${l.intercompany<0?'-':''}${fmtMoney(Math.abs(l.intercompany))}.\n`;});
+    if(state.activeEntity){const l=locByCode(state.activeEntity); if(l) ctx+=`\nThe user is currently viewing ${l.name} specifically.\n`;}
+    ctx+=`\nNOTES: Intercompany "Due To/From" balances net across entities — never treat them as cash. Prime cost = food cost + labor. Don't sum balance sheets across legal entities.\n`;
+    return ctx + BREVITY + '\n__USER_QUESTION__:' + (userQ||'');
+  }
+  function briefingPrompt(){
+    return `Generate a concise FINANCIAL PERFORMANCE BRIEFING for this restaurant group using only the numbers provided. Sections (keep each tight):
+P&L SNAPSHOT — consolidated sales, prime cost, EBITDA with the figures.
+MARGIN WATCH — locations off the 55-65% prime benchmark, with their numbers.
+LOCATION SPOTLIGHT — the weakest-margin site and the single biggest driver.
+BALANCE SHEET FLAGS — intercompany exposure, cash, inventory.
+ACTION ITEMS — 3 specific moves with expected $ or point impact.
+Write for an owner/operator. Real numbers only, no invented figures.`;
+  }
+
+  /* ---- upload staging + apply ---- */
+  function labelType(t){return {balance_sheet:'Balance Sheet',pnl_side_by_side:'P&L Side-by-Side',pnl_trailing:'P&L Trailing-13'}[t]||t;}
+  function stageFiles(files){
+    const list=Array.from(files).slice(0,5);
+    if(files.length>5) alert('Limit is 5 files — using the first 5.');
+    state.staged=[]; let pending=list.length;
+    list.forEach(file=>{
+      const reader=new FileReader();
+      reader.onload=e=>{
+        let entry={name:file.name};
+        try{
+          const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+          const ws=wb.Sheets[wb.SheetNames[0]];
+          const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null});
+          const p=parseSheet(rows);
+          if(p.reportType==='unknown'){entry.ok=false;entry.msg='Not recognized as a financial statement';}
+          else{entry.ok=true;entry.parsed=p;entry.msg=`${labelType(p.reportType)} · ${p.entity?p.entity.code+' '+p.entity.name:(p.columns?p.columns.length+' cols':'')} · ${p.when||''}`;}
+        }catch(err){entry.ok=false;entry.msg='Could not read file (not a valid .xlsx)';}
+        state.staged.push(entry);
+        if(--pending===0) renderFileList();
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+  function renderFileList(){
+    document.getElementById('finFileList').innerHTML=state.staged.map(f=>
+      `<div class="file-item"><i class="ti ${f.ok?'ti-circle-check fi-ok':'ti-alert-triangle fi-bad'} fi-ico"></i><div class="fi-meta"><div class="fi-name">${f.name}</div><div class="fi-detect">${f.msg}</div></div></div>`).join('');
+  }
+  function applyStaged(){
+    const ok=state.staged.filter(f=>f.ok&&f.parsed);
+    if(!ok.length){alert('No valid statements to apply.');return;}
+    const bsByCode={}; const side=ok.find(f=>f.parsed.reportType==='pnl_side_by_side'); const trail=ok.find(f=>f.parsed.reportType==='pnl_trailing');
+    ok.forEach(f=>{const p=f.parsed; if(p.reportType==='balance_sheet'&&p.entity)bsByCode[p.entity.code]=p;});
+    const fin={data:true,when:(side?side.parsed.when:ok[0].parsed.when)||'Uploaded period',locations:[]};
+    if(side){
+      const m=side.parsed.metrics; const total=side.parsed.columns[side.parsed.columns.length-1];
+      const g=(k,col)=>m[k]&&m[k][col]?m[k][col]:{dollars:0,pct:0};
+      fin.consolidated={total_sales:g('total_sales',total).dollars,food_cost_pct:g('food_cost',total).pct||0,
+        labor_pct:g('labor',total).pct||0,prime_pct:g('prime_cost',total).pct||0,gross_pct:g('gross_profit',total).pct||0,
+        controllable_pct:g('controllable_exp',total).pct||0,noncontrollable_pct:g('noncontrollable_exp',total).pct||0,
+        ebitda_pct:g('ebitda',total).pct||0,net_pct:g('net_profit',total).pct||0,
+        mix:{Food:g('food_sales',total).dollars||g('total_sales',total).dollars*0.8,Alcohol:g('alcohol_sales',total).dollars,'Soft Bev':g('soft_bev_sales',total).dollars}};
+      side.parsed.columns.filter(col=>/HT /i.test(col)).forEach(col=>{
+        const code=col.includes('Gilbert')?'100':col.includes('Chandler')?'200':col.includes('Goodyear')?'400':col;
+        fin.locations.push({name:col,code,sales:g('total_sales',col).dollars,food_pct:g('food_cost',col).pct||0,
+          labor_pct:g('labor',col).pct||0,prime_pct:g('prime_cost',col).pct||0,gross_pct:g('gross_profit',col).pct||0,
+          controllable_pct:g('controllable_exp',col).pct||0,noncontrollable_pct:g('noncontrollable_exp',col).pct||0,
+          ebitda_pct:g('ebitda',col).pct||0,bank:(bsByCode[code]&&bsByCode[code].metrics.bank)||0,
+          inventory:(bsByCode[code]&&bsByCode[code].metrics.inventory)||0,intercompany:(bsByCode[code]&&bsByCode[code].metrics.intercompany)||0,
+          mix:{Food:g('food_sales',col).dollars,Alcohol:g('alcohol_sales',col).dollars,'Soft Bev':g('soft_bev_sales',col).dollars}});
+      });
+    }
+    if(trail){const m=trail.parsed.metrics;const cols=trail.parsed.columns;
+      fin.trailing={periods:cols.map(c=>c.replace(/Period (\d+), \d+/,'P$1')),
+        sales:cols.map(c=>m.total_sales&&m.total_sales[c]?m.total_sales[c].dollars:0),
+        ebitda:cols.map(c=>m.ebitda&&m.ebitda[c]?(m.ebitda[c].pct||0):0)};
+    } else fin.trailing=SAMPLE.trailing;
+    if(!fin.consolidated||!fin.locations.length){
+      alert('Applied, but no Location Side-by-Side P&L was found — that file powers the consolidated KPIs and per-location split. Add it for the full dashboard.');
+      if(!fin.consolidated){closeUploadModal();return;}
+    }
+    state.data=fin; state.fileCount=ok.length; state.activeEntity=null;
+    closeUploadModal();
+    if(currentMode!=='financial') setMode('financial'); else render();
+    updateModeStatusBar();
+  }
+
+  function render(){
+    document.getElementById('dateRangeLabel') && (document.getElementById('dateRangeLabel').textContent = activeData().when);
+    document.getElementById('dashTitle').textContent='Financial Dashboard';
+    renderEntities(); renderKpis(); renderCharts();
+  }
+  function init(){ /* charts built lazily on first financial view */ }
+
+  return { parseSheet, SAMPLE, state, activeData, selectEntity, render, renderKpis, renderCharts,
+    renderSuggested, buildContext, briefingPrompt, stageFiles, applyStaged, init };
+})();
+
 initCharts();
+Financial.init();
+setMode('operational');
 refreshSuggestedQuestions();
 
 // Show mobile nav bar on small screens
