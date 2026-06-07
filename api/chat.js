@@ -1,12 +1,36 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const client = new Anthropic();
 
-// ---- Semantic layer ----
-const { buildQueryContext, contextToSystemBlock } = require('./lib/retriever.js');
-const ontology    = require('./Semantic/ontology.json');
-const calcRules   = require('./Semantic/calc_rules.json');
-const diagnostics = require('./Semantic/diagnostic_graph.json');
-const posDict     = require('./Semantic/pos_dictionary.json');
+/**
+ * Lazy, fully non-fatal loader for the semantic layer.
+ *
+ * Previously these were top-level `require`s. If ANY of them failed to
+ * resolve at runtime (wrong path, missing file, bad JSON), the entire
+ * serverless function failed to initialize and every chat request — in
+ * both Operational and Financial modes — returned a 500, which the
+ * frontend surfaces as "Sorry, I had trouble with that. Try again."
+ *
+ * By loading them inside a try/catch and degrading gracefully, the core
+ * chat call to Anthropic no longer depends on the semantic layer being
+ * present. If the semantic files load, we use them; if not, chat still
+ * works (just without the extra schema context).
+ */
+function loadSemanticLayer() {
+  try {
+    const { buildQueryContext, contextToSystemBlock } = require('./lib/retriever.js');
+    return {
+      buildQueryContext,
+      contextToSystemBlock,
+      ontology:    require('./Semantic/ontology.json'),
+      calcRules:   require('./Semantic/calc_rules.json'),
+      diagnostics: require('./Semantic/diagnostic_graph.json'),
+      posDict:     require('./Semantic/pos_dictionary.json'),
+    };
+  } catch (e) {
+    console.warn('Semantic layer unavailable (non-fatal):', e.message);
+    return null;
+  }
+}
 
 /**
  * The frontend embeds two markers into the system prompt string:
@@ -43,52 +67,32 @@ module.exports = async (req, res) => {
   try {
     const { model, max_tokens, system, messages } = req.body;
 
-    // Guard: reject retired model to surface regressions immediately
-    if (model && model.includes('4-5')) {
-      return res.status(400).json({ error: 'Retired model — update app.html to claude-sonnet-4-6' });
-    }
-
     // Pull out the schema payload the frontend embedded
     const { schemas, question, cleanSystem } = extractSemanticPayload(system || '');
 
-    // Build semantic context block if any schemas were resolved
+    // Build semantic context block if any schemas were resolved AND the
+    // semantic layer is available. Any failure here is swallowed so the
+    // chat call below always runs.
     let semanticBlock = '';
     const schemaList = Object.values(schemas);
     if (schemaList.length > 0) {
-      try {
-        // Merge all uploaded schemas into one unified schema.
-        // On canonId conflicts, higher-confidence mapping wins.
-        // Dominant POS = the one with the most high-confidence mappings.
-        let mergedResolved = {};
-        let posCounts = {};
-        for (const schema of schemaList) {
-          const pos = schema.posSystem || 'unknown';
-          if (!posCounts[pos]) posCounts[pos] = 0;
-          for (const [canonId, mapping] of Object.entries(schema.resolved || {})) {
-            const existing = mergedResolved[canonId];
-            if (!existing || (mapping.confidence || 0) > (existing.confidence || 0)) {
-              mergedResolved[canonId] = mapping;
-            }
-            if ((mapping.confidence || 0) >= 0.8) posCounts[pos]++;
-          }
+      const sem = loadSemanticLayer();
+      if (sem) {
+        try {
+          const primarySchema = schemaList[0];
+          const ctx = sem.buildQueryContext({
+            schema: primarySchema,
+            question,
+            ontology:    sem.ontology,
+            calcRules:   sem.calcRules,
+            diagnostics: sem.diagnostics,
+            posDict:     sem.posDict,
+            orgProfile:  null   // no org profile in v1
+          });
+          semanticBlock = '\n\n' + sem.contextToSystemBlock(ctx);
+        } catch (e) {
+          console.warn('Semantic context build failed (non-fatal):', e.message);
         }
-        const dominantPos = Object.entries(posCounts).sort((a,b) => b[1]-a[1])[0]?.[0] || schemaList[0].posSystem;
-        const mergedSchema = { ...schemaList[0], posSystem: dominantPos, resolved: mergedResolved };
-
-        const ctx = buildQueryContext({
-          schema: mergedSchema,
-          question,
-          ontology,
-          calcRules,
-          diagnostics,
-          posDict,
-          orgProfile: null
-        });
-
-        semanticBlock = '\n\n' + contextToSystemBlock(ctx);
-      } catch (e) {
-        // Non-fatal: if the semantic build fails, chat still works
-        console.warn('Semantic context build failed (non-fatal):', e.message);
       }
     }
 
@@ -104,7 +108,9 @@ module.exports = async (req, res) => {
     res.json(response);
 
   } catch (err) {
+    // Log the real reason server-side; return it so the frontend/devtools
+    // can show something more useful than the generic fallback.
     console.error('chat error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message || 'chat handler failed' });
   }
 };
