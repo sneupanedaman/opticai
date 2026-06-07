@@ -304,11 +304,11 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     </div>
 
     <div class="mode-switch" id="modeSwitch">
-      <button class="mode-btn active" id="mode-operational" onclick="setMode('operational')"><i class="ti ti-activity"></i> Operational</button>
-      <button class="mode-btn" id="mode-financial" onclick="setMode('financial')"><i class="ti ti-report-money"></i> Financial</button>
+      <button class="mode-btn" id="mode-operational" onclick="setMode('operational')"><i class="ti ti-activity"></i> Operational</button>
+      <button class="mode-btn active" id="mode-financial" onclick="setMode('financial')"><i class="ti ti-report-money"></i> Financial</button>
     </div>
 
-    <div class="sidebar-section" id="opsLocSection">
+    <div class="sidebar-section" id="opsLocSection" style="display:none">
       <div class="sidebar-label">Locations</div>
       <div id="locationsList">
         <div class="location-pill active" onclick="filterByLocation(null, this)"><div class="location-dot"></div> All Locations</div>
@@ -320,12 +320,12 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
       </div>
     </div>
 
-    <div class="sidebar-section" id="finLocSection" style="display:none">
+    <div class="sidebar-section" id="finLocSection">
       <div class="sidebar-label">Entities</div>
       <div id="finEntityList"></div>
     </div>
 
-    <div class="dataset-list" id="datasetList">
+    <div class="dataset-list" id="datasetList" style="display:none">
       <div class="sidebar-label">Datasets</div>
       <div class="ds-item" id="ds-sales" onclick="openUploadModal()">
         <div class="ds-dot demo" id="dot-sales"></div>
@@ -369,23 +369,23 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
   <!-- MAIN -->
   <div class="main">
     <div class="topbar">
-      <span class="topbar-title" id="dashTitle">Operations Dashboard</span>
+      <span class="topbar-title" id="dashTitle">Financial Dashboard</span>
       <span class="topbar-sep">·</span>
       <span class="date-range" id="dateRangeLabel">Feb 2 – Jun 22, 2026 · 21 weeks · 5 Locations</span>
       <div class="topbar-right">
         <button class="btn-sm" onclick="openCustomizePanel()"><i class="ti ti-layout-dashboard"></i> Customize</button>
-        <button class="btn-sm btn-primary" onclick="openUploadModal()"><i class="ti ti-upload"></i> Upload CSV</button>
+        <button class="btn-sm btn-primary" onclick="openUploadModal()"><i class="ti ti-upload"></i> Upload Data</button>
       </div>
     </div>
 
     <!-- DATA STATUS BANNER -->
     <div class="data-status-bar demo-mode" id="statusBar">
       <i class="ti ti-info-circle"></i>
-      <span id="statusText">Running on <strong>demo data</strong> — 5 locations, 21 weeks (Feb–Jun 2026). Upload your own CSVs to analyze your real restaurant data.</span>
+      <span id="statusText">Financial mode on <strong>sample data</strong> (demo) — upload P&amp;L / Balance Sheet exports (.xlsx) to go live.</span>
     </div>
 
     <div class="content">
-      <div class="left-panel" id="opsPanel">
+      <div class="left-panel" id="opsPanel" style="display:none">
         <!-- KPI ROW -->
         <div class="kpi-row">
           <div class="kpi-card demo-card" id="kpi-sales">
@@ -478,10 +478,14 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
             </div>
           </div>
         </div>
+        <div id="opsEmpty" style="display:none;padding:40px 20px;text-align:center;color:var(--text3);font-size:13px;">
+          <i class="ti ti-file-upload" style="font-size:28px;display:block;margin-bottom:10px;opacity:.6"></i>
+          No operational data to chart yet. Upload a sales, labor, food-cost, or PMIX export (.csv) to populate the dashboard.
+        </div>
       </div>
 
       <!-- FINANCIAL DASHBOARD PANEL -->
-      <div class="left-panel" id="finPanel" style="display:none">
+      <div class="left-panel" id="finPanel">
         <div class="kpi-row" id="finKpiRow"></div>
         <div class="chart-section">
           <div class="chart-row">
@@ -503,11 +507,15 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
               <div class="chart-wrap"><canvas id="finWfChart"></canvas></div>
             </div>
             <div class="chart-card narrow" id="card-finTrail">
-              <div class="chart-title">Trailing-13 sales &amp; EBITDA
+              <div class="chart-title"><span id="finTrailTitle">Trailing-13 sales &amp; EBITDA</span>
                 <span style="font-size:10px;color:var(--text3)" id="finSrcTrail">sample</span></div>
               <div class="chart-wrap"><canvas id="finTrailChart"></canvas></div>
             </div>
           </div>
+        </div>
+        <div id="finEmpty" style="display:none;padding:40px 20px;text-align:center;color:var(--text3);font-size:13px;">
+          <i class="ti ti-file-upload" style="font-size:28px;display:block;margin-bottom:10px;opacity:.6"></i>
+          No statement data to chart yet. Upload a Location Side-by-Side P&amp;L (and optionally a Trailing-13 P&amp;L) to populate the dashboard.
         </div>
       </div>
 
@@ -626,12 +634,12 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     <div class="modal-sub">Drop multiple files at once by domain. OpticAI detects each file's type from its contents. Demo data stays for anything not uploaded. Max 500 rows per file in this preview.</div>
 
     <div class="domain-tabs">
-      <button class="domain-tab active" id="domtab-operational" onclick="switchUploadDomain('operational')"><i class="ti ti-activity"></i> Operational (CSV)</button>
-      <button class="domain-tab" id="domtab-financial" onclick="switchUploadDomain('financial')"><i class="ti ti-report-money"></i> Financial (Excel)</button>
+      <button class="domain-tab" id="domtab-operational" onclick="switchUploadDomain('operational')"><i class="ti ti-activity"></i> Operational (CSV)</button>
+      <button class="domain-tab active" id="domtab-financial" onclick="switchUploadDomain('financial')"><i class="ti ti-report-money"></i> Financial (Excel)</button>
     </div>
 
     <!-- OPERATIONAL UPLOAD PANE -->
-    <div id="opsUploadPane">
+    <div id="opsUploadPane" style="display:none">
       <div class="dropzone" id="opsDropzone" onclick="document.getElementById('opsMultiInput').click()">
         <i class="ti ti-file-upload"></i>
         <div class="dz-title">Drop Sales / Labor / Food Cost / PMIX / Inventory CSVs</div>
@@ -690,7 +698,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     </div><!-- /opsUploadPane -->
 
     <!-- FINANCIAL UPLOAD PANE -->
-    <div id="finUploadPane" style="display:none">
+    <div id="finUploadPane">
       <div class="dropzone" id="finDropzone" onclick="document.getElementById('finMultiInput').click()">
         <i class="ti ti-file-spreadsheet"></i>
         <div class="dz-title">Drop up to 5 financial statements (.xlsx)</div>
@@ -1367,6 +1375,7 @@ function updateDashboard(type, summary, filename) {
   }
 
   updateStatusBar();
+  updateOpsLayout();
   questionPoolIndex = 0; // reset to start of pool when new data loaded
   refreshSuggestedQuestions();
 }
@@ -1902,6 +1911,8 @@ function resetDashboard() {
   chartConfig.forEach(c => toggleChart(c.id, true));
   // Remove any custom charts
   document.querySelectorAll('.custom-chart-card').forEach(el => el.remove());
+  // Re-apply data-driven visibility so empty cards don't reappear
+  if (currentMode === 'financial') Financial.render(); else updateOpsLayout();
   closeCustomizePanel();
 }
 
@@ -2439,6 +2450,32 @@ function applyLocationFilter() {
   updateFilteredKPIs(loc);
 }
 
+/* Operational dynamic layout — in live mode (any CSV uploaded), show only the
+   charts whose backing data exists; hide the rest. In demo mode (nothing
+   uploaded) show everything as labeled sample data.
+   Cards are resolved from their canvas ids (stable) rather than card ids,
+   which the Customize panel renames on open. */
+function updateOpsLayout() {
+  const cardOf = canvasId => { const c=document.getElementById(canvasId); return c?c.closest('.chart-card'):null; };
+  const set = (canvasId, show) => { const el=cardOf(canvasId); if(el) el.style.display = show?'':'none'; };
+  const liveOps = Object.values(uploadedData).some(Boolean);
+  const canvases = ['salesChart','pmixChart','laborChart','dowChart'];
+  if (!liveOps) {
+    canvases.forEach(c=>set(c,true));
+  } else {
+    // Weekly sales + day-of-week both derive from the sales export.
+    set('salesChart', !!uploadedData.sales);
+    set('dowChart',   !!uploadedData.sales);
+    // Labor % needs a labor file, or labor cost + sales to compute it.
+    set('laborChart', !!(uploadedData.labor || (uploadedData.foodcost && uploadedData.sales)));
+    // PMIX margin needs a product-mix export.
+    set('pmixChart',  !!uploadedData.pmix);
+  }
+  const anyVisible = canvases.some(c=>{const el=cardOf(c);return el&&el.style.display!=='none';});
+  const emptyEl = document.getElementById('opsEmpty');
+  if (emptyEl) emptyEl.style.display = (liveOps && !anyVisible) ? '' : 'none';
+}
+
 function updateDowChart(loc) {
   if (!dowChart) return;
   const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -2683,7 +2720,7 @@ function setMode(mode){
   // status bar
   updateModeStatusBar();
   if (fin) { Financial.render(); }
-  else { [salesChart,laborChart,pmixChart,dowChart].forEach(c=>{try{c&&c.resize();}catch(e){}}); }
+  else { updateOpsLayout(); [salesChart,laborChart,pmixChart,dowChart].forEach(c=>{try{c&&c.resize();}catch(e){}}); }
   refreshSuggestedQuestions();
 }
 
@@ -2890,12 +2927,27 @@ const Financial = (function(){
       options:opts({cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#8b909e',font:{size:10},boxWidth:10,padding:8}}}})});
     charts.wf=new Chart(document.getElementById('finWfChart'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[]}]},
       options:opts({plugins:{legend:{display:false}},scales:{x:{ticks:{color:tick,font:{size:10}},grid:{display:false}},y:{ticks:{color:tick,callback:v=>v+'%'},grid:{color:grid}}}})});
-    charts.trail=new Chart(document.getElementById('finTrailChart'),{type:'bar',data:{labels:[],datasets:[
-      {type:'bar',label:'Sales ($K)',data:[],backgroundColor:'rgba(59,130,246,.5)',yAxisID:'y'},
-      {type:'line',label:'EBITDA %',data:[],borderColor:'#10b981',tension:.4,pointRadius:2,yAxisID:'y1'}]},
-      options:opts({scales:{x:{ticks:{color:tick,font:{size:9}},grid:{display:false}},y:{ticks:{color:tick,callback:v=>'$'+v+'K'},grid:{color:grid}},y1:{position:'right',ticks:{color:'#10b981',callback:v=>v+'%'},grid:{display:false}}}})});
     charts.built=true;
   }
+  /* trailing/replacement slot — built (and rebuilt) dynamically so the same
+     card can show either the Trailing-13 chart or, when no trailing file is
+     present, a per-location EBITDA-margin chart instead. */
+  function buildTrailChart(kind){
+    if(charts.trail){ try{charts.trail.destroy();}catch(e){} charts.trail=null; }
+    const ctx=document.getElementById('finTrailChart');
+    if(kind==='ebitda'){
+      charts.trail=new Chart(ctx,{type:'bar',data:{labels:[],datasets:[
+        {label:'EBITDA %',data:[],backgroundColor:[]}]},
+        options:opts({plugins:{legend:{display:false}},scales:{x:{ticks:{color:tick,font:{size:10}},grid:{display:false}},y:{ticks:{color:tick,callback:v=>v+'%'},grid:{color:grid}}}})});
+    } else {
+      charts.trail=new Chart(ctx,{type:'bar',data:{labels:[],datasets:[
+        {type:'bar',label:'Sales ($K)',data:[],backgroundColor:'rgba(59,130,246,.5)',yAxisID:'y'},
+        {type:'line',label:'EBITDA %',data:[],borderColor:'#10b981',tension:.4,pointRadius:2,yAxisID:'y1'}]},
+        options:opts({scales:{x:{ticks:{color:tick,font:{size:9}},grid:{display:false}},y:{ticks:{color:tick,callback:v=>'$'+v+'K'},grid:{color:grid}},y1:{position:'right',ticks:{color:'#10b981',callback:v=>v+'%'},grid:{display:false}}}})});
+    }
+    charts.trailKind=kind;
+  }
+  function showCard(id,show){ const e=document.getElementById(id); if(e) e.style.display=show?'':'none'; }
   function renderCharts(){
     ensureCharts();
     const d=activeData(); const s=scoped(); const src=state.data?'your data':'sample';
@@ -2917,22 +2969,58 @@ const Financial = (function(){
     charts.wf.data.datasets[0].data=stages.map(x=>+x[1].toFixed(1));
     charts.wf.data.datasets[0].backgroundColor=stages.map(x=>x[1]<0?'#ef4444':(x[0]==='EBITDA'?'#10b981':'#3b82f6'));
     charts.wf.update();
-    // Trailing — per-location if selected (scaled share when only consolidated available), else consolidated
-    const t=d.trailing; let salesArr=t.sales, ebitdaArr=t.ebitda;
-    if(state.activeEntity){ const l=locByCode(state.activeEntity); const share=l? l.sales/d.consolidated.total_sales : 1;
-      salesArr=t.sales.map(v=>v*share); ebitdaArr=t.ebitda.map(()=> (l?l.ebitda_pct:t.ebitda[0])); }
-    charts.trail.data.labels=t.periods;
-    charts.trail.data.datasets[0].data=salesArr.map(v=>Math.round(v/1000));
-    charts.trail.data.datasets[1].data=ebitdaArr.map(v=>+(v*100).toFixed(1));
-    charts.trail.update();
-    let trailSrc=src;
-    if(state.data){
-      if(d.trailingIsSample) trailSrc='sample trend — add a Trailing-13 P&L for live history';
-      else if(d.trailingEntity && !state.activeEntity) trailSrc=`${d.trailingEntity} only — no consolidated trailing file`;
-      else trailSrc='your data';
-    }
+    // ---- Per-card visibility (live mode hides slots with no backing data) ----
+    const live=!!state.data;
+    const mixHasData=mix.length>0;
+    // Prime-by-location needs locations; mix needs ≥1 slice; waterfall needs consolidated margins.
+    showCard('card-finPrime', !live || locs.length>0);
+    showCard('card-finMix',   !live || mixHasData);
+    showCard('card-finWf',    !live || !!d.consolidated);
     ['finSrcPrime','finSrcMix','finSrcWf'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=src;});
-    const te=document.getElementById('finSrcTrail'); if(te) te.textContent=trailSrc;
+
+    // ---- Trailing slot: real trend, or (live + no trailing file) a per-location
+    //      EBITDA-margin chart instead, or hidden if nothing meaningful to show ----
+    const titleEl=document.getElementById('finTrailTitle');
+    const useEbitdaFallback = live && d.trailingIsSample && d.locations.length>0;
+    let showTrail=true;
+    if(useEbitdaFallback){
+      // Repurpose the slot with a unique insight: EBITDA % by location.
+      if(charts.trailKind!=='ebitda') buildTrailChart('ebitda');
+      const el = state.activeEntity ? d.locations.filter(l=>l.code===state.activeEntity) : d.locations;
+      charts.trail.data.labels=el.map(l=>l.name);
+      charts.trail.data.datasets[0].data=el.map(l=>+(l.ebitda_pct*100).toFixed(1));
+      charts.trail.data.datasets[0].backgroundColor=el.map(l=>l.ebitda_pct<0?'#ef4444':(l.ebitda_pct<0.08?'#f59e0b':'#10b981'));
+      charts.trail.update();
+      if(titleEl) titleEl.textContent='EBITDA margin by location';
+      document.getElementById('finSrcTrail').textContent='your data · per-location EBITDA';
+    } else if(live && d.trailingIsSample && d.locations.length===0){
+      // Nothing real to put here.
+      showTrail=false;
+    } else {
+      // Real trailing trend (or sample mode showing the labeled sample trend).
+      if(charts.trailKind!=='trail') buildTrailChart('trail');
+      const t=d.trailing; let salesArr=t.sales, ebitdaArr=t.ebitda;
+      if(state.activeEntity){ const l=locByCode(state.activeEntity); const share=l? l.sales/d.consolidated.total_sales : 1;
+        salesArr=t.sales.map(v=>v*share); ebitdaArr=t.ebitda.map(()=> (l?l.ebitda_pct:t.ebitda[0])); }
+      charts.trail.data.labels=t.periods;
+      charts.trail.data.datasets[0].data=salesArr.map(v=>Math.round(v/1000));
+      charts.trail.data.datasets[1].data=ebitdaArr.map(v=>+(v*100).toFixed(1));
+      charts.trail.update();
+      if(titleEl) titleEl.textContent='Trailing-13 sales & EBITDA';
+      let trailSrc=src;
+      if(live){
+        if(d.trailingEntity && !state.activeEntity) trailSrc=`${d.trailingEntity} only — no consolidated trailing file`;
+        else trailSrc='your data';
+      }
+      document.getElementById('finSrcTrail').textContent=trailSrc;
+    }
+    showCard('card-finTrail', showTrail);
+
+    // ---- Empty state: if live and every card is hidden, show the note ----
+    const anyVisible = ['card-finPrime','card-finMix','card-finWf','card-finTrail']
+      .some(id=>{const e=document.getElementById(id);return e&&e.style.display!=='none';});
+    const emptyEl=document.getElementById('finEmpty');
+    if(emptyEl) emptyEl.style.display = (live && !anyVisible) ? '' : 'none';
   }
 
   /* ---- suggested questions (financial, on-topic) ---- */
@@ -3074,7 +3162,7 @@ Write for an owner/operator. Real numbers only, no invented figures.`;
 
 initCharts();
 Financial.init();
-setMode('operational');
+setMode('financial');
 refreshSuggestedQuestions();
 
 // Show mobile nav bar on small screens
