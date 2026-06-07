@@ -520,6 +520,9 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
           <button onclick="clearChat()" title="Clear chat" style="margin-left:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:color 0.15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">
             <i class="ti ti-trash"></i>
           </button>
+          <button onclick="openFeedback('chat header')" title="Share feedback" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:color 0.15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">
+            <i class="ti ti-thumb-up"></i>
+          </button>
         </div>
         <div style="padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0;">
           <button id="briefingBtn" onclick="generateBriefing()" style="width:100%;padding:9px 14px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:8px;color:#93c5fd;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;transition:all 0.15s;">
@@ -577,10 +580,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
   </div>
 </div>
 
-<!-- FLOATING FEEDBACK BUTTON -->
-<button class="floating-fb" onclick="openFeedback('floating button')">
-  <i class="ti ti-thumb-up" style="font-size:14px"></i> Share feedback
-</button>
+<!-- (feedback button moved into the AI chat header — see .chat-header) -->
 
 <!-- CUSTOMIZE MODAL -->
 <div class="modal-overlay" id="customizeModal">
@@ -2805,20 +2805,20 @@ const Financial = (function(){
 
   /* ---- sample data (derived from the real 3-location group, Period 5) ---- */
   const SAMPLE={
-    when:'Period 5, 2026 · As of 5/17/2026',
+    when:'Period 5, 2026 · As of 5/17/2026  (sample)',
     consolidated:{total_sales:814625,food_cost_pct:.327,labor_pct:.377,prime_pct:.697,gross_pct:.303,
       controllable_pct:.064,noncontrollable_pct:.148,ebitda_pct:.091,net_pct:.077,
-      mix:{Food:647856,Alcohol:204577,'Soft Bev':16093}},
+      mix:{Food:647856,Alcohol:204622,'Soft Bev':16094}},
     locations:[
-      {name:'HT Gilbert',code:'100',sales:333784,food_pct:.323,labor_pct:.322,prime_pct:.639,gross_pct:.361,
-        controllable_pct:.060,noncontrollable_pct:.112,ebitda_pct:.189,bank:445247,intercompany:649953,inventory:55283,
-        mix:{Food:265000,Alcohol:62000,'Soft Bev':6784}},
-      {name:'HT Chandler',code:'200',sales:241374,food_pct:.327,labor_pct:.377,prime_pct:.704,gross_pct:.296,
-        controllable_pct:.066,noncontrollable_pct:.140,ebitda_pct:.090,bank:371639,intercompany:331363,inventory:55244,
-        mix:{Food:191000,Alcohol:45000,'Soft Bev':5374}},
-      {name:'HT Goodyear',code:'400',sales:239467,food_pct:.332,labor_pct:.410,prime_pct:.740,gross_pct:.260,
-        controllable_pct:.070,noncontrollable_pct:.150,ebitda_pct:.040,bank:79508,intercompany:-570949,inventory:61583,
-        mix:{Food:191000,Alcohol:44000,'Soft Bev':4467}}],
+      {name:'HT Gilbert',code:'100',sales:333784,food_pct:.324,labor_pct:.323,prime_pct:.641,gross_pct:.359,
+        controllable_pct:.073,noncontrollable_pct:.097,ebitda_pct:.189,bank:445247,intercompany:649953,inventory:55283,
+        mix:{Food:275334,Alcohol:71740,'Soft Bev':7377}},
+      {name:'HT Chandler',code:'200',sales:241374,food_pct:.323,labor_pct:.378,prime_pct:.692,gross_pct:.308,
+        controllable_pct:.054,noncontrollable_pct:.143,ebitda_pct:.111,bank:371639,intercompany:331363,inventory:55244,
+        mix:{Food:180908,Alcohol:73554,'Soft Bev':3844}},
+      {name:'HT Goodyear',code:'400',sales:239467,food_pct:.335,labor_pct:.389,prime_pct:.716,gross_pct:.284,
+        controllable_pct:.060,noncontrollable_pct:.226,ebitda_pct:-.002,bank:79508,intercompany:-570949,inventory:61583,
+        mix:{Food:191614,Alcohol:59328,'Soft Bev':4873}}],
     trailing:{periods:['P6','P7','P8','P9','P10','P11','P12','P13','P1','P2','P3','P4','P5'],
       sales:[742,701,768,720,795,810,788,765,802,818,799,807,815].map(x=>x*1000),
       ebitda:[.071,.062,.080,.069,.085,.090,.088,.082,.091,.093,.089,.090,.091]}
