@@ -281,6 +281,215 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 </head>
 <body>
 
+<!-- ===================== LOGIN GATE ===================== -->
+<div id="opticLogin" style="position:fixed;inset:0;z-index:100000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="width:100%;max-width:360px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:30px 28px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:22px;">
+      <div style="width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-chart-dots-3" style="color:#fff;font-size:18px"></i></div>
+      <div><div style="font-size:16px;font-weight:600;color:var(--text)">OpticAI</div><div style="font-size:11px;color:var(--text3)">Restaurant Intelligence</div></div>
+    </div>
+
+    <!-- Sign-in panel -->
+    <div id="opticSigninPanel">
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">Sign in</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:18px">Enter your credentials to access the dashboard.</div>
+      <input id="opticUser" type="text" placeholder="Username" autocomplete="username"
+        style="width:100%;padding:10px 12px;margin-bottom:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;">
+      <input id="opticPass" type="password" placeholder="Password" autocomplete="current-password"
+        style="width:100%;padding:10px 12px;margin-bottom:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;">
+      <div id="opticErr" style="font-size:12px;color:var(--red);min-height:16px;margin-bottom:8px;"></div>
+      <button id="opticSignBtn" onclick="opticLogin()"
+        style="width:100%;padding:11px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Sign in</button>
+      <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--text2)">
+        Don't have access?
+        <a onclick="opticToggleAccess(true)" style="color:var(--accent);cursor:pointer">Request it</a>
+      </div>
+    </div>
+
+    <!-- Request-access panel -->
+    <div id="opticAccessPanel" style="display:none">
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">Request access</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:18px">Enter your email and we'll review your request.</div>
+      <input id="opticReqEmail" type="email" placeholder="you@company.com"
+        style="width:100%;padding:10px 12px;margin-bottom:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;">
+      <div id="opticReqMsg" style="font-size:12px;min-height:16px;margin-bottom:8px;"></div>
+      <button id="opticReqBtn" onclick="opticRequestAccess()"
+        style="width:100%;padding:11px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Send request</button>
+      <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--text2)">
+        <a onclick="opticToggleAccess(false)" style="color:var(--accent);cursor:pointer">Back to sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================== AUTH CONTROLLER ===================== */
+(function(){
+  var LS = 'opticSession';
+  function load(){ try { var s = JSON.parse(localStorage.getItem(LS)); if (s && s.token) return s; } catch(e){} return null; }
+  window.OPTIC_SESSION = load();
+
+  window.opticShowLogin = function(){ var el=document.getElementById('opticLogin'); if(el) el.style.display='flex'; };
+  window.opticHideLogin = function(){ var el=document.getElementById('opticLogin'); if(el) el.style.display='none'; };
+
+  window.opticToggleAccess = function(show){
+    document.getElementById('opticSigninPanel').style.display = show ? 'none' : 'block';
+    document.getElementById('opticAccessPanel').style.display = show ? 'block' : 'none';
+  };
+
+  window.opticLogin = async function(){
+    var u = document.getElementById('opticUser').value.trim();
+    var p = document.getElementById('opticPass').value;
+    var err = document.getElementById('opticErr');
+    var btn = document.getElementById('opticSignBtn');
+    err.textContent = '';
+    if (!u || !p){ err.textContent = 'Enter a username and password.'; return; }
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    try {
+      var res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username:u, password:p }) });
+      var data = await res.json();
+      if (!res.ok){ err.textContent = data.error || 'Sign-in failed.'; btn.disabled=false; btn.textContent='Sign in'; return; }
+      window.OPTIC_SESSION = data;
+      localStorage.setItem(LS, JSON.stringify(data));
+      window.opticHideLogin();
+      opticInjectChip();
+    } catch(e){
+      err.textContent = 'Network error. Try again.'; btn.disabled=false; btn.textContent='Sign in';
+    }
+  };
+
+  window.opticRequestAccess = async function(){
+    var email = document.getElementById('opticReqEmail').value.trim();
+    var msg = document.getElementById('opticReqMsg');
+    var btn = document.getElementById('opticReqBtn');
+    msg.style.color = 'var(--red)'; msg.textContent = '';
+    if (!email){ msg.textContent = 'Enter your email.'; return; }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      var res = await fetch('/api/request-access', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email }) });
+      var data = await res.json();
+      if (!res.ok){ msg.textContent = data.error || 'Could not send request.'; btn.disabled=false; btn.textContent='Send request'; return; }
+      msg.style.color = 'var(--green)';
+      msg.textContent = 'Request sent — you\'ll hear back once approved.';
+      btn.textContent = 'Sent'; 
+    } catch(e){
+      msg.textContent = 'Network error. Try again.'; btn.disabled=false; btn.textContent='Send request';
+    }
+  };
+
+  window.opticLogout = function(){ localStorage.removeItem(LS); window.OPTIC_SESSION=null; location.reload(); };
+
+  // Called by chat fetches on a 401 (expired/invalid token)
+  window.opticForceReauth = function(){
+    localStorage.removeItem(LS); window.OPTIC_SESSION=null;
+    var btn=document.getElementById('opticSignBtn'); if(btn){ btn.disabled=false; btn.textContent='Sign in'; }
+    var err=document.getElementById('opticErr'); if(err) err.textContent='Session expired — please sign in again.';
+    window.opticToggleAccess(false);
+    window.opticShowLogin();
+  };
+
+  function opticInjectChip(){
+    var s = window.OPTIC_SESSION; if(!s) return;
+    var bar = document.querySelector('.topbar-right'); if(!bar) return;
+    if (document.getElementById('opticUserChip')) return;
+    var wrap = document.createElement('div');
+    wrap.id = 'opticUserChip';
+    wrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
+    var adminBtn = (s.role === 'admin')
+      ? '<button class="btn-sm" onclick="openUsageModal()" title="API usage & cost"><i class="ti ti-gauge"></i> Usage</button>'
+      : '';
+    wrap.innerHTML =
+      adminBtn +
+      '<span style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px">' +
+        '<i class="ti ti-user-circle" style="font-size:15px;color:var(--text3)"></i>' + (s.displayName || s.username) +
+        (s.role === 'admin' ? ' <span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(59,130,246,0.12);color:var(--accent)">Admin</span>' : '') +
+      '</span>' +
+      '<button class="btn-sm" onclick="opticLogout()" title="Sign out"><i class="ti ti-logout"></i></button>';
+    bar.appendChild(wrap);
+  }
+  window.opticInjectChip = opticInjectChip;
+
+  // Gate on load: show overlay unless a session exists.
+  if (window.OPTIC_SESSION) { window.opticHideLogin(); } else { window.opticShowLogin(); }
+  document.addEventListener('DOMContentLoaded', function(){ if (window.OPTIC_SESSION) opticInjectChip(); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' && document.getElementById('opticLogin') && document.getElementById('opticLogin').style.display !== 'none'){
+      if (document.getElementById('opticAccessPanel').style.display !== 'none') window.opticRequestAccess();
+      else window.opticLogin();
+    }
+  });
+
+  /* ----- Admin usage modal ----- */
+  window.openUsageModal = async function(){
+    var s = window.OPTIC_SESSION; if(!s || s.role!=='admin') return;
+    var old = document.getElementById('opticUsageModal'); if(old) old.remove();
+    var m = document.createElement('div');
+    m.id='opticUsageModal';
+    m.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:20px;';
+    m.innerHTML='<div style="width:100%;max-width:640px;max-height:80vh;overflow:auto;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;">'+
+      '<div style="display:flex;align-items:center;margin-bottom:16px"><div style="font-size:15px;font-weight:600;color:var(--text)"><i class="ti ti-gauge"></i> API Usage</div>'+
+      '<button class="btn-sm" style="margin-left:auto" onclick="document.getElementById(\'opticUsageModal\').remove()">Close</button></div>'+
+      '<div id="opticUsageBody" style="font-size:13px;color:var(--text2)">Loading…</div></div>';
+    m.addEventListener('click', function(e){ if(e.target===m) m.remove(); });
+    document.body.appendChild(m);
+    var body = document.getElementById('opticUsageBody');
+    try {
+      var res = await fetch('/api/usage', { headers: { 'x-session-token': s.token } });
+      if (res.status===401){ m.remove(); window.opticForceReauth(); return; }
+      var d = await res.json();
+      if (!d.kvConfigured){
+        body.innerHTML = '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;line-height:1.6">Usage tracking needs <strong style="color:var(--text)">Vercel KV</strong> provisioned. Once it\'s connected, per-user calls and estimated cost will appear here. (Chat still records usage to the server log in the meantime.)</div>';
+        return;
+      }
+      var t = d.totals || {calls:0,inputTokens:0,outputTokens:0,costUSD:0};
+      var rows = (d.users||[]).map(function(u){
+        return '<tr style="border-top:1px solid var(--border)">'+
+          '<td style="padding:8px 6px;color:var(--text)">'+u.username+'</td>'+
+          '<td style="padding:8px 6px;text-align:right">'+u.calls+'</td>'+
+          '<td style="padding:8px 6px;text-align:right">'+u.inputTokens.toLocaleString()+'</td>'+
+          '<td style="padding:8px 6px;text-align:right">'+u.outputTokens.toLocaleString()+'</td>'+
+          '<td style="padding:8px 6px;text-align:right;color:var(--green)">$'+u.costUSD.toFixed(4)+'</td></tr>';
+      }).join('');
+      if(!rows) rows = '<tr><td colspan="5" style="padding:14px 6px;color:var(--text3)">No usage recorded yet.</td></tr>';
+      var b = d.budget; var budgetHtml = '';
+      if (b) {
+        var low = b.remainingUSD <= b.thresholdUSD;
+        var col = low ? 'var(--amber)' : 'var(--green)';
+        budgetHtml =
+          '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">'+
+            '<div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Budget</div><div style="font-size:14px;color:var(--text)">$'+b.budgetUSD.toFixed(2)+'</div></div>'+
+            '<div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Spent</div><div style="font-size:14px;color:var(--text)">$'+b.spentUSD.toFixed(2)+'</div></div>'+
+            '<div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Remaining</div><div style="font-size:14px;font-weight:600;color:'+col+'">$'+b.remainingUSD.toFixed(2)+'</div></div>'+
+            '<div style="margin-left:auto;display:flex;align-items:center;gap:10px">'+
+              '<span style="font-size:11px;color:var(--text3)">Alert at $'+b.thresholdUSD.toFixed(2)+' left · '+(b.alertArmed?'armed':'already sent')+'</span>'+
+              (b.alertArmed?'':'<button class="btn-sm" onclick="opticRearmBudget()">Re-arm alert</button>')+
+            '</div>'+
+          '</div>';
+      }
+      body.innerHTML = budgetHtml +
+        '<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+        '<thead><tr style="color:var(--text3);text-transform:uppercase;font-size:10px;letter-spacing:0.05em">'+
+        '<th style="text-align:left;padding:6px">User</th><th style="text-align:right;padding:6px">Calls</th>'+
+        '<th style="text-align:right;padding:6px">Input tok</th><th style="text-align:right;padding:6px">Output tok</th>'+
+        '<th style="text-align:right;padding:6px">Est. cost</th></tr></thead><tbody>'+rows+'</tbody>'+
+        '<tfoot><tr style="border-top:2px solid var(--border2);font-weight:600;color:var(--text)">'+
+        '<td style="padding:8px 6px">Total</td><td style="padding:8px 6px;text-align:right">'+t.calls+'</td>'+
+        '<td style="padding:8px 6px;text-align:right">'+t.inputTokens.toLocaleString()+'</td>'+
+        '<td style="padding:8px 6px;text-align:right">'+t.outputTokens.toLocaleString()+'</td>'+
+        '<td style="padding:8px 6px;text-align:right;color:var(--green)">$'+t.costUSD.toFixed(4)+'</td></tr></tfoot></table>'+
+        '<div style="font-size:11px;color:var(--text3);margin-top:12px;line-height:1.5">Cost is an estimate from token counts × per-model rates set in <code>api/chat.js</code>. Verify against your Anthropic billing.</div>';
+    } catch(e){ body.textContent = 'Could not load usage.'; }
+  };
+
+  window.opticRearmBudget = async function(){
+    var s = window.OPTIC_SESSION; if(!s) return;
+    try { await fetch('/api/usage', { method:'POST', headers:{'Content-Type':'application/json','x-session-token':s.token}, body: JSON.stringify({ action:'resetBudgetAlert' }) }); } catch(e){}
+    openUsageModal();
+  };
+})();
+</script>
+<!-- =================== END LOGIN GATE =================== -->
+
 <div class="mobile-bar" style="display:none">
   <div class="mobile-logo">
     <div class="mobile-logo-icon"><i class="ti ti-chart-dots-3"></i></div>
@@ -1253,9 +1462,10 @@ function handleFileUpload(event, type) {
         const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
         const resolveRes = await fetch('/api/resolve', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'x-session-token': (window.OPTIC_SESSION&&window.OPTIC_SESSION.token)||'' },
           body: JSON.stringify({ headers, filename: file.name, learnedAliases })
         });
+        if (resolveRes.status === 401) { window.opticForceReauth(); return; }
         if (resolveRes.ok) {
           const schema = await resolveRes.json();
           resolvedSchemas[type] = schema;
@@ -1714,9 +1924,10 @@ async function sendMessage() {
   const typingEl = appendTyping();
   try {
     const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-session-token': (window.OPTIC_SESSION&&window.OPTIC_SESSION.token)||'' },
       body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: buildSystemPrompt(text), messages: conversationHistory })
     });
+    if (res.status === 401){ typingEl.remove(); window.opticForceReauth(); return; }
     const data = await res.json();
     const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, I had trouble with that. Try again.';
     typingEl.remove();
@@ -1782,9 +1993,10 @@ Keep it direct, specific, and written for a GM — not an analyst. Use real numb
 
   try {
     const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-session-token': (window.OPTIC_SESSION&&window.OPTIC_SESSION.token)||'' },
       body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: conversationHistory })
     });
+    if (res.status === 401){ typingEl.remove(); window.opticForceReauth(); return; }
     const data = await res.json();
     const reply = data.content?.map(b => b.text||'').filter(Boolean).join('') || 'Sorry, could not generate briefing.';
     typingEl.remove();
