@@ -698,7 +698,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
         <input type="file" id="finMultiInput" accept=".xlsx,.xls" multiple style="display:none" onchange="Financial.stageFiles(this.files)">
       </div>
       <div class="file-list" id="finFileList"></div>
-      <button class="btn-sm btn-primary" style="margin-top:12px" onclick="Financial.applyStaged()"><i class="ti ti-check"></i> Apply statements to dashboard</button>
+      <div id="finApplyHint" style="margin-top:10px;font-size:11px;color:var(--text3);display:none"><i class="ti ti-info-circle" style="font-size:12px"></i> Recognized statements will be applied to the dashboard when you click <strong>Done</strong>.</div>
     </div>
 
     <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;margin-bottom:14px;margin-top:14px;">
@@ -707,7 +707,7 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
     </div>
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeUploadModal()">Close</button>
-      <button class="btn-sm btn-primary" onclick="closeUploadModal()"><i class="ti ti-check"></i> Done</button>
+      <button class="btn-sm btn-primary" onclick="finishUpload()"><i class="ti ti-check"></i> Done</button>
     </div>
   </div>
 </div>
@@ -1507,6 +1507,16 @@ function openUploadModal() {
   document.getElementById('uploadModal').classList.add('open');
 }
 function closeUploadModal() { document.getElementById('uploadModal').classList.remove('open'); }
+// Done = apply. If financial statements are staged, applying them IS the Done action
+// (Financial.applyStaged switches to financial mode and closes on success). Otherwise
+// (operational files already applied on selection, or nothing staged) just close.
+function finishUpload() {
+  if (typeof Financial !== 'undefined' && Financial.state && Array.isArray(Financial.state.staged) && Financial.state.staged.length) {
+    Financial.applyStaged();
+    return;
+  }
+  closeUploadModal();
+}
 document.getElementById('uploadModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUploadModal(); });
 
 // ---- AI CHAT ----
@@ -2915,7 +2925,14 @@ const Financial = (function(){
     charts.trail.data.datasets[0].data=salesArr.map(v=>Math.round(v/1000));
     charts.trail.data.datasets[1].data=ebitdaArr.map(v=>+(v*100).toFixed(1));
     charts.trail.update();
-    ['finSrcPrime','finSrcMix','finSrcWf','finSrcTrail'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=src;});
+    let trailSrc=src;
+    if(state.data){
+      if(d.trailingIsSample) trailSrc='sample trend — add a Trailing-13 P&L for live history';
+      else if(d.trailingEntity && !state.activeEntity) trailSrc=`${d.trailingEntity} only — no consolidated trailing file`;
+      else trailSrc='your data';
+    }
+    ['finSrcPrime','finSrcMix','finSrcWf'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=src;});
+    const te=document.getElementById('finSrcTrail'); if(te) te.textContent=trailSrc;
   }
 
   /* ---- suggested questions (financial, on-topic) ---- */
@@ -2952,7 +2969,7 @@ const Financial = (function(){
     ctx+=`CONSOLIDATED P&L: Sales ${fmtMoney(c.total_sales)}; Food Cost ${pct(c.food_cost_pct)}; Labor ${pct(c.labor_pct)} (fully burdened); Prime Cost ${pct(c.prime_pct)} (benchmark 55-65%); Gross Profit ${pct(c.gross_pct)}; EBITDA ${pct(c.ebitda_pct)}; Net ${pct(c.net_pct)}.\n\nBY LOCATION:\n`;
     d.locations.forEach(l=>{ctx+=`- ${l.name} (${l.code}): Sales ${fmtMoney(l.sales)}, Prime ${pct(l.prime_pct)} (food ${pct(l.food_pct)}, labor ${pct(l.labor_pct)}), EBITDA ${pct(l.ebitda_pct)}; bank ${fmtMoney(l.bank)}, inventory ${fmtMoney(l.inventory)}, intercompany ${l.intercompany<0?'-':''}${fmtMoney(Math.abs(l.intercompany))}.\n`;});
     if(state.activeEntity){const l=locByCode(state.activeEntity); if(l) ctx+=`\nThe user is currently viewing ${l.name} specifically.\n`;}
-    ctx+=`\nNOTES: Intercompany "Due To/From" balances net across entities — never treat them as cash. Prime cost = food cost + labor. Don't sum balance sheets across legal entities.\n`;
+    ctx+=`\nNOTES: Intercompany "Due To/From" balances net across entities — never treat them as cash. Don't sum balance sheets across legal entities. Prime Cost % is on a total-sales basis and already equals total COGS + total labor. The Food Cost % shown is food cost \u00f7 FOOD sales (a different denominator than Labor %), so do NOT add Food Cost % and Labor % together to reconcile Prime Cost %.\n`;
     return ctx + BREVITY + '\n__USER_QUESTION__:' + (userQ||'');
   }
   function briefingPrompt(){
@@ -2980,7 +2997,15 @@ Write for an owner/operator. Real numbers only, no invented figures.`;
           const ws=wb.Sheets[wb.SheetNames[0]];
           const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null});
           const p=parseSheet(rows);
-          if(p.reportType==='unknown'){entry.ok=false;entry.msg='Not recognized as a financial statement';}
+          if(p.reportType==='unknown'){
+            entry.ok=false;
+            const hdr=(rows[0]||[]).map(x=>String(x==null?'':x).toLowerCase());
+            const looksTxn = hdr.some(h=>/transactiontype|approvalstatus|amountremaining|transactionid|spreadtype/.test(h))
+              || (hdr.includes('location') && hdr.includes('amount') && hdr.includes('date') && hdr.length>=10);
+            entry.msg = looksTxn
+              ? 'Transaction/ledger export — OpticAI v1 uses statement-level reports (Balance Sheet, P&L). Not added.'
+              : 'Not recognized as a financial statement';
+          }
           else{entry.ok=true;entry.parsed=p;entry.msg=`${labelType(p.reportType)} · ${p.entity?p.entity.code+' '+p.entity.name:(p.columns?p.columns.length+' cols':'')} · ${p.when||''}`;}
         }catch(err){entry.ok=false;entry.msg='Could not read file (not a valid .xlsx)';}
         state.staged.push(entry);
@@ -2990,6 +3015,8 @@ Write for an owner/operator. Real numbers only, no invented figures.`;
     });
   }
   function renderFileList(){
+    const hint=document.getElementById('finApplyHint');
+    if(hint) hint.style.display = state.staged.some(f=>f.ok) ? '' : 'none';
     document.getElementById('finFileList').innerHTML=state.staged.map(f=>
       `<div class="file-item"><i class="ti ${f.ok?'ti-circle-check fi-ok':'ti-alert-triangle fi-bad'} fi-ico"></i><div class="fi-meta"><div class="fi-name">${f.name}</div><div class="fi-detect">${f.msg}</div></div></div>`).join('');
   }
@@ -3021,7 +3048,9 @@ Write for an owner/operator. Real numbers only, no invented figures.`;
       fin.trailing={periods:cols.map(c=>c.replace(/Period (\d+), \d+/,'P$1')),
         sales:cols.map(c=>m.total_sales&&m.total_sales[c]?m.total_sales[c].dollars:0),
         ebitda:cols.map(c=>m.ebitda&&m.ebitda[c]?(m.ebitda[c].pct||0):0)};
-    } else fin.trailing=SAMPLE.trailing;
+      fin.trailingIsSample=false;
+      fin.trailingEntity=(trail.parsed.entity&&trail.parsed.entity.name)?trail.parsed.entity.name:null;
+    } else { fin.trailing=SAMPLE.trailing; fin.trailingIsSample=true; fin.trailingEntity=null; }
     if(!fin.consolidated||!fin.locations.length){
       alert('Applied, but no Location Side-by-Side P&L was found — that file powers the consolidated KPIs and per-location split. Add it for the full dashboard.');
       if(!fin.consolidated){closeUploadModal();return;}
