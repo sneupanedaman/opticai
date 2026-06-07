@@ -410,7 +410,15 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
   window.opticInjectChip = opticInjectChip;
 
   // Gate on load: show overlay unless a session exists.
-  if (window.OPTIC_SESSION) { window.opticHideLogin(); } else { window.opticShowLogin(); }
+  if (window.OPTIC_SESSION) {
+    window.opticHideLogin();
+  } else {
+    window.opticShowLogin();
+    // Arriving from the landing "Request access" button → open the email form.
+    if (/request|access/i.test((location.hash || '') + (location.search || ''))) {
+      window.opticToggleAccess(true);
+    }
+  }
   document.addEventListener('DOMContentLoaded', function(){ if (window.OPTIC_SESSION) opticInjectChip(); });
   document.addEventListener('keydown', function(e){
     if (e.key === 'Enter' && document.getElementById('opticLogin') && document.getElementById('opticLogin').style.display !== 'none'){
