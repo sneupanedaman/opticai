@@ -590,7 +590,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
       <span class="topbar-sep">·</span>
       <span class="date-range" id="dateRangeLabel">Feb 2 – Jun 22, 2026 · 21 weeks · 5 Locations</span>
       <div class="topbar-right">
-        <button class="btn-sm" onclick="openCustomizePanel()"><i class="ti ti-layout-dashboard"></i> Customize</button>
         <button class="btn-sm btn-primary" onclick="openUploadModal()"><i class="ti ti-upload"></i> Upload Data</button>
       </div>
     </div>
@@ -806,43 +805,6 @@ input[type=file].ds-file-input { position: absolute; inset: 0; opacity: 0; curso
 </div>
 
 <!-- (feedback button moved into the AI chat header — see .chat-header) -->
-
-<!-- CUSTOMIZE MODAL -->
-<div class="modal-overlay" id="customizeModal">
-  <div class="modal" style="width:540px;max-height:85vh;overflow-y:auto;">
-    <div class="modal-title">Customize Dashboard</div>
-    <div class="modal-sub">Show, hide, or reorder your KPI tiles and charts.</div>
-
-    <div style="margin-bottom:16px;">
-      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">KPI Tiles</div>
-      <div id="kpiToggles" style="display:flex;flex-direction:column;gap:6px;"></div>
-    </div>
-
-    <div style="margin-bottom:20px;">
-      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Charts</div>
-      <div id="chartToggles" style="display:flex;flex-direction:column;gap:6px;"></div>
-    </div>
-
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">Build a custom chart from your uploaded columns</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <select id="customChartCol" style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;">
-          <option value="">Select a metric column...</option>
-        </select>
-        <select id="customChartType" style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;">
-          <option value="bar">Bar chart</option>
-          <option value="line">Line chart</option>
-        </select>
-        <button onclick="buildCustomChart()" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">Add Chart</button>
-      </div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-sm" onclick="closeCustomizePanel()">Close</button>
-      <button class="btn-sm btn-primary" onclick="resetDashboard()"><i class="ti ti-refresh"></i> Reset to Default</button>
-    </div>
-  </div>
-</div>
 
 <!-- UPLOAD MODAL -->
 <div class="modal-overlay" id="uploadModal">
@@ -2058,147 +2020,6 @@ function appendBriefingMsg(text) {
   return w;
 }
 
-// ── CUSTOMIZE PANEL ──
-const kpiConfig = [
-  { id: 'sales',    label: 'Total Sales' },
-  { id: 'labor',    label: 'Labor %' },
-  { id: 'foodcost', label: 'Food Cost %' },
-  { id: 'prime',    label: 'Prime Cost' },
-  { id: 'check',    label: 'Avg Check' },
-];
-const chartConfig = [
-  { id: 'salesChartCard',  label: 'Weekly Sales by Location' },
-  { id: 'pmixChartCard',   label: 'PMIX — Margin by Category' },
-  { id: 'laborChartCard',  label: 'Labor % by Location' },
-  { id: 'dowChartCard',    label: 'Avg Daily Sales by Day of Week' },
-];
-
-function openCustomizePanel() {
-  // Build KPI toggles
-  const kpiContainer = document.getElementById('kpiToggles');
-  kpiContainer.innerHTML = kpiConfig.map(k => {
-    const card = document.getElementById('kpi-' + k.id);
-    const visible = card ? card.style.display !== 'none' : true;
-    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
-      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleKpi('${k.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
-      ${k.label}
-    </label>`;
-  }).join('');
-
-  // Build chart toggles — add IDs to chart cards first
-  document.querySelectorAll('.chart-card').forEach((card, i) => {
-    if (chartConfig[i]) card.id = chartConfig[i].id;
-  });
-  const chartContainer = document.getElementById('chartToggles');
-  chartContainer.innerHTML = chartConfig.map(c => {
-    const card = document.getElementById(c.id);
-    const visible = card ? card.style.display !== 'none' : true;
-    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);">
-      <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleChart('${c.id}', this.checked)" style="accent-color:#3b82f6;width:15px;height:15px;">
-      ${c.label}
-    </label>`;
-  }).join('');
-
-  // Populate custom chart column selector
-  const colSelect = document.getElementById('customChartCol');
-  colSelect.innerHTML = '<option value="">Select a metric column...</option>';
-  Object.entries(uploadedData).forEach(([type, data]) => {
-    if (data && data.summary?.metricCols) {
-      data.summary.metricCols.forEach(col => {
-        colSelect.innerHTML += `<option value="${type}:${col}">${col} (from ${type})</option>`;
-      });
-    }
-  });
-
-  document.getElementById('customizeModal').classList.add('open');
-}
-
-function closeCustomizePanel() { document.getElementById('customizeModal').classList.remove('open'); }
-document.getElementById('customizeModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCustomizePanel(); });
-
-function toggleKpi(id, show) {
-  const card = document.getElementById('kpi-' + id);
-  if (card) card.style.display = show ? '' : 'none';
-}
-
-function toggleChart(id, show) {
-  const card = document.getElementById(id);
-  if (card) card.style.display = show ? '' : 'none';
-}
-
-function resetDashboard() {
-  kpiConfig.forEach(k => toggleKpi(k.id, true));
-  chartConfig.forEach(c => toggleChart(c.id, true));
-  // Remove any custom charts
-  document.querySelectorAll('.custom-chart-card').forEach(el => el.remove());
-  // Re-apply data-driven visibility so empty cards don't reappear
-  if (currentMode === 'financial') Financial.render(); else updateOpsLayout();
-  closeCustomizePanel();
-}
-
-function buildCustomChart() {
-  const colSelect = document.getElementById('customChartCol');
-  const chartType = document.getElementById('customChartType').value;
-  const val = colSelect.value;
-  if (!val) return;
-
-  const [type, col] = val.split(':');
-  const data = uploadedData[type];
-  if (!data) return;
-
-  const rows = data.rows;
-  const keys = Object.keys(rows[0]);
-  const locationCol = keys.find(k => ['location','store','site'].includes(k));
-  const dateCol = keys.find(k => ['date','week','period'].includes(k));
-
-  let chartData;
-  if (locationCol) {
-    const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].slice(0,4);
-    const labels = rows.filter(r => r[locationCol]===locs[0]).map((_,i)=>'W'+(i+1));
-    const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981'];
-    const datasets = locs.map((loc,i) => ({
-      label: loc,
-      data: rows.filter(r=>r[locationCol]===loc).map(r=>parseFloat(r[col])||0),
-      backgroundColor: chartType==='bar' ? colors[i] : undefined,
-      borderColor: colors[i], borderWidth: 2, tension: 0.4,
-      fill: false, pointRadius: 3
-    }));
-    chartData = { labels, datasets };
-  } else {
-    const labels = rows.map((_,i)=>'W'+(i+1));
-    chartData = { labels, datasets: [{ label: col, data: rows.map(r=>parseFloat(r[col])||0), backgroundColor:'#3b82f6', borderColor:'#3b82f6', borderWidth:2, tension:0.4 }] };
-  }
-
-  // Add chart card to chart section
-  const chartSection = document.querySelector('.chart-section');
-  const wrapper = document.createElement('div');
-  wrapper.className = 'chart-row custom-chart-card';
-  wrapper.style.cssText = 'flex:0 0 180px;';
-  wrapper.innerHTML = `
-    <div class="chart-card" style="flex:1;position:relative;">
-      <div class="chart-title">${col} <button onclick="this.closest('.custom-chart-card').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 4px;" title="Remove">✕</button></div>
-      <div class="chart-wrap"><canvas id="custom-chart-${Date.now()}"></canvas></div>
-    </div>`;
-  chartSection.appendChild(wrapper);
-
-  const canvas = wrapper.querySelector('canvas');
-  new Chart(canvas, {
-    type: chartType,
-    data: chartData,
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: locationCol ? true : false, labels: { color:'#8b909e', font:{size:11} } } },
-      scales: {
-        x: { grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#555b6a',font:{size:10}} },
-        y: { grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#555b6a',font:{size:10}} }
-      }
-    }
-  });
-
-  closeCustomizePanel();
-  appendMsg('ai', `Custom chart added for "${col}" from your ${type} data. You can see it at the bottom of the dashboard. Remove it anytime using the ✕ button.`);
-}
-
 // ── DYNAMIC SUGGESTED QUESTIONS — pool-based rotating system ──
 let questionPoolIndex = 0;
 
@@ -2672,9 +2493,7 @@ function applyLocationFilter() {
 
 /* Operational dynamic layout — in live mode (any CSV uploaded), show only the
    charts whose backing data exists; hide the rest. In demo mode (nothing
-   uploaded) show everything as labeled sample data.
-   Cards are resolved from their canvas ids (stable) rather than card ids,
-   which the Customize panel renames on open. */
+   uploaded) show everything as labeled sample data. */
 function updateOpsLayout() {
   const cardOf = canvasId => { const c=document.getElementById(canvasId); return c?c.closest('.chart-card'):null; };
   const set = (canvasId, show) => { const el=cardOf(canvasId); if(el) el.style.display = show?'':'none'; };
