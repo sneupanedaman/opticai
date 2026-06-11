@@ -227,7 +227,8 @@ module.exports = async (req, res) => {
       model,
       max_tokens,
       system: [{ type: "text", text: finalSystem, cache_control: { type: "ephemeral" } }],
-      messages,
+      messages
+    }, {
       headers: { "anthropic-beta": "prompt-caching-2024-07-31" }
     });
 
