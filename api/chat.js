@@ -226,8 +226,9 @@ module.exports = async (req, res) => {
     const response = await client.messages.create({
       model,
       max_tokens,
-      system: finalSystem,
-      messages
+      system: [{ type: "text", text: finalSystem, cache_control: { type: "ephemeral" } }],
+      messages,
+      headers: { "anthropic-beta": "prompt-caching-2024-07-31" }
     });
 
     // Meter this call against the signed-in user (non-blocking on failure).

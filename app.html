@@ -1893,9 +1893,10 @@ async function sendMessage() {
   conversationHistory.push({ role: 'user', content: text });
   const typingEl = appendTyping();
   try {
+    const historyForApi = conversationHistory.slice(-6);
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'x-session-token': (window.OPTIC_SESSION&&window.OPTIC_SESSION.token)||'' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: buildSystemPrompt(text), messages: conversationHistory })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: buildSystemPrompt(text), messages: historyForApi })
     });
     if (res.status === 401){ typingEl.remove(); window.opticForceReauth(); return; }
     const data = await res.json();
@@ -1962,9 +1963,10 @@ Keep it direct, specific, and written for a GM — not an analyst. Use real numb
   conversationHistory.push({ role: 'user', content: briefingPrompt });
 
   try {
+    const historyForApi = conversationHistory.slice(-6);
     const res = await fetch('/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'x-session-token': (window.OPTIC_SESSION&&window.OPTIC_SESSION.token)||'' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: conversationHistory })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: buildSystemPrompt(briefingPrompt), messages: historyForApi })
     });
     if (res.status === 401){ typingEl.remove(); window.opticForceReauth(); return; }
     const data = await res.json();
