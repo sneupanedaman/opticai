@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpticAI — Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  /* warm, institutional — the anti-Tailwind palette */
+  --canvas: #F4F1EA;
+  --surface: #FCFBF7;
+  --surface-2: #F0EDE4;
+  --ink: #20201C;
+  --ink-soft: #6A655B;
+  --ink-faint: #9C968A;
+  --line: #E2DDD1;
+  --line-strong: #D2CCBD;
+
+  --brand: #235C45;       /* deep evergreen */
+  --brand-ink: #18402F;
+  --brand-soft: #E5EDE7;
+  --clay: #B6603C;        /* terracotta */
+  --clay-soft: #F3E6DD;
+
+  --pos: #2C7A57;
+  --neg: #A8442C;
+  --warn: #9C6B16;
+  --warn-soft: #F4EAD3;
+
+  /* chart series — harmonious warm set, NOT default tailwind */
+  --c1: #235C45;  --c2: #B6603C;  --c3: #C99A3A;  --c4: #5E8C84;  --c5: #8A5A6B;
+
+  --radius: 7px;
+  --shadow: 0 1px 2px rgba(40,36,28,.04), 0 1px 0 rgba(40,36,28,.02);
+  --shadow-lift: 0 2px 10px rgba(40,36,28,.06), 0 0 0 1px var(--line);
+}
+[data-theme="dark"] {
+  --canvas: #14130F;
+  --surface: #1C1A15;
+  --surface-2: #211E18;
+  --ink: #EFEBE0;
+  --ink-soft: #A39C8C;
+  --ink-faint: #6F695C;
+  --line: #2C2820;
+  --line-strong: #3A352B;
+  --brand: #5FA383;
+  --brand-ink: #7DB89C;
+  --brand-soft: #1E2C24;
+  --clay: #D08359;
+  --clay-soft: #2E241D;
+  --pos: #5FA383;
+  --neg: #D07a5e;
+  --warn: #C99A3A;
+  --warn-soft: #2A2415;
+  --c1: #5FA383;  --c2: #D08359;  --c3: #D8B45A;  --c4: #7FB0A6;  --c5: #B07E8F;
+  --shadow: none;
+  --shadow-lift: 0 0 0 1px var(--line);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: 'Hanken Grotesk', system-ui, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+.num { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.app { display: flex; height: 100vh; }
+
+/* ───────── SIDEBAR ───────── */
+.sidebar {
+  width: 248px; flex-shrink: 0; background: var(--surface);
+  border-right: 1px solid var(--line); display: flex; flex-direction: column;
+}
+.brand-block { padding: 22px 20px 18px; display: flex; align-items: center; gap: 11px; }
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  background: var(--brand); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+}
+.brand-mark i { font-size: 18px; }
+.brand-name { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.brand-tag { font-size: 11px; color: var(--ink-faint); letter-spacing: .01em; margin-top: 1px; }
+
+.mode-seg {
+  margin: 4px 16px 20px; display: flex; gap: 3px; padding: 3px;
+  background: var(--surface-2); border-radius: 9px; border: 1px solid var(--line);
+}
+.mode-seg button {
+  flex: 1; border: none; background: transparent; cursor: pointer;
+  font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--ink-soft);
+  padding: 7px 6px; border-radius: 6px; display: flex; align-items: center;
+  justify-content: center; gap: 6px; transition: all .15s;
+}
+.mode-seg button i { font-size: 15px; }
+.mode-seg button.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+.nav-label {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-faint); padding: 0 22px; margin-bottom: 8px;
+}
+.entity { padding: 0 12px; display: flex; flex-direction: column; gap: 1px; }
+.entity-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 7px;
+  cursor: pointer; color: var(--ink-soft); font-size: 13.5px; font-weight: 500; transition: all .12s;
+}
+.entity-item:hover { background: var(--surface-2); color: var(--ink); }
+.entity-item.active { background: var(--brand-soft); color: var(--brand-ink); font-weight: 600; }
+[data-theme="dark"] .entity-item.active { color: var(--brand); }
+.entity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.entity-item .num { margin-left: auto; font-size: 12px; color: var(--ink-faint); }
+.entity-item.active .num { color: var(--brand); }
+
+.sidebar-foot { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--line); }
+.btn {
+  font-family: inherit; cursor: pointer; border-radius: 8px; font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  transition: all .15s; border: 1px solid transparent; white-space: nowrap;
+}
+.btn-primary { background: var(--brand); color: #fff; padding: 10px 14px; font-size: 13px; width: 100%; box-shadow: inset 0 1px 0 rgba(255,255,255,.15); }
+.btn-primary:hover { background: var(--brand-ink); }
+.btn-ghost { background: transparent; color: var(--ink-soft); border-color: var(--line-strong); padding: 7px 12px; font-size: 12.5px; }
+.btn-ghost:hover { background: var(--surface-2); color: var(--ink); }
+
+/* ───────── MAIN ───────── */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar {
+  display: flex; align-items: center; gap: 14px; padding: 0 24px; height: 60px;
+  border-bottom: 1px solid var(--line); background: var(--surface); flex-shrink: 0;
+}
+.page-title { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+.period-chip {
+  font-size: 12px; color: var(--ink-soft); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 20px; padding: 5px 12px;
+  display: flex; align-items: center; gap: 7px;
+}
+.period-chip .num { font-size: 11.5px; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--line-strong);
+  background: transparent; color: var(--ink-soft); cursor: pointer; display: flex;
+  align-items: center; justify-content: center; transition: all .15s;
+}
+.icon-btn:hover { background: var(--surface-2); color: var(--ink); }
+.icon-btn i { font-size: 17px; }
+.user-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ink-soft); padding-left: 4px; }
+.user-av { width: 28px; height: 28px; border-radius: 50%; background: var(--clay); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.role-tag { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--brand); background: var(--brand-soft); padding: 2px 7px; border-radius: 5px; }
+[data-theme="dark"] .role-tag { color: var(--brand-ink); }
+
+.content { flex: 1; display: flex; min-height: 0; }
+.board { flex: 1; overflow-y: auto; padding: 18px 24px 28px; min-width: 0; }
+
+/* data-source ribbon — single, calm, not per-card */
+.ribbon {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px;
+  background: var(--warn-soft); border: 1px solid color-mix(in oklab, var(--warn) 28%, transparent);
+  color: var(--warn); font-size: 12.5px; margin-bottom: 18px;
+}
+.ribbon i { font-size: 16px; }
+.ribbon strong { font-weight: 700; }
+.ribbon a { color: var(--warn); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; margin-left: auto; white-space: nowrap; }
+
+/* ───────── KPI BAND ───────── */
+.kpi-band {
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; gap: 0;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  overflow: hidden; margin-bottom: 18px; box-shadow: var(--shadow);
+}
+.kpi { padding: 18px 20px; border-right: 1px solid var(--line); position: relative; }
+.kpi:last-child { border-right: none; }
+.kpi.hero { background: var(--brand); color: #fff; }
+.kpi-k { font-size: 11.5px; font-weight: 600; letter-spacing: .02em; color: var(--ink-soft); margin-bottom: 10px; text-transform: none; }
+.kpi.hero .kpi-k { color: rgba(255,255,255,.78); }
+.kpi-v { font-size: 30px; font-weight: 500; line-height: 1; letter-spacing: -0.03em; }
+.kpi.hero .kpi-v { font-size: 34px; }
+.kpi-sub { font-size: 11.5px; margin-top: 9px; display: flex; align-items: center; gap: 5px; color: var(--ink-faint); }
+.kpi.hero .kpi-sub { color: rgba(255,255,255,.72); }
+.kpi-sub.pos { color: var(--pos); }
+.kpi-sub.neg { color: var(--neg); }
+.kpi-sub.warn { color: var(--warn); }
+.kpi-sub i { font-size: 14px; }
+.kpi-spark { position: absolute; right: 16px; top: 16px; width: 56px; height: 22px; opacity: .9; }
+
+/* ───────── CHART GRID ───────── */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.panel {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 18px 18px 16px; box-shadow: var(--shadow); display: flex; flex-direction: column;
+}
+.panel.span2 { grid-column: 1 / -1; }
+.panel-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.panel-title { font-size: 14.5px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
+.panel-note { font-size: 11px; color: var(--ink-faint); }
+.panel-meta { margin-left: auto; font-size: 11px; color: var(--ink-faint); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.legend { display: flex; gap: 16px; margin: 8px 0 2px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-soft); font-weight: 500; white-space: nowrap; }
+.legend-sw { width: 10px; height: 10px; border-radius: 3px; }
+.chart-box { position: relative; flex: 1; min-height: 200px; margin-top: 8px; }
+
+/* ───────── AI ANALYST RAIL ───────── */
+.rail { width: 372px; flex-shrink: 0; background: var(--surface); border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+.rail-head { padding: 16px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+.rail-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--brand-soft); color: var(--brand); display: flex; align-items: center; justify-content: center; }
+[data-theme="dark"] .rail-icon { color: var(--brand-ink); }
+.rail-icon i { font-size: 17px; }
+.rail-title { font-size: 14px; font-weight: 700; }
+.rail-status { font-size: 11px; color: var(--pos); display: flex; align-items: center; gap: 5px; margin-top: 1px; }
+.rail-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pos); }
+.rail-tools { margin-left: auto; display: flex; gap: 4px; }
+
+.brief-btn {
+  margin: 14px 16px; padding: 11px 14px; border-radius: 9px;
+  background: var(--brand-soft); border: 1px solid color-mix(in oklab, var(--brand) 22%, transparent);
+  color: var(--brand-ink); font-family: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+[data-theme="dark"] .brief-btn { color: var(--brand); }
+.brief-btn:hover { background: color-mix(in oklab, var(--brand) 14%, var(--surface)); }
+
+.suggest { padding: 0 16px 12px; }
+.suggest-label { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }
+.chip {
+  display: block; width: 100%; text-align: left; padding: 9px 12px; margin-bottom: 6px;
+  border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink-soft); font-family: inherit; font-size: 12.5px; line-height: 1.4;
+  cursor: pointer; transition: all .14s;
+}
+.chip:hover { border-color: var(--brand); color: var(--brand-ink); background: var(--brand-soft); }
+[data-theme="dark"] .chip:hover { color: var(--brand); }
+
+.messages { flex: 1; overflow-y: auto; padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+.messages::-webkit-scrollbar { width: 5px; }
+.messages::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
+.m-label { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+.bubble { font-size: 13.5px; line-height: 1.6; }
+.m-ai .bubble { color: var(--ink); }
+.m-user { align-self: flex-end; max-width: 88%; }
+.m-user .m-label { text-align: right; }
+.m-user .bubble { background: var(--brand); color: #fff; padding: 10px 13px; border-radius: 12px 12px 3px 12px; }
+.bubble h4 { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); margin: 14px 0 7px; }
+.bubble h4:first-child { margin-top: 0; }
+.bubble ol { margin: 4px 0 0; padding-left: 4px; list-style: none; counter-reset: a; display: flex; flex-direction: column; gap: 9px; }
+.bubble ol li { counter-increment: a; padding-left: 26px; position: relative; }
+.bubble ol li::before {
+  content: counter(a); position: absolute; left: 0; top: 0; width: 18px; height: 18px;
+  background: var(--brand-soft); color: var(--brand-ink); border-radius: 5px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+[data-theme="dark"] .bubble ol li::before { color: var(--brand); }
+.bubble strong { font-weight: 700; color: var(--ink); }
+.bubble .impact { color: var(--brand); font-weight: 700; }
+[data-theme="dark"] .bubble .impact { color: var(--brand-ink); }
+
+.composer { padding: 12px 16px; border-top: 1px solid var(--line); display: flex; gap: 8px; align-items: flex-end; }
+.composer .field {
+  flex: 1; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 13px; font-family: inherit; font-size: 13px; color: var(--ink); resize: none;
+  height: 42px; outline: none;
+}
+.composer .field:focus { border-color: var(--brand); background: var(--surface); }
+.composer .field::placeholder { color: var(--ink-faint); }
+.send { width: 42px; height: 42px; border-radius: 10px; background: var(--brand); color: #fff; border: none; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.send i { font-size: 18px; }
+
+/* settings popover */
+.pop { position: absolute; top: 54px; right: 24px; z-index: 50; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 12px; padding: 16px; width: 250px; box-shadow: 0 8px 30px rgba(40,36,28,.14); display: none; }
+.pop.open { display: block; }
+.pop-row { margin-bottom: 14px; }
+.pop-row:last-child { margin-bottom: 0; }
+.pop-lab { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }
+.seg2 { display: flex; gap: 4px; padding: 3px; background: var(--surface-2); border-radius: 8px; border: 1px solid var(--line); }
+.seg2 button { flex: 1; border: none; background: transparent; font-family: inherit; font-size: 12px; font-weight: 600; color: var(--ink-soft); padding: 6px; border-radius: 5px; cursor: pointer; }
+.seg2 button.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.swatches { display: flex; gap: 8px; }
+.sw { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all .12s; }
+.sw.active { border-color: var(--ink); box-shadow: 0 0 0 2px var(--surface) inset; }
+
+[data-ic]{display:inline-flex;align-items:center;justify-content:center;line-height:0}
+[data-ic] svg{width:1em;height:1em;display:block}
+@media (max-width:1280px){
+  .grid{grid-template-columns:1fr}
+  .kpi-band{grid-template-columns:repeat(2,1fr)}
+  .kpi.hero{grid-column:1/-1}
+  .kpi{border-bottom:1px solid var(--line)}
+}
+@media (max-width:1080px){ .rail{width:320px} }
+</style>
+</head>
+<body data-theme="light">
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand-block">
+      <div class="brand-mark"><i data-ic="bar-chart"></i></div>
+      <div>
+        <div class="brand-name">OpticAI</div>
+        <div class="brand-tag">Restaurant Intelligence</div>
+      </div>
+    </div>
+    <div class="mode-seg">
+      <button><i data-ic="activity"></i> Operational</button>
+      <button class="active"><i data-ic="receipt"></i> Financial</button>
+    </div>
+    <div class="nav-label">Entities</div>
+    <div class="entity">
+      <div class="entity-item active"><span class="entity-dot" style="background:var(--brand)"></span> All · Consolidated <span class="num">$815K</span></div>
+      <div class="entity-item"><span class="entity-dot" style="background:var(--c2)"></span> HT Gilbert <span class="num">$291K</span></div>
+      <div class="entity-item"><span class="entity-dot" style="background:var(--c3)"></span> HT Chandler <span class="num">$278K</span></div>
+      <div class="entity-item"><span class="entity-dot" style="background:var(--c4)"></span> HT Goodyear <span class="num">$246K</span></div>
+    </div>
+    <div class="sidebar-foot">
+      <button class="btn btn-primary"><i data-ic="upload"></i> Upload statements</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title">Financial</div>
+      <div class="period-chip"><i data-ic="calendar" style="font-size:14px"></i> Period 5 · <span class="num">2026</span> · as of <span class="num">5/17</span></div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost" id="exportBtn" title="Export dashboard as PDF"><i data-ic="download" style="font-size:15px"></i> Export</button>
+        <button class="icon-btn" id="gearBtn" title="Appearance"><i data-ic="sliders"></i></button>
+        <div class="user-chip">
+          <div class="user-av">A</div>
+          <span>Admin</span>
+          <span class="role-tag">Admin</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="board">
+        <div class="ribbon">
+          <i data-ic="flask"></i>
+          <span>Showing <strong>sample data</strong> — figures are illustrative until you connect your own statements.</span>
+          <a>Upload P&amp;L / Balance Sheet →</a>
+        </div>
+
+        <!-- KPI BAND -->
+        <div class="kpi-band">
+          <div class="kpi hero">
+            <div class="kpi-k">Total Sales · Consolidated</div>
+            <div class="kpi-v num">$815K</div>
+            <div class="kpi-sub"><i data-ic="trending-up"></i> +4.2% vs prior period</div>
+            <canvas class="kpi-spark" id="sparkHero"></canvas>
+          </div>
+          <div class="kpi">
+            <div class="kpi-k">Prime Cost</div>
+            <div class="kpi-v num">69.7%</div>
+            <div class="kpi-sub neg"><i data-ic="arrow-up-right"></i> 4.7 pts over 65% target</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-k">Food Cost</div>
+            <div class="kpi-v num">32.7%</div>
+            <div class="kpi-sub warn"><i data-ic="arrow-up-right"></i> 0.7 pts over 32%</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-k">Labor</div>
+            <div class="kpi-v num">37.7%</div>
+            <div class="kpi-sub neg"><i data-ic="arrow-up-right"></i> fully burdened</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-k">EBITDA Margin</div>
+            <div class="kpi-v num">9.1%</div>
+            <div class="kpi-sub pos"><i data-ic="check"></i> operating positive</div>
+          </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="grid">
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Prime cost by location</div>
+              <div class="panel-meta">sample</div>
+            </div>
+            <div class="legend">
+              <div class="legend-item"><span class="legend-sw" style="background:var(--c1)"></span> Food %</div>
+              <div class="legend-item"><span class="legend-sw" style="background:var(--c2)"></span> Labor %</div>
+              <div class="legend-item" style="margin-left:auto;color:var(--ink-faint)"><span style="width:14px;border-top:1.5px dashed var(--ink-faint);display:inline-block"></span> 65% target</div>
+            </div>
+            <div class="chart-box"><canvas id="primeChart"></canvas></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Revenue mix</div>
+              <div class="panel-meta">sample</div>
+            </div>
+            <div class="chart-box"><canvas id="mixChart"></canvas></div>
+          </div>
+
+          <div class="panel span2">
+            <div class="panel-head">
+              <div class="panel-title">P&amp;L margin waterfall</div>
+              <div class="panel-note">how every sales dollar becomes EBITDA</div>
+              <div class="panel-meta">sample</div>
+            </div>
+            <div class="chart-box" style="min-height:230px"><canvas id="waterfallChart"></canvas></div>
+          </div>
+
+          <div class="panel span2">
+            <div class="panel-head">
+              <div class="panel-title">Trailing-13 sales &amp; EBITDA</div>
+              <div class="panel-note">rolling thirteen periods</div>
+              <div class="panel-meta">sample</div>
+            </div>
+            <div class="legend">
+              <div class="legend-item"><span class="legend-sw" style="background:var(--c4)"></span> Sales ($K)</div>
+              <div class="legend-item"><span class="legend-sw" style="background:var(--c1)"></span> EBITDA %</div>
+            </div>
+            <div class="chart-box" style="min-height:210px"><canvas id="trailChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI RAIL -->
+      <aside class="rail">
+        <div class="rail-head">
+          <div class="rail-icon"><i data-ic="sparkles"></i></div>
+          <div>
+            <div class="rail-title">AI Analyst</div>
+            <div class="rail-status"><span class="dot"></span> Connected to your figures</div>
+          </div>
+          <div class="rail-tools">
+            <button class="icon-btn" style="width:30px;height:30px;border-color:transparent" title="Clear"><i data-ic="eraser" style="font-size:15px"></i></button>
+          </div>
+        </div>
+
+        <button class="brief-btn"><i data-ic="file-text"></i> Generate financial briefing</button>
+
+        <div class="suggest">
+          <div class="suggest-label">Try asking</div>
+          <button class="chip">What is HT Gilbert doing right on margin?</button>
+          <button class="chip">Flag balance-sheet risks, including intercompany exposure.</button>
+          <button class="chip">Which location has the worst prime cost, and why?</button>
+        </div>
+
+        <div class="messages">
+          <div class="m-ai">
+            <div class="m-label">OpticAI</div>
+            <div class="bubble">
+              Across all three locations, consolidated EBITDA is <strong>9.1%</strong> on <strong>$815K</strong> sales — operating positive, but prime cost at <strong>69.7%</strong> is the pressure point. Goodyear is the drag. Here's where I'd focus this period:
+              <h4>Action items</h4>
+              <ol>
+                <li><strong>Cut Goodyear labor ~6 points</strong> (to ≈33%) via schedule optimization and productivity standards. <span class="impact">Recovers ~$14K/period</span>, flips the location to ~6% EBITDA.</li>
+                <li><strong>Audit Chandler &amp; Goodyear food waste and portioning.</strong> A 1-point food-cost reduction <span class="impact">saves ~$5K/period</span> consolidated.</li>
+                <li><strong>Resolve Goodyear's intercompany balance.</strong> Restructure or capitalize the $571K to clarify true cash position before any expansion decision.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <div class="composer">
+          <button class="icon-btn" style="width:42px;height:42px" title="Voice"><i data-ic="mic"></i></button>
+          <textarea class="field" placeholder="Ask about the financials…" rows="1"></textarea>
+          <button class="send"><i data-ic="send"></i></button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- appearance popover -->
+<div class="pop" id="pop">
+  <div class="pop-row">
+    <div class="pop-lab">Theme</div>
+    <div class="seg2" id="themeSeg">
+      <button data-theme-val="light" class="active">Light</button>
+      <button data-theme-val="dark">Dark</button>
+    </div>
+  </div>
+  <div class="pop-row">
+    <div class="pop-lab">Accent</div>
+    <div class="swatches" id="swatches">
+      <div class="sw active" data-brand="#235C45" style="background:#235C45" title="Evergreen"></div>
+      <div class="sw" data-brand="#7A3E2E" style="background:#7A3E2E" title="Oxblood"></div>
+      <div class="sw" data-brand="#2A4A6B" style="background:#2A4A6B" title="Ink blue"></div>
+      <div class="sw" data-brand="#5B4A86" style="background:#5B4A86" title="Aubergine"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ICONS = {
+  'bar-chart':'<line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="9"/><line x1="18" y1="20" x2="18" y2="4"/>',
+  'activity':'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+  'receipt':'<path d="M5 3v18l2-1.2L9 21l2-1.2L13 21l2-1.2L17 21l2-1.2V3l-2 1.2L15 3l-2 1.2L11 3 9 4.2 7 3Z"/><line x1="8.5" y1="8.5" x2="15.5" y2="8.5"/><line x1="8.5" y1="12" x2="15.5" y2="12"/>',
+  'upload':'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  'calendar':'<rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/>',
+  'download':'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  'sliders':'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1.5" y1="14" x2="6.5" y2="14"/><line x1="9.5" y1="8" x2="14.5" y2="8"/><line x1="17.5" y1="16" x2="22.5" y2="16"/>',
+  'flask':'<path d="M10 3h4"/><path d="M10 3v5.5L5.2 17a2 2 0 0 0 1.8 3h10a2 2 0 0 0 1.8-3L14 8.5V3"/><line x1="7.5" y1="15" x2="16.5" y2="15"/>',
+  'trending-up':'<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+  'arrow-up-right':'<line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/>',
+  'check':'<polyline points="20 6 9 17 4 12"/>',
+  'sparkles':'<path d="M12 4l1.7 4.1L18 10l-4.3 1.9L12 16l-1.7-4.1L6 10l4.3-1.9Z"/><path d="M19 4.5l.7 1.6L21 7l-1.3.6L19 9l-.7-1.4L17 7l1.3-.9Z"/>',
+  'eraser':'<path d="M4.5 14.5l6-6 8 8-3.5 3.5H8Z"/><line x1="13.5" y1="20" x2="20" y2="20"/>',
+  'file-text':'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
+  'mic':'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/>',
+  'send':'<line x1="12" y1="20" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/>'
+};
+document.querySelectorAll('[data-ic]').forEach(el=>{
+  const p = ICONS[el.getAttribute('data-ic')]; if(!p) return;
+  el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>';
+});
+</script>
+<script>
+const css = getComputedStyle(document.documentElement);
+const col = n => css.getPropertyValue(n).trim();
+const FONT = "'Hanken Grotesk', sans-serif";
+Chart.defaults.font.family = FONT;
+Chart.defaults.font.size = 12;
+
+function gridColor(){ return document.body.dataset.theme === 'dark' ? 'rgba(255,255,255,.06)' : 'rgba(40,36,28,.07)'; }
+function tickColor(){ return col('--ink-faint'); }
+
+let charts = [];
+function build(){
+  charts.forEach(c => c.destroy()); charts = [];
+  const c1=col('--c1'), c2=col('--c2'), c3=col('--c3'), c4=col('--c4'), c5=col('--c5');
+  const baseScale = (opts={}) => ({
+    grid: { color: gridColor(), drawTicks:false }, border:{display:false},
+    ticks: { color: tickColor(), font:{size:11}, padding:8, ...opts }
+  });
+
+  // hero sparkline
+  charts.push(new Chart(document.getElementById('sparkHero'), {
+    type:'line',
+    data:{ labels:[...Array(13).keys()], datasets:[{ data:[680,705,690,720,735,710,760,748,772,765,800,792,815].map(v=>v/10),
+      borderColor:'rgba(255,255,255,.9)', borderWidth:1.5, pointRadius:0, tension:.4, fill:false }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{enabled:false}},
+      scales:{x:{display:false},y:{display:false}} }
+  }));
+
+  // prime cost stacked bar
+  charts.push(new Chart(document.getElementById('primeChart'), {
+    type:'bar',
+    data:{ labels:['HT Gilbert','HT Chandler','HT Goodyear'], datasets:[
+      { label:'Food %', data:[31.8,32.4,33.9], backgroundColor:c1, borderRadius:{topLeft:0,topRight:0,bottomLeft:5,bottomRight:5}, barThickness:54, stack:'s' },
+      { label:'Labor %', data:[35.1,36.8,41.2], backgroundColor:c2, borderRadius:{topLeft:5,topRight:5,bottomLeft:0,bottomRight:0}, barThickness:54, stack:'s' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>c.dataset.label+': '+c.raw+'%' } },
+        annotation:false },
+      scales:{ x:{ stacked:true, ...baseScale(), grid:{display:false} },
+        y:{ stacked:true, ...baseScale({callback:v=>v+'%'}), suggestedMax:80 } } }
+  }));
+
+  // revenue mix doughnut
+  charts.push(new Chart(document.getElementById('mixChart'), {
+    type:'doughnut',
+    data:{ labels:['Food','Alcohol','Soft Bev'], datasets:[{ data:[82,15,3], backgroundColor:[c1,c2,c5], borderColor:col('--surface'), borderWidth:3, hoverOffset:5 }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'66%',
+      plugins:{ legend:{ position:'bottom', labels:{ color:col('--ink-soft'), font:{size:12,weight:'500'}, boxWidth:10, boxHeight:10, padding:14, usePointStyle:true, pointStyle:'rectRounded' } } } }
+  }));
+
+  // waterfall
+  const wfLabels=['Sales','− Prime','Gross','− Controllable','− Non-ctrl','EBITDA'];
+  const ranges=[[0,100],[34.6,100],[0,34.6],[26,34.6],[9.1,26],[0,9.1]];
+  const wfColors=[c4, c2, c1, c2, c2, c1];
+  charts.push(new Chart(document.getElementById('waterfallChart'), {
+    type:'bar',
+    data:{ labels:wfLabels, datasets:[{ data:ranges, backgroundColor:wfColors, borderRadius:4, barThickness:64 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>{const[a,b]=c.raw;return Math.abs(b-a).toFixed(1)+'% of sales';} } } },
+      scales:{ x:{ ...baseScale(), grid:{display:false} }, y:{ ...baseScale({callback:v=>v+'%'}), min:0, max:100 } } }
+  }));
+
+  // trailing-13 combo
+  const tLabels=['P5','P6','P7','P8','P9','P10','P11','P12','P13','P1','P2','P3','P4'];
+  charts.push(new Chart(document.getElementById('trailChart'), {
+    data:{ labels:tLabels, datasets:[
+      { type:'bar', label:'Sales ($K)', data:[690,705,712,724,700,742,755,768,760,786,792,804,815], backgroundColor:c4, borderRadius:4, barThickness:26, yAxisID:'y' },
+      { type:'line', label:'EBITDA %', data:[6.1,6.4,6.0,6.8,5.9,7.2,7.6,8.0,7.7,8.4,8.6,8.9,9.1], borderColor:c1, backgroundColor:c1, borderWidth:2, pointRadius:0, tension:.4, yAxisID:'y1' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{ ...baseScale(), grid:{display:false} },
+        y:{ position:'left', ...baseScale({callback:v=>'$'+v+'K'}), min:0 },
+        y1:{ position:'right', ...baseScale({callback:v=>v+'%'}), grid:{display:false}, min:0, max:12 } } }
+  }));
+}
+build();
+
+// ── export to PDF (opens the browser print dialog → Save as PDF) ──
+document.getElementById('exportBtn').addEventListener('click', () => {
+  // make sure charts are crisp for print, then invoke print
+  charts.forEach(c => c.resize());
+  setTimeout(() => window.print(), 60);
+});
+
+// ── appearance controls ──
+const pop = document.getElementById('pop');
+document.getElementById('gearBtn').addEventListener('click', e => { e.stopPropagation(); pop.classList.toggle('open'); });
+document.addEventListener('click', e => { if(!pop.contains(e.target)) pop.classList.remove('open'); });
+
+document.getElementById('themeSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  document.body.dataset.theme = b.dataset.themeVal;
+  [...e.currentTarget.children].forEach(x=>x.classList.toggle('active', x===b));
+  setTimeout(build, 30);
+});
+document.getElementById('swatches').addEventListener('click', e => {
+  const s = e.target.closest('.sw'); if(!s) return;
+  const c = s.dataset.brand;
+  const root = document.documentElement;
+  root.style.setProperty('--brand', c);
+  // derive supporting tones
+  root.style.setProperty('--brand-ink', shade(c,-22));
+  root.style.setProperty('--brand-soft', mix(c, col('--surface'), .14));
+  root.style.setProperty('--c1', c);
+  [...e.currentTarget.children].forEach(x=>x.classList.toggle('active', x===s));
+  setTimeout(build, 30);
+});
+function hex2rgb(h){ const n=parseInt(h.slice(1),16); return [n>>16&255,n>>8&255,n&255]; }
+function rgb2hex(r,g,b){ return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join(''); }
+function shade(h,p){ const [r,g,b]=hex2rgb(h); const f=1+p/100; return rgb2hex(r*f,g*f,b*f); }
+function mix(h,bg,t){ const a=hex2rgb(h); const b=hex2rgb(bg.startsWith('#')?bg:'#FCFBF7'); return rgb2hex(a[0]*t+b[0]*(1-t),a[1]*t+b[1]*(1-t),a[2]*t+b[2]*(1-t)); }
+</script>
+
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#235C45"/><g fill="#F4F1EA"><rect x="30" y="56" width="9" height="18" rx="2"/><rect x="46" y="44" width="9" height="30" rx="2"/><rect x="62" y="34" width="9" height="40" rx="2"/></g></svg>
+</template>
+</body>
+</html>
