@@ -888,46 +888,8 @@ input[type=file].ds-file-input { position:absolute; inset:0; opacity:0; cursor:p
       Labor: <code>date, location, labor_cost, labor_pct, hours, wages</code><br>
       Food Cost: <code>date, location, food_cost, food_cost_pct, cogs</code><br>
       PMIX: <code>item, category, quantity, revenue, food_cost_pct</code><br>
-      Inventory: <code>item, category, on_hand, par, variance, cost</code>
-    </div>
-
-    <div class="upload-grid">
-      <div class="upload-tile" id="tile-sales">
-        <i data-ic="trending-up"></i>
-        <div class="upload-tile-name">Sales</div>
-        <div class="upload-tile-sub" id="tile-sales-sub">Click to upload CSV</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'sales')">
-      </div>
-      <div class="upload-tile" id="tile-labor">
-        <i data-ic="users"></i>
-        <div class="upload-tile-name">Labor</div>
-        <div class="upload-tile-sub" id="tile-labor-sub">Click to upload CSV</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'labor')">
-      </div>
-      <div class="upload-tile" id="tile-foodcost">
-        <i data-ic="chef-hat"></i>
-        <div class="upload-tile-name">Food Cost</div>
-        <div class="upload-tile-sub" id="tile-foodcost-sub">Click to upload CSV</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'foodcost')">
-      </div>
-      <div class="upload-tile" id="tile-pmix">
-        <i data-ic="receipt"></i>
-        <div class="upload-tile-name">PMIX</div>
-        <div class="upload-tile-sub" id="tile-pmix-sub">Click to upload CSV</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'pmix')">
-      </div>
-      <div class="upload-tile" id="tile-inventory">
-        <i data-ic="building-warehouse"></i>
-        <div class="upload-tile-name">Inventory</div>
-        <div class="upload-tile-sub" id="tile-inventory-sub">Click to upload CSV</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'inventory')">
-      </div>
-      <div class="upload-tile" id="tile-custom" style="grid-column:1/-1;background:rgba(59,130,246,0.04);border-color:rgba(59,130,246,0.25);border-style:dashed;">
-        <i data-ic="table-plus" style="color:var(--brand)"></i>
-        <div class="upload-tile-name">Custom CSV</div>
-        <div class="upload-tile-sub" id="tile-custom-sub">Any data · requires Date + Location columns</div>
-        <input type="file" accept=".csv" onchange="handleFileUpload(event, 'custom')">
-      </div>
+      Inventory: <code>item, category, on_hand, par, variance, cost</code><br>
+      Other: any CSV with <code>date</code> + <code>location</code> columns will be ingested as a custom dataset.
     </div>
 
     </div><!-- /opsUploadPane -->
@@ -1814,15 +1776,18 @@ function checkAmbiguousColumns(keys, filename, callback) {
 
   // Ask user in chat for each ambiguous column
   const col = found[0]; // handle one at a time
+  const remaining = found.slice(1);
   const info = ambiguousColumns[col];
+  pendingColumnQuestion = { col, type: null, filename, remaining, kind: 'ambiguous' };
+
   const optionBtns = info.options.map((opt, i) =>
-    `<button onclick="resolveAmbiguity('${col}','${opt}','${filename}',${JSON.stringify(found.slice(1))})" style="display:block;width:100%;text-align:left;padding:6px 10px;margin:3px 0;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#93c5fd'" onmouseout="this.style.borderColor='';this.style.color='var(--text2)'">${opt}</button>`
+    `<button onclick="resolveAmbiguity('${col}','${opt}','${filename}',${JSON.stringify(remaining)})" style="display:block;width:100%;text-align:left;padding:6px 10px;margin:3px 0;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#93c5fd'" onmouseout="this.style.borderColor='';this.style.color='var(--text2)'">${opt}</button>`
   ).join('');
 
   const w = document.createElement('div');
   w.className = 'msg msg-ai'; w.id = 'ambig-' + col;
   w.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(245,158,11,0.3);">
-    <div style="color:var(--amber);font-size:12px;margin-bottom:8px;">⚠️ I found a column called <strong>"${col}"</strong> in ${filename}. What does it represent?</div>
+    <div style="color:var(--amber);font-size:12px;margin-bottom:8px;">⚠️ I found a column called <strong>"${col}"</strong> in ${filename}. What does it represent? <em style="opacity:0.6">Or just type it below.</em></div>
     ${optionBtns}
   </div>`;
   messagesEl.appendChild(w);
@@ -1830,10 +1795,12 @@ function checkAmbiguousColumns(keys, filename, callback) {
 }
 
 function resolveAmbiguity(col, choice, filename, remaining) {
+  pendingColumnQuestion = null;
   fieldMappings[col] = choice;
   const el = document.getElementById('ambig-' + col);
   if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> = ${choice}. Analysis updated.</div>`;
   appendMsg('ai', `Thanks! I'll treat "${col}" as "${choice}" in all analysis going forward.`);
+  if (remaining && remaining.length > 0) checkAmbiguousColumns(remaining, filename, () => {});
 }
 
 function updateKpi(id, value, srcLabel, isLive) {
@@ -1908,6 +1875,7 @@ let conversationHistory = [];
 const BREVITY = `\n\nRESPONSE STYLE: Be brief and direct. Lead with the answer or the key number, then at most 1-2 sentences of why. 2-4 sentences total unless a full briefing is explicitly requested. Use real numbers from the data, never invent figures, and say so if the data doesn't cover something. No markdown headers.`;
 let liveDataContext = '';
 let resolvedSchemas = {}; // stores semantic schema per uploaded file type
+let pendingColumnQuestion = null; // set while an unmapped/ambiguous prompt is active
 const messagesEl = document.getElementById('messages');
 const inputEl = document.getElementById('chatInput');
 const sendBtn = document.getElementById('sendBtn');
@@ -1943,6 +1911,13 @@ function checkAmbiguousColumnsFromSchema(ambiguousCols, filename) {
   const col = ambiguousCols[0];
   const remaining = ambiguousCols.slice(1);
 
+  // Derive type from which resolvedSchema contains this ambiguous column
+  const type = Object.keys(resolvedSchemas).find(t => {
+    const s = resolvedSchemas[t];
+    return s && Array.isArray(s.ambiguous) && s.ambiguous.some(a => a.column === col.column);
+  }) || null;
+  pendingColumnQuestion = { col: col.column, type, filename, remaining, kind: 'ambiguous' };
+
   const optionBtns = col.top.map(opt =>
     `<button onclick="resolveAmbiguityFromSchema('${col.column}','${opt.canonId}','${filename}',${JSON.stringify(remaining)})"
       style="display:block;width:100%;text-align:left;padding:6px 10px;margin:3px 0;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;"
@@ -1955,7 +1930,7 @@ function checkAmbiguousColumnsFromSchema(ambiguousCols, filename) {
   w.className = 'msg msg-ai';
   w.id = 'ambig-schema-' + col.column;
   w.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(245,158,11,0.3);">
-    <div style="color:var(--amber);font-size:12px;margin-bottom:8px;">⚠️ I found a column called <strong>"${col.column}"</strong> in ${filename}. What does it represent?</div>
+    <div style="color:var(--amber);font-size:12px;margin-bottom:8px;">⚠️ I found a column called <strong>"${col.column}"</strong> in ${filename}. What does it represent? <em style="opacity:0.6">Or just type it below.</em></div>
     ${optionBtns}
   </div>`;
   messagesEl.appendChild(w);
@@ -1963,6 +1938,9 @@ function checkAmbiguousColumnsFromSchema(ambiguousCols, filename) {
 }
 
 function resolveAmbiguityFromSchema(col, canonId, filename, remaining) {
+  pendingColumnQuestion = null;
+  let uploadType = null;
+  let posSystem = null;
   Object.keys(resolvedSchemas).forEach(type => {
     const schema = resolvedSchemas[type];
     if (schema && schema.ambiguous) {
@@ -1970,9 +1948,21 @@ function resolveAmbiguityFromSchema(col, canonId, filename, remaining) {
       if (match) {
         schema.resolved[canonId] = { sourceColumn: col, confidence: 1.0, via: 'user_confirmed' };
         schema.ambiguous = schema.ambiguous.filter(a => a.column !== col);
+        uploadType = type;
+        posSystem = schema.posSystem;
       }
     }
   });
+  // Fire-and-forget log
+  const knownTypes = ['sales','labor','foodcost','pmix','inventory'];
+  const dictionaryTarget = (knownTypes.includes(uploadType) && posSystem && posSystem !== 'generic')
+    ? `pos_dictionary.json -> pos_systems.${posSystem}.column_map`
+    : `ontology.json -> metrics/entities.${canonId}.synonyms`;
+  fetch('/api/log-learned-mapping', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ column: col, mappedTo: canonId, kind: 'ambiguous', file: filename, uploadType: uploadType || 'unknown', timestamp: new Date().toISOString(), dictionaryTarget })
+  }).catch(() => {});
   const el = document.getElementById('ambig-schema-' + col);
   if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> mapped to ${canonId}. Analysis updated.</div>`;
   if (remaining && remaining.length > 0) checkAmbiguousColumnsFromSchema(remaining, filename);
@@ -2003,6 +1993,8 @@ function checkUnmappedColumnsFromSchema(unmappedCols, type, filename) {
   const col = unmappedCols[0];
   const remaining = unmappedCols.slice(1);
 
+  pendingColumnQuestion = { col, type, filename, remaining, kind: 'unmapped' };
+
   const optionBtns = LEARNABLE_CONCEPTS.map(([id,label]) =>
     `<button onclick="learnUnmappedColumn('${col}','${id}','${type}','${filename}',${JSON.stringify(remaining)})"
       style="display:inline-block;text-align:left;padding:5px 9px;margin:2px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:11px;cursor:pointer;font-family:inherit;"
@@ -2015,7 +2007,7 @@ function checkUnmappedColumnsFromSchema(unmappedCols, type, filename) {
   w.className = 'msg msg-ai';
   w.id = 'unmapped-' + col;
   w.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(59,130,246,0.3);">
-    <div style="color:#93c5fd;font-size:12px;margin-bottom:8px;">🆕 I found a column I don't recognize: <strong>"${col}"</strong> in ${filename}. What is it? (I'll remember for this session.)</div>
+    <div style="color:#93c5fd;font-size:12px;margin-bottom:8px;">🆕 I found a column I don't recognize: <strong>"${col}"</strong> in ${filename}. What is it? (I'll remember for this session.) <em style="opacity:0.6">Or just type it below.</em></div>
     <div style="display:flex;flex-wrap:wrap;gap:0;margin-bottom:6px;">${optionBtns}</div>
     <button onclick="learnUnmappedColumn('${col}','__ignore__','${type}','${filename}',${JSON.stringify(remaining)})"
       style="display:block;width:100%;text-align:center;padding:6px 10px;margin-top:4px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:inherit;">Something else / ignore this column</button>
@@ -2024,10 +2016,30 @@ function checkUnmappedColumnsFromSchema(unmappedCols, type, filename) {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-function learnUnmappedColumn(col, canonId, type, filename, remaining) {
+function learnUnmappedColumn(col, canonId, type, filename, remaining, customLabel) {
+  pendingColumnQuestion = null;
   const el = document.getElementById('unmapped-' + col);
   if (canonId === '__ignore__') {
     if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid var(--border);font-size:12px;color:var(--text3);">Okay — I'll leave <strong>"${col}"</strong> out of the analysis.</div>`;
+  } else if (canonId === '__custom__') {
+    // User typed a free-text label — store without a canonical id
+    const schema = resolvedSchemas[type];
+    if (schema) {
+      schema.resolved[col] = { sourceColumn: col, confidence: 1.0, via: 'user_typed', label: customLabel };
+      if (Array.isArray(schema.unmapped)) schema.unmapped = schema.unmapped.filter(c => c !== col);
+    }
+    // Log for Santosh's review
+    const posSystem = resolvedSchemas[type]?.posSystem;
+    const knownTypes = ['sales','labor','foodcost','pmix','inventory'];
+    const dictionaryTarget = (knownTypes.includes(type) && posSystem && posSystem !== 'generic')
+      ? `pos_dictionary.json -> pos_systems.${posSystem}.column_map`
+      : `ontology.json -> review needed, no canonical match (user-typed label, may need new canonical concept)`;
+    fetch('/api/log-learned-mapping', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ column: col, mappedTo: customLabel, kind: 'unmapped', file: filename, uploadType: type, timestamp: new Date().toISOString(), dictionaryTarget })
+    }).catch(() => {});
+    if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Got it — <strong>"${col}"</strong> = "${customLabel}" (in ${filename}). Logged for review.</div>`;
   } else {
     // Store on the schema so the model sees it this session
     const schema = resolvedSchemas[type];
@@ -2045,6 +2057,17 @@ function learnUnmappedColumn(col, canonId, type, filename, remaining) {
         s.unmapped = s.unmapped.filter(c => c !== col);
       }
     });
+    // Fire-and-forget log for persistent review
+    const posSystem = resolvedSchemas[type]?.posSystem;
+    const knownTypes = ['sales','labor','foodcost','pmix','inventory'];
+    const dictionaryTarget = (knownTypes.includes(type) && posSystem && posSystem !== 'generic')
+      ? `pos_dictionary.json -> pos_systems.${posSystem}.column_map`
+      : `ontology.json -> metrics/entities.${canonId}.synonyms`;
+    fetch('/api/log-learned-mapping', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ column: col, mappedTo: canonId, kind: 'unmapped', file: filename, uploadType: type, timestamp: new Date().toISOString(), dictionaryTarget })
+    }).catch(() => {});
     if (el) el.innerHTML = `<div class="msg-label">OpticAI</div><div class="msg-bubble" style="background:var(--bg3);border:1px solid rgba(16,185,129,0.2);font-size:12px;color:var(--text2);">✓ Learned — <strong>"${col}"</strong> = ${canonId}. I'll recognize it for the rest of this session.</div>`;
   }
   if (remaining && remaining.length > 0) checkUnmappedColumnsFromSchema(remaining, type, filename);
@@ -2058,6 +2081,41 @@ function sendSuggested(text) { inputEl.value = text.trim(); sendMessage(); }
 async function sendMessage() {
   const text = inputEl.value.trim();
   if (!text) return;
+
+  // Intercept typed answers to active column prompts
+  if (pendingColumnQuestion) {
+    const { col, type, filename, remaining, kind } = pendingColumnQuestion;
+    inputEl.value = '';
+    appendMsg('user', text);
+    const typedLabel = text;
+
+    if (kind === 'unmapped') {
+      learnUnmappedColumn(col, '__custom__', type, filename, remaining, typedLabel);
+    } else {
+      // ambiguous — resolve with typed label
+      pendingColumnQuestion = null;
+      const schema = type ? resolvedSchemas[type] : null;
+      const posSystem = schema?.posSystem;
+      if (schema && schema.ambiguous) {
+        schema.resolved[col] = { sourceColumn: col, confidence: 1.0, via: 'user_typed', label: typedLabel };
+        schema.ambiguous = schema.ambiguous.filter(a => a.column !== col);
+      }
+      const knownTypes = ['sales','labor','foodcost','pmix','inventory'];
+      const dictionaryTarget = (knownTypes.includes(type) && posSystem && posSystem !== 'generic')
+        ? `pos_dictionary.json -> pos_systems.${posSystem}.column_map`
+        : `ontology.json -> review needed, no canonical match (user-typed label, may need new canonical concept)`;
+      fetch('/api/log-learned-mapping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ column: col, mappedTo: typedLabel, kind: 'ambiguous', file: filename, uploadType: type || 'unknown', timestamp: new Date().toISOString(), dictionaryTarget })
+      }).catch(() => {});
+      const confirmMsg = `✓ Got it — "${col}" = "${typedLabel}" (in ${filename}). Logged for review.`;
+      appendMsg('ai', confirmMsg);
+      if (remaining && remaining.length > 0) checkAmbiguousColumnsFromSchema(remaining, filename);
+    }
+    return;
+  }
+
   inputEl.value = '';
   sendBtn.disabled = true;
   // Remove welcome message permanently on first interaction
