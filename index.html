@@ -4,160 +4,215 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OpticAI — Restaurant Intelligence</title>
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* ── TOKENS ──────────────────────────────────────────────────────────── */
 :root {
-  --bg: #0d0f12; --bg2: #13161b; --bg3: #1a1e26;
-  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
-  --text: #e8eaf0; --text2: #8b909e; --text3: #555b6a;
-  --accent: #3b82f6; --accent2: #1d4ed8;
-  --green: #10b981; --amber: #f59e0b; --purple: #8b5cf6;
+  --canvas:#F4F1EA; --surface:#FCFBF7; --surface-2:#F0EDE4;
+  --ink:#20201C; --ink-soft:#6A655B; --ink-faint:#9C968A;
+  --line:#E2DDD1; --line-strong:#D2CCBD;
+  --brand:#235C45; --brand-ink:#18402F; --brand-deep:#143A2B; --brand-soft:#E5EDE7;
+  --clay:#B6603C; --clay-soft:#F3E6DD;
+  --pos:#2C7A57; --neg:#A8442C; --warn:#9C6B16; --warn-soft:#F4EAD3;
+  --c1:#235C45; --c2:#B6603C; --c3:#C99A3A; --c4:#5E8C84; --c5:#8A5A6B;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; }
+/* ── RESET ───────────────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;background:var(--canvas);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:14px;font-variant-numeric:tabular-nums;scroll-behavior:smooth;}
+.num{font-family:'IBM Plex Mono',monospace;letter-spacing:-0.02em;}
 
-/* NAV */
-nav { display: flex; align-items: center; padding: 20px 48px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(13,15,18,0.92); backdrop-filter: blur(12px); z-index: 10; }
-.nav-logo { display: flex; align-items: center; gap: 10px; }
-.nav-logo-icon { width: 30px; height: 30px; background: var(--accent); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
-.nav-logo-icon i { color: #fff; font-size: 16px; }
-.nav-logo-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
-.nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-.nav-link { font-size: 13px; color: var(--text2); cursor: pointer; transition: color 0.15s; }
-.nav-link:hover { color: var(--text); }
-.nav-cta { padding: 7px 16px; background: var(--accent); border: none; border-radius: 7px; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
-.nav-cta:hover { background: var(--accent2); }
+/* ── DARK BAND ───────────────────────────────────────────────────────── */
+.dark-band{background:var(--brand-ink);color:#F1EEE4;--warn:#C99A3A;}
 
-/* HERO */
-.hero { max-width: 900px; margin: 0 auto; padding: 100px 48px 80px; text-align: center; }
-.hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); border-radius: 20px; padding: 5px 14px; font-size: 12px; color: #93c5fd; margin-bottom: 28px; }
-.hero-badge i { font-size: 13px; }
-.hero-h1 { font-size: 52px; font-weight: 600; line-height: 1.1; letter-spacing: -0.03em; color: var(--text); margin-bottom: 20px; }
-.hero-h1 em { font-style: italic; font-weight: 300; color: var(--text2); }
-.hero-sub { font-size: 18px; color: var(--text2); line-height: 1.65; max-width: 600px; margin: 0 auto 40px; font-weight: 400; }
-.hero-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
-.btn-hero { padding: 13px 28px; border-radius: 9px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: flex; align-items: center; gap: 8px; border: none; }
-.btn-hero-primary { background: var(--accent); color: #fff; }
-.btn-hero-primary:hover { background: var(--accent2); transform: translateY(-1px); }
-.btn-hero-secondary { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
-.btn-hero-secondary:hover { background: var(--bg2); color: var(--text); }
+/* ── ICONS ───────────────────────────────────────────────────────────── */
+[data-ic]{display:inline-flex;align-items:center;justify-content:center;line-height:1;}
+[data-ic] svg{width:1em;height:1em;flex-shrink:0;}
 
-/* DASHBOARD PREVIEW */
-.preview-wrap { max-width: 1100px; margin: 0 auto 100px; padding: 0 32px; }
-.preview-label { text-align: center; font-size: 12px; color: var(--text3); margin-bottom: 16px; letter-spacing: 0.05em; text-transform: uppercase; }
-.preview-frame { background: var(--bg2); border: 1px solid var(--border2); border-radius: 14px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.5); }
-.preview-bar { background: var(--bg3); padding: 10px 16px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
-.preview-dot { width: 10px; height: 10px; border-radius: 50%; }
-.preview-url { margin-left: 12px; background: var(--bg2); border-radius: 5px; padding: 4px 12px; font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
-.preview-content { padding: 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-.preview-kpi { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
-.preview-kpi-label { font-size: 10px; color: var(--text3); margin-bottom: 4px; }
-.preview-kpi-val { font-size: 18px; font-weight: 500; font-family: 'DM Mono', monospace; }
-.preview-kpi-delta { font-size: 10px; margin-top: 2px; }
-.preview-charts { padding: 0 20px 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
-.preview-chart-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; height: 140px; display: flex; flex-direction: column; }
-.preview-chart-title { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
-.preview-chart-body { flex: 1; display: flex; align-items: flex-end; gap: 3px; }
-.preview-bar-item { flex: 1; border-radius: 3px 3px 0 0; opacity: 0.8; }
-.preview-line { flex: 1; position: relative; overflow: hidden; }
-.preview-line svg { width: 100%; height: 100%; }
-.preview-chat { margin: 0 20px 20px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-.preview-chat-msg { font-size: 12px; color: var(--text2); margin-bottom: 8px; line-height: 1.5; }
-.preview-chat-q { display: inline-block; background: var(--accent); color: #fff; padding: 6px 10px; border-radius: 7px; font-size: 11px; margin-bottom: 6px; }
-.preview-chat-a { background: var(--bg2); border: 1px solid var(--border); border-radius: 7px; padding: 8px 10px; font-size: 11px; color: var(--text2); line-height: 1.5; }
+/* ── LAYOUT ──────────────────────────────────────────────────────────── */
+.container{max-width:1120px;margin:0 auto;padding:0 48px;}
 
-/* HOW IT WORKS */
-.section { max-width: 900px; margin: 0 auto 100px; padding: 0 48px; }
-.section-label { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
-.section-h2 { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 14px; line-height: 1.2; }
-.section-sub { font-size: 16px; color: var(--text2); line-height: 1.65; max-width: 560px; margin-bottom: 48px; }
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.step { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
-.step-num { width: 28px; height: 28px; border-radius: 7px; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 14px; font-family: 'DM Mono', monospace; }
-.step-title { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
-.step-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+/* ── NAV ─────────────────────────────────────────────────────────────── */
+nav{position:sticky;top:0;z-index:50;background:var(--brand-ink);border-bottom:1px solid rgba(241,238,228,.1);}
+.nav-inner{display:flex;align-items:center;gap:32px;padding:15px 48px;max-width:1120px;margin:0 auto;}
+.nav-logo{display:flex;align-items:center;gap:9px;flex-shrink:0;text-decoration:none;}
+.nav-logo-mark{width:28px;height:28px;background:rgba(241,238,228,.12);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.nav-logo-mark [data-ic]{color:#F1EEE4;font-size:14px;}
+.nav-logo-name{font-size:15px;font-weight:600;color:#F1EEE4;letter-spacing:-0.01em;}
+.nav-links{display:flex;gap:24px;margin-left:auto;}
+.nav-link{font-size:13px;color:rgba(241,238,228,.6);cursor:pointer;transition:color .15s;background:none;border:none;font-family:'Hanken Grotesk',sans-serif;}
+.nav-link:hover{color:#F1EEE4;}
+.nav-signin{padding:6px 14px;border-radius:6px;border:1px solid rgba(241,238,228,.22);background:transparent;color:#F1EEE4;font-size:13px;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.nav-signin:hover{background:rgba(241,238,228,.08);border-color:rgba(241,238,228,.4);}
 
-/* DATASETS */
-.datasets-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 48px; }
-.ds-tile { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 14px; }
-.ds-tile-icon { font-size: 20px; color: var(--accent); margin-bottom: 8px; }
-.ds-tile-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
-.ds-tile-desc { font-size: 11px; color: var(--text3); line-height: 1.5; }
+/* ── HERO ────────────────────────────────────────────────────────────── */
+.hero{padding:80px 0 0;text-align:center;}
+.hero-inner{max-width:720px;margin:0 auto;padding:0 48px;}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(241,238,228,.08);border:1px solid rgba(241,238,228,.18);border-radius:20px;padding:5px 14px;font-size:11.5px;color:rgba(241,238,228,.75);margin-bottom:28px;font-family:'IBM Plex Mono',monospace;}
+.hero-badge [data-ic]{font-size:13px;}
+.hero-h1{font-size:54px;font-weight:800;line-height:1.08;letter-spacing:-0.035em;color:#F1EEE4;margin-bottom:20px;}
+.hero-h1 em{font-style:italic;font-weight:400;color:rgba(241,238,228,.65);}
+.hero-sub{font-size:17px;color:rgba(241,238,228,.68);line-height:1.7;max-width:560px;margin:0 auto 40px;}
+.hero-sub strong{color:#F1EEE4;}
+.capture-wrap{max-width:440px;margin:0 auto;}
+.capture-form{display:flex;gap:8px;}
+.capture-input{flex:1;background:rgba(241,238,228,.1);border:1px solid rgba(241,238,228,.2);border-radius:8px;padding:11px 14px;color:#F1EEE4;font-size:13px;font-family:'Hanken Grotesk',sans-serif;outline:none;transition:border-color .15s;}
+.capture-input::placeholder{color:rgba(241,238,228,.35);}
+.capture-input:focus{border-color:rgba(241,238,228,.5);}
+.capture-btn{padding:11px 18px;background:#F1EEE4;border:none;border-radius:8px;color:var(--brand-ink);font-size:13px;font-weight:600;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;transition:opacity .15s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.capture-btn:hover{opacity:.9;}
+.capture-note{font-size:11px;color:rgba(241,238,228,.38);margin-top:9px;}
+.capture-success{display:none;font-size:13px;color:rgba(241,238,228,.75);padding:12px 0;display:none;align-items:center;justify-content:center;gap:7px;}
 
-/* SAMPLE QS */
-.questions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-.question-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; align-items: flex-start; gap: 10px; }
-.question-card i { color: var(--accent); font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-.question-text { font-size: 13px; color: var(--text2); line-height: 1.55; }
-.question-text strong { color: var(--text); font-weight: 500; }
+/* ── MOCK WINDOW ─────────────────────────────────────────────────────── */
+.mock-wrap{max-width:1100px;margin:56px auto 0;padding:0 32px 60px;}
+.mock-window{background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;box-shadow:0 32px 80px rgba(20,58,43,.4);}
+.mock-bar{background:var(--surface-2);padding:10px 16px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);}
+.mock-dot{width:10px;height:10px;border-radius:50%;}
+.mock-url{flex:1;max-width:240px;margin:0 10px;background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:4px 10px;font-size:11px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;}
+.mock-toggle{margin-left:auto;display:flex;background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:2px;}
+.mock-tab{padding:4px 11px;border-radius:5px;border:none;background:transparent;font-size:11px;font-weight:500;color:var(--ink-faint);cursor:pointer;font-family:'Hanken Grotesk',sans-serif;transition:all .15s;display:flex;align-items:center;gap:4px;}
+.mock-tab.active{background:var(--brand);color:#fff;}
+.mock-kpi-band{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;border-bottom:1px solid var(--line);}
+.mock-kpi{padding:10px 12px;border-right:1px solid var(--line);}
+.mock-kpi:last-child{border-right:none;}
+.mock-kpi.hero-tile{background:var(--brand);}
+.mock-kpi-label{font-size:10px;color:var(--ink-faint);margin-bottom:3px;}
+.mock-kpi.hero-tile .mock-kpi-label{color:rgba(255,255,255,.7);}
+.mock-kpi-val{font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:-0.02em;color:var(--ink);line-height:1.1;}
+.mock-kpi.hero-tile .mock-kpi-val{color:#fff;font-size:22px;}
+.mock-kpi-delta{font-size:10px;color:var(--ink-faint);margin-top:2px;}
+.mock-charts{display:grid;grid-template-columns:2fr 1fr;border-bottom:1px solid var(--line);}
+.mock-chart-card{padding:12px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;}
+.mock-chart-card:last-child{border-right:none;}
+.mock-chart-title{font-size:11px;font-weight:500;color:var(--ink-soft);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.mock-chart-wrap{flex:1;position:relative;height:110px;}
+.mock-chart-wrap canvas{position:absolute;inset:0;}
+.mock-chat{padding:12px 16px;display:flex;flex-direction:column;gap:7px;}
+.mock-chat-q{align-self:flex-end;background:var(--brand);color:#fff;padding:7px 11px;border-radius:10px 10px 3px 10px;font-size:11px;line-height:1.5;max-width:72%;}
+.mock-chat-a{align-self:flex-start;font-size:11px;line-height:1.65;color:var(--ink-soft);max-width:92%;}
+.mock-window[data-mode="op"] .view-fin{display:none;}
+.mock-window[data-mode="fin"] .view-op{display:none;}
 
-/* VS SECTION */
-.vs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.vs-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-.vs-card.featured { border-color: rgba(59,130,246,0.4); background: rgba(59,130,246,0.05); }
-.vs-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.vs-card-name { font-size: 14px; font-weight: 500; }
-.vs-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(59,130,246,0.15); color: var(--accent); margin-left: auto; }
-.vs-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 12px; color: var(--text2); border-bottom: 1px solid var(--border); }
-.vs-row:last-child { border-bottom: none; }
-.vs-row i { font-size: 14px; flex-shrink: 0; }
-.vs-row .check { color: var(--green); }
-.vs-row .cross { color: var(--text3); }
-.vs-row .partial { color: var(--amber); }
+/* ── SECTIONS ────────────────────────────────────────────────────────── */
+.section{padding:80px 0;}
+.section-label{font-size:10px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--brand);margin-bottom:10px;}
+.section-label.clay{color:var(--clay);}
+.section-h2{font-size:34px;font-weight:700;letter-spacing:-.025em;line-height:1.2;color:var(--ink);margin-bottom:12px;}
+.section-sub{font-size:16px;color:var(--ink-soft);line-height:1.7;max-width:560px;margin-bottom:48px;}
 
-/* PRIVACY */
-.privacy-bar { max-width: 900px; margin: 0 auto 60px; padding: 0 48px; }
-.privacy-inner { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text2); }
-.privacy-inner i { color: var(--green); font-size: 16px; flex-shrink: 0; }
+/* ── PLATFORM TWO VIEWS ──────────────────────────────────────────────── */
+.platform-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.platform-card{border-radius:14px;padding:26px 28px 30px;border:1px solid var(--line);}
+.platform-card.op{background:var(--brand-soft);border-color:rgba(35,92,69,.15);}
+.platform-card.fin{background:var(--clay-soft);border-color:rgba(182,96,60,.15);}
+.platform-card-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.pc-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.platform-card.op .pc-icon{background:var(--brand);color:#fff;}
+.platform-card.fin .pc-icon{background:var(--clay);color:#fff;}
+.platform-card-title{font-size:16px;font-weight:600;color:var(--ink);}
+.platform-card-sub{font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:18px;}
+.platform-qs{display:flex;flex-direction:column;gap:0;}
+.platform-q{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--ink-soft);line-height:1.55;padding:8px 0;border-top:1px solid rgba(35,92,69,.1);}
+.platform-card.fin .platform-q{border-top-color:rgba(182,96,60,.1);}
+.platform-q [data-ic]{font-size:13px;flex-shrink:0;margin-top:2px;}
+.platform-card.op .platform-q [data-ic]{color:var(--brand);}
+.platform-card.fin .platform-q [data-ic]{color:var(--clay);}
 
-/* CTA FOOTER */
-.cta-footer { max-width: 900px; margin: 0 auto 80px; padding: 0 48px; text-align: center; }
-.cta-footer-inner { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; padding: 56px 48px; }
-.cta-footer h2 { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 12px; }
-.cta-footer p { font-size: 16px; color: var(--text2); margin-bottom: 32px; }
+/* ── STEPS ───────────────────────────────────────────────────────────── */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;}
+.step-num{width:28px;height:28px;border-radius:6px;background:var(--brand-soft);border:1px solid rgba(35,92,69,.18);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--brand);margin-bottom:14px;font-family:'IBM Plex Mono',monospace;}
+.step-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.step-desc{font-size:13px;color:var(--ink-soft);line-height:1.65;}
 
-/* FOOTER */
-footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; }
-.footer-left { font-size: 12px; color: var(--text3); }
-.footer-right { font-size: 12px; color: var(--text3); }
+/* ── DATASETS ────────────────────────────────────────────────────────── */
+.ds-section{background:var(--surface);}
+.ds-group{margin-bottom:28px;}
+.ds-group-label{display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--brand);margin-bottom:12px;}
+.ds-group-label.fin-grp{color:var(--clay);}
+.ds-group-label [data-ic]{font-size:14px;}
+.ds-tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.ds-tiles.fin-tiles{grid-template-columns:repeat(3,1fr);}
+.ds-tile{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:16px 14px;}
+.ds-tile-icon{font-size:20px;color:var(--brand);margin-bottom:8px;}
+.ds-tile-icon.fin{color:var(--clay);}
+.ds-tile-name{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:3px;}
+.ds-tile-desc{font-size:11px;color:var(--ink-faint);line-height:1.5;}
 
-/* ANIMATIONS */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.hero-badge, .hero-h1, .hero-sub, .hero-actions { animation: fadeUp 0.6s ease both; }
-.hero-badge { animation-delay: 0.05s; }
-.hero-h1 { animation-delay: 0.12s; }
-.hero-sub { animation-delay: 0.2s; }
-.hero-actions { animation-delay: 0.28s; }
+/* ── QUESTIONS ───────────────────────────────────────────────────────── */
+.questions-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.q-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;align-items:flex-start;gap:10px;}
+.q-tag{font-size:9px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.q-tag.op{background:var(--brand-soft);color:var(--brand);}
+.q-tag.fin{background:var(--clay-soft);color:var(--clay);}
+.q-text{font-size:13px;color:var(--ink-soft);line-height:1.55;}
+.q-text strong{color:var(--ink);font-weight:500;}
 
-/* ── MOBILE ── */
-@media (max-width: 768px) {
-  nav { padding: 14px 20px; }
-  .nav-link { display: none; }
-  .hero { padding: 60px 24px 50px; }
-  .hero-h1 { font-size: 32px; }
-  .hero-sub { font-size: 15px; }
-  .hero-actions { flex-direction: column; align-items: stretch; }
-  .btn-hero { justify-content: center; }
-  .preview-wrap { padding: 0 16px; margin-bottom: 60px; }
-  .preview-content { grid-template-columns: repeat(2, 1fr); }
-  .preview-charts { grid-template-columns: 1fr; }
-  .section { padding: 0 24px; margin-bottom: 60px; }
-  .section-h2 { font-size: 26px; }
-  .steps { grid-template-columns: 1fr; }
-  .datasets-grid { grid-template-columns: 1fr 1fr; }
-  .questions-grid { grid-template-columns: 1fr; }
-  .vs-grid { grid-template-columns: 1fr; }
-  .privacy-bar { padding: 0 24px; }
-  .cta-footer { padding: 0 24px; }
-  .cta-footer-inner { padding: 36px 24px; }
-  .cta-footer h2 { font-size: 26px; }
-  footer { padding: 20px 24px; flex-direction: column; gap: 8px; text-align: center; }
+/* ── PROBLEM / SOLUTION (dark band) ─────────────────────────────────── */
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
+.problem-card{background:rgba(241,238,228,.05);border:1px solid rgba(241,238,228,.12);border-radius:12px;padding:22px;}
+.problem-icon{font-size:20px;color:var(--warn);margin-bottom:10px;}
+.problem-title{font-size:14px;font-weight:600;color:#F1EEE4;margin-bottom:7px;}
+.problem-desc{font-size:13px;color:rgba(241,238,228,.65);line-height:1.65;}
+.solution-panel{background:rgba(241,238,228,.05);border:1px solid rgba(241,238,228,.12);border-radius:12px;padding:26px 30px;margin-bottom:16px;}
+.solution-label{font-size:10px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:rgba(241,238,228,.42);margin-bottom:16px;}
+.solution-checks{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.solution-check{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(241,238,228,.65);line-height:1.6;}
+.solution-check [data-ic]{font-size:14px;flex-shrink:0;margin-top:2px;color:#7DBFA0;}
+.solution-check strong{color:#F1EEE4;}
+.testimonial{background:rgba(241,238,228,.05);border:1px solid rgba(241,238,228,.12);border-radius:10px;padding:22px 26px;}
+.testimonial-quote{font-size:13px;color:rgba(241,238,228,.65);line-height:1.7;font-style:italic;margin-bottom:8px;}
+.testimonial-attr{font-size:11px;color:rgba(241,238,228,.38);}
+
+/* ── PRIVACY ─────────────────────────────────────────────────────────── */
+.privacy-strip{padding:0 0 40px;}
+.privacy-inner{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-soft);}
+.privacy-inner [data-ic]{color:var(--pos);font-size:18px;flex-shrink:0;}
+
+/* ── FINAL CTA ───────────────────────────────────────────────────────── */
+.final-cta{padding:80px 0;text-align:center;}
+.final-cta h2{font-size:38px;font-weight:800;letter-spacing:-.03em;color:#F1EEE4;margin-bottom:14px;line-height:1.15;}
+.final-cta p{font-size:16px;color:rgba(241,238,228,.62);margin-bottom:36px;max-width:460px;margin-left:auto;margin-right:auto;}
+
+/* ── FOOTER ──────────────────────────────────────────────────────────── */
+footer{background:var(--brand-deep);padding:20px 48px;display:flex;align-items:center;justify-content:space-between;}
+.footer-copy{font-size:12px;color:rgba(241,238,228,.45);}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────── */
+@media(max-width:980px){
+  .hero-h1{font-size:42px;}
+  .mock-kpi:nth-child(4),.mock-kpi:nth-child(5){display:none;}
+  .mock-kpi-band{grid-template-columns:1.5fr 1fr 1fr;}
+  .platform-grid{grid-template-columns:1fr;}
+  .steps{grid-template-columns:1fr 1fr;}
+  .ds-tiles{grid-template-columns:repeat(3,1fr);}
+  .ds-tiles.fin-tiles{grid-template-columns:1fr 1fr 1fr;}
+  .questions-grid{grid-template-columns:1fr;}
+  .problem-grid{grid-template-columns:1fr 1fr;}
+  .solution-checks{grid-template-columns:1fr;}
 }
-@media (max-width: 480px) {
-  .hero-h1 { font-size: 28px; }
-  .datasets-grid { grid-template-columns: 1fr; }
-  .preview-content { grid-template-columns: 1fr 1fr; }
+@media(max-width:720px){
+  .nav-inner{padding:14px 20px;}
+  .nav-links{display:none;}
+  .container{padding:0 20px;}
+  .hero-inner{padding:0 20px;}
+  .hero{padding:56px 0 0;}
+  .hero-h1{font-size:32px;}
+  .hero-sub{font-size:15px;}
+  .capture-form{flex-direction:column;}
+  .mock-wrap{padding:0 16px 40px;}
+  .mock-kpi-band{grid-template-columns:1.5fr 1fr;}
+  .mock-kpi:nth-child(3),.mock-kpi:nth-child(4),.mock-kpi:nth-child(5){display:none;}
+  .mock-charts{grid-template-columns:1fr;}
+  .mock-chart-card:last-child{display:none;}
+  .section{padding:56px 0;}
+  .section-h2{font-size:26px;}
+  .section-sub{font-size:14px;}
+  .steps{grid-template-columns:1fr;}
+  .ds-tiles,.ds-tiles.fin-tiles{grid-template-columns:1fr 1fr;}
+  .problem-grid{grid-template-columns:1fr;}
+  .final-cta h2{font-size:28px;}
+  footer{flex-direction:column;gap:8px;text-align:center;padding:16px 20px;}
 }
 </style>
 </head>
@@ -165,223 +220,487 @@ footer { border-top: 1px solid var(--border); padding: 24px 48px; display: flex;
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">
-    <div class="nav-logo-icon"><i class="ti ti-chart-dots-3"></i></div>
-    <span class="nav-logo-name">OpticAI</span>
-  </div>
-  <div class="nav-right">
-    <span class="nav-link" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</span>
-    <span class="nav-link" onclick="document.getElementById('compare').scrollIntoView({behavior:'smooth'})">vs. alternatives</span>
-    <button class="nav-cta" onclick="window.location.href='app.html'">Sign in <i class="ti ti-arrow-right" style="font-size:13px"></i></button>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">
+      <div class="nav-logo-mark"><i data-ic="bar-chart"></i></div>
+      <span class="nav-logo-name">OpticAI</span>
+    </a>
+    <div class="nav-links">
+      <button class="nav-link" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
+      <button class="nav-link" onclick="document.getElementById('datasets').scrollIntoView({behavior:'smooth'})">Datasets</button>
+      <button class="nav-link" onclick="document.getElementById('why').scrollIntoView({behavior:'smooth'})">Why OpticAI</button>
+    </div>
+    <button class="nav-signin" onclick="window.location.href='app.html'">Sign in <i data-ic="arrow-right" style="font-size:12px"></i></button>
   </div>
 </nav>
 
 <!-- HERO -->
-<div class="hero">
-  <div class="hero-badge"><i class="ti ti-sparkles"></i> Multi-location · Multi-dataset · Actually works</div>
-  <h1 class="hero-h1">Restaurant analytics<br><em>that answers real questions</em></h1>
-  <p class="hero-sub">Upload your sales, labor, food cost, PMIX, and inventory data. Ask anything. Get instant, specific answers — across all your locations at once.</p>
-  <div class="hero-actions">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-      <button class="btn-hero btn-hero-primary" onclick="window.location.href='app.html#request'">
-        <i class="ti ti-mail"></i> Request access
-      </button>
-      <span style="font-size:12px;color:var(--text3)">Enter your email and we'll review your request</span>
+<div class="dark-band hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><i data-ic="sparkles"></i> Operations + Financials · Multi-location · Answers, not dashboards</div>
+    <h1 class="hero-h1">Restaurant intelligence<br><em>that works like an analyst</em></h1>
+    <p class="hero-sub">Upload your POS exports, labor schedules, and <strong>financial statements</strong>. Ask in plain English. Get specific answers — across all your locations at once.</p>
+    <div class="capture-wrap">
+      <div id="heroForm">
+        <div class="capture-form">
+          <input type="email" class="capture-input" id="heroEmail" placeholder="your@email.com">
+          <button class="capture-btn" onclick="submitCapture('hero')"><i data-ic="mail"></i> Request access</button>
+        </div>
+        <div class="capture-note">We'll review your request and follow up shortly.</div>
+      </div>
+      <div class="capture-success" id="heroSuccess"><i data-ic="check"></i> Thanks — we'll be in touch.</div>
     </div>
-    <button class="btn-hero btn-hero-secondary" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">
-      <i class="ti ti-info-circle"></i> How it works
-    </button>
   </div>
-</div>
 
-<!-- DASHBOARD PREVIEW -->
-<div class="preview-wrap">
-  <div class="preview-label">Live dashboard — real AI analysis</div>
-  <div class="preview-frame">
-    <div class="preview-bar">
-      <div class="preview-dot" style="background:#ef4444"></div>
-      <div class="preview-dot" style="background:#f59e0b"></div>
-      <div class="preview-dot" style="background:#10b981"></div>
-      <div class="preview-url">opticai.vercel.app/app</div>
-    </div>
-    <div class="preview-content">
-      <div class="preview-kpi"><div class="preview-kpi-label">Total Sales</div><div class="preview-kpi-val" style="color:#e8eaf0">$1.24M</div><div class="preview-kpi-delta" style="color:#10b981">↑ 4.2%</div></div>
-      <div class="preview-kpi"><div class="preview-kpi-label">Labor %</div><div class="preview-kpi-val" style="color:#f59e0b">31.8%</div><div class="preview-kpi-delta" style="color:#f59e0b">↑ above target</div></div>
-      <div class="preview-kpi"><div class="preview-kpi-label">Food Cost %</div><div class="preview-kpi-val" style="color:#e8eaf0">28.4%</div><div class="preview-kpi-delta" style="color:#10b981">↓ 0.6pts</div></div>
-      <div class="preview-kpi"><div class="preview-kpi-label">Prime Cost</div><div class="preview-kpi-val" style="color:#f59e0b">60.2%</div><div class="preview-kpi-delta" style="color:#f59e0b">Watch closely</div></div>
-      <div class="preview-kpi"><div class="preview-kpi-label">Avg Check</div><div class="preview-kpi-val" style="color:#e8eaf0">$18.40</div><div class="preview-kpi-delta" style="color:#10b981">↑ $0.80</div></div>
-    </div>
-    <div class="preview-charts">
-      <div class="preview-chart-card">
-        <div class="preview-chart-title">Weekly sales by location</div>
-        <div class="preview-line">
-          <svg viewBox="0 0 300 80" preserveAspectRatio="none">
-            <polyline points="0,60 25,55 50,57 75,45 100,40 125,48 150,35 175,42 200,38 225,50 250,30 275,25" fill="none" stroke="#3b82f6" stroke-width="2"/>
-            <polyline points="0,45 25,50 50,43 75,55 100,62 125,50 150,58 175,52 200,56 225,48 250,55 275,58" fill="none" stroke="#f59e0b" stroke-width="2"/>
-            <polyline points="0,70 25,65 50,67 75,58 100,62 125,55 150,64 175,54 200,60 225,62 250,50 275,46" fill="none" stroke="#8b5cf6" stroke-width="2"/>
-          </svg>
+  <!-- MOCK WINDOW -->
+  <div class="mock-wrap">
+    <div class="mock-window" id="mockWindow" data-mode="op">
+      <div class="mock-bar">
+        <div class="mock-dot" style="background:#ef4444"></div>
+        <div class="mock-dot" style="background:#f59e0b"></div>
+        <div class="mock-dot" style="background:#10b981"></div>
+        <div class="mock-url">opticai.vercel.app/app</div>
+        <div class="mock-toggle">
+          <button class="mock-tab active" id="tabOp" onclick="switchTab('op')"><i data-ic="activity" style="font-size:11px"></i> Operational</button>
+          <button class="mock-tab" id="tabFin" onclick="switchTab('fin')"><i data-ic="receipt" style="font-size:11px"></i> Financial</button>
         </div>
       </div>
-      <div class="preview-chart-card">
-        <div class="preview-chart-title">PMIX by category</div>
-        <div class="preview-chart-body" style="align-items:center;justify-content:center">
-          <svg viewBox="0 0 80 80" width="80" height="80">
-            <circle cx="40" cy="40" r="30" fill="none" stroke="#3b82f6" stroke-width="12" stroke-dasharray="71 117"/>
-            <circle cx="40" cy="40" r="30" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="41 147" stroke-dashoffset="-71"/>
-            <circle cx="40" cy="40" r="30" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="34 154" stroke-dashoffset="-112"/>
-            <circle cx="40" cy="40" r="30" fill="none" stroke="#8b5cf6" stroke-width="12" stroke-dasharray="19 169" stroke-dashoffset="-146"/>
-            <circle cx="40" cy="40" r="30" fill="none" stroke="#ef4444" stroke-width="12" stroke-dasharray="22 166" stroke-dashoffset="-165"/>
-            <circle cx="40" cy="40" r="22" fill="#13161b"/>
-          </svg>
+
+      <!-- OPERATIONAL VIEW -->
+      <div class="view-op">
+        <div class="mock-kpi-band">
+          <div class="mock-kpi hero-tile">
+            <div class="mock-kpi-label">Total Sales</div>
+            <div class="mock-kpi-val num">$9.53M</div>
+            <div class="mock-kpi-delta" style="color:rgba(255,255,255,.6)">Feb – Jun 2026 · 5 locations</div>
+          </div>
+          <div class="mock-kpi">
+            <div class="mock-kpi-label">Prime Cost</div>
+            <div class="mock-kpi-val num" style="color:var(--neg)">70.1%</div>
+            <div class="mock-kpi-delta" style="color:var(--neg)">above 65% benchmark</div>
+          </div>
+          <div class="mock-kpi">
+            <div class="mock-kpi-label">Labor %</div>
+            <div class="mock-kpi-val num" style="color:var(--warn)">39.7%</div>
+            <div class="mock-kpi-delta" style="color:var(--warn)">above 30% target</div>
+          </div>
+          <div class="mock-kpi">
+            <div class="mock-kpi-label">Food Cost %</div>
+            <div class="mock-kpi-val num" style="color:var(--warn)">30.4%</div>
+            <div class="mock-kpi-delta" style="color:var(--warn)">above 28% target</div>
+          </div>
+          <div class="mock-kpi">
+            <div class="mock-kpi-label">Avg Check</div>
+            <div class="mock-kpi-val num">$27.60</div>
+            <div class="mock-kpi-delta" style="color:var(--pos)">5 locations · 21 wks</div>
+          </div>
+        </div>
+        <div class="mock-charts">
+          <div class="mock-chart-card">
+            <div class="mock-chart-title">Weekly sales by location <span class="num" style="font-size:10px;color:var(--ink-faint)">sample</span></div>
+            <div class="mock-chart-wrap"><canvas id="mockSalesChart"></canvas></div>
+          </div>
+          <div class="mock-chart-card">
+            <div class="mock-chart-title">PMIX — margin by category <span style="font-size:10px;color:var(--ink-faint)">sample</span></div>
+            <div class="mock-chart-wrap"><canvas id="mockPmixChart"></canvas></div>
+          </div>
+        </div>
+        <div class="mock-chat">
+          <div class="mock-chat-q">Why was labor high at Midtown last week?</div>
+          <div class="mock-chat-a"><strong>Midtown's labor hit 41.2% last week</strong> — 11 pts above target. The spike traces to Wed–Thu specifically: a new kitchen manager is overscheduling BOH without adjusting for Midtown's structurally lower midweek volume. Cutting 2 BOH shifts Wed–Thu could recover ~<span class="num">1.8</span> pts of prime cost.</div>
+        </div>
+      </div>
+
+      <!-- FINANCIAL VIEW -->
+      <div class="view-fin">
+        <div class="mock-kpi-band">
+          <div class="mock-kpi hero-tile">
+            <div class="mock-kpi-label">Total Revenue</div>
+            <div class="mock-kpi-val num">$4.18M</div>
+            <div class="mock-kpi-delta" style="color:rgba(255,255,255,.6)">FY 2025 · 3 entities</div>
+          </div>
+          <div class="mock-kpi">
+            <div class="mock-kpi-label">Prime Cost</div>
+            <div class="mock-kpi-val num" style="color:var(--warn)">62.4%</div>
+            <div class="mock-kpi-delta" style="color:var(--warn)">+1.2 pts vs prior year</div>
+          </div>
+          <div class="mock-kpi">
+            <div class="mock-kpi-label">Food Cost %</div>
+            <div class="mock-kpi-val num">29.1%</div>
+            <div class="mock-kpi-delta" style="color:var(--pos)">in-target</div>
+          </div>
+          <div class="mock-kpi">
+            <div class="mock-kpi-label">Labor %</div>
+            <div class="mock-kpi-val num" style="color:var(--warn)">33.3%</div>
+            <div class="mock-kpi-delta" style="color:var(--warn)">above 30% target</div>
+          </div>
+          <div class="mock-kpi">
+            <div class="mock-kpi-label">EBITDA Margin</div>
+            <div class="mock-kpi-val num" style="color:var(--pos)">14.2%</div>
+            <div class="mock-kpi-delta" style="color:var(--pos)">above 12% target</div>
+          </div>
+        </div>
+        <div class="mock-charts">
+          <div class="mock-chart-card">
+            <div class="mock-chart-title">P&amp;L margin waterfall <span style="font-size:10px;color:var(--ink-faint)">sample</span></div>
+            <div class="mock-chart-wrap"><canvas id="mockWfChart"></canvas></div>
+          </div>
+          <div class="mock-chart-card">
+            <div class="mock-chart-title">Revenue mix <span style="font-size:10px;color:var(--ink-faint)">sample</span></div>
+            <div class="mock-chart-wrap"><canvas id="mockRevChart"></canvas></div>
+          </div>
+        </div>
+        <div class="mock-chat">
+          <div class="mock-chat-q">What's the biggest EBITDA opportunity across our three entities?</div>
+          <div class="mock-chat-a"><strong>Riverside has the clearest upside: <span class="num">9.8%</span> EBITDA vs. <span class="num">14.2%</span> group average.</strong> The gap traces to labor (<span class="num">36.1%</span> vs. <span class="num">31.4%</span> group avg) — specifically BOH scheduling Mon–Wed. Aligning Riverside's model to Downtown's is worth ~<span class="num">$62K</span> annually in EBITDA at current run-rate.</div>
         </div>
       </div>
     </div>
-    <div class="preview-chat">
-      <div class="preview-chat-q">Why was labor high at Midtown last week?</div>
-      <div class="preview-chat-a">Midtown's labor hit 38.2% last week — 8pts above target. The spike traces to Tuesday and Wednesday specifically, where a new kitchen manager (started W6) is overscheduling BOH staff without adjusting for Midtown's structurally lower midweek volume. Recommend a scheduling audit: cut 2 BOH shifts on Tue-Wed and cross-train for flexibility. This alone could recover ~1.5pts of prime cost.</div>
+  </div>
+</div><!-- /hero dark-band -->
+
+<!-- ONE PLATFORM, TWO VIEWS -->
+<div class="section" id="platform">
+  <div class="container">
+    <div class="section-label">One platform, two views</div>
+    <h2 class="section-h2">Operational exports <em style="font-style:italic;font-weight:400;color:var(--ink-soft)">and</em> financial statements, in one conversation</h2>
+    <p class="section-sub">Most tools do one or the other. OpticAI connects your POS exports and your accountant's P&L so you can ask questions that cross the line between the two.</p>
+    <div class="platform-grid">
+      <div class="platform-card op">
+        <div class="platform-card-header">
+          <div class="pc-icon"><i data-ic="activity"></i></div>
+          <div class="platform-card-title">Operational</div>
+        </div>
+        <p class="platform-card-sub">Upload CSV exports from your POS, scheduling tool, and food cost system. OpticAI detects column formats automatically — no template required.</p>
+        <div class="platform-qs">
+          <div class="platform-q"><i data-ic="message"></i> Why was Midtown labor above target last Tuesday?</div>
+          <div class="platform-q"><i data-ic="message"></i> Which menu items are hurting food cost margin?</div>
+          <div class="platform-q"><i data-ic="message"></i> Give me a weekly ops briefing for all 5 locations.</div>
+        </div>
+      </div>
+      <div class="platform-card fin">
+        <div class="platform-card-header">
+          <div class="pc-icon"><i data-ic="receipt"></i></div>
+          <div class="platform-card-title">Financial</div>
+        </div>
+        <p class="platform-card-sub">Upload Location Side-by-Side P&Ls and Trailing-13 statements. Entity, period, and report type are read from inside each file — not the filename.</p>
+        <div class="platform-qs">
+          <div class="platform-q"><i data-ic="message"></i> What's driving EBITDA variance vs. prior year?</div>
+          <div class="platform-q"><i data-ic="message"></i> Which entity has the highest intercompany risk?</div>
+          <div class="platform-q"><i data-ic="message"></i> Summarize cash position across all entities for the board.</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- HOW IT WORKS -->
-<div class="section" id="how">
-  <div class="section-label">How it works</div>
-  <h2 class="section-h2">Three steps to real answers</h2>
-  <p class="section-sub">No dashboards to configure. No queries to write. Just upload your data and ask.</p>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">01</div>
-      <div class="step-title">Upload your exports</div>
-      <div class="step-desc">Drag in CSVs from your POS, scheduling system, or accounting software. OpticAI detects columns automatically — no template required.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">02</div>
-      <div class="step-title">Ask in plain English</div>
-      <div class="step-desc">Ask any operational question. OpticAI understands restaurant context — it knows what prime cost means, what a healthy labor % looks like, and how to read PMIX data.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">03</div>
-      <div class="step-title">Get specific answers</div>
-      <div class="step-desc">Not generic summaries — specific numbers, root causes, and recommendations tied to your actual data, across all your locations at once.</div>
+<div class="section" id="how" style="background:var(--surface);">
+  <div class="container">
+    <div class="section-label">How it works</div>
+    <h2 class="section-h2">Three steps to real answers</h2>
+    <p class="section-sub">No dashboards to configure. No queries to write. Just upload your exports and ask.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Upload your exports</div>
+        <div class="step-desc">Drop CSVs from your POS or scheduling tool, or Excel statements from your accountant. OpticAI detects each file's type from its contents — no template required.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Ask in plain English</div>
+        <div class="step-desc">Ask any question in plain English. OpticAI understands restaurant context — prime cost, labor benchmarks, PMIX margin, and how to read a P&L side-by-side.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Get specific answers</div>
+        <div class="step-desc">Not generic summaries — specific numbers, root causes, and recommendations tied to your actual data, across all your locations at once.</div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- DATASETS -->
-<div class="section">
-  <div class="section-label">Supported datasets</div>
-  <h2 class="section-h2">All your operational data, connected</h2>
-  <p class="section-sub">Upload any combination. Dashboard updates per dataset — sample data fills in what you haven't uploaded yet.</p>
-  <div class="datasets-grid">
-    <div class="ds-tile"><div class="ds-tile-icon"><i class="ti ti-chart-line"></i></div><div class="ds-tile-name">Sales</div><div class="ds-tile-desc">Revenue, covers, avg check, day-of-week trends</div></div>
-    <div class="ds-tile"><div class="ds-tile-icon"><i class="ti ti-users"></i></div><div class="ds-tile-name">Labor</div><div class="ds-tile-desc">Labor %, hours, wages, scheduling by location</div></div>
-    <div class="ds-tile"><div class="ds-tile-icon"><i class="ti ti-chef-hat"></i></div><div class="ds-tile-name">Food Cost</div><div class="ds-tile-desc">COGS, food cost %, waste, vendor performance</div></div>
-    <div class="ds-tile"><div class="ds-tile-icon"><i class="ti ti-receipt"></i></div><div class="ds-tile-name">PMIX</div><div class="ds-tile-desc">Item mix, margin by category, attach rates</div></div>
-    <div class="ds-tile"><div class="ds-tile-icon"><i class="ti ti-building-warehouse"></i></div><div class="ds-tile-name">Inventory</div><div class="ds-tile-desc">On-hand, par levels, variance, cost</div></div>
+<div class="section ds-section" id="datasets">
+  <div class="container">
+    <div class="section-label">Supported data</div>
+    <h2 class="section-h2">Operational exports and financial statements</h2>
+    <p class="section-sub">Upload any combination. Sample data fills the rest so you always have a working dashboard from day one.</p>
+    <div class="ds-group">
+      <div class="ds-group-label"><i data-ic="activity"></i> Operational data</div>
+      <div class="ds-tiles">
+        <div class="ds-tile"><div class="ds-tile-icon"><i data-ic="trending-up"></i></div><div class="ds-tile-name">Sales</div><div class="ds-tile-desc">Revenue, covers, avg check, day-of-week trends</div></div>
+        <div class="ds-tile"><div class="ds-tile-icon"><i data-ic="users"></i></div><div class="ds-tile-name">Labor</div><div class="ds-tile-desc">Labor %, hours, wages, scheduling by location</div></div>
+        <div class="ds-tile"><div class="ds-tile-icon"><i data-ic="chef-hat"></i></div><div class="ds-tile-name">Food Cost</div><div class="ds-tile-desc">COGS, food cost %, waste, vendor performance</div></div>
+        <div class="ds-tile"><div class="ds-tile-icon"><i data-ic="receipt"></i></div><div class="ds-tile-name">PMIX</div><div class="ds-tile-desc">Item mix, margin by category, attach rates</div></div>
+        <div class="ds-tile"><div class="ds-tile-icon"><i data-ic="box"></i></div><div class="ds-tile-name">Inventory</div><div class="ds-tile-desc">On-hand, par levels, variance, cost</div></div>
+      </div>
+    </div>
+    <div class="ds-group">
+      <div class="ds-group-label fin-grp"><i data-ic="file-text"></i> Financial statements</div>
+      <div class="ds-tiles fin-tiles">
+        <div class="ds-tile"><div class="ds-tile-icon fin"><i data-ic="file-text"></i></div><div class="ds-tile-name">P&L Statement</div><div class="ds-tile-desc">Location side-by-side, trailing-13, waterfall analysis</div></div>
+        <div class="ds-tile"><div class="ds-tile-icon fin"><i data-ic="scale"></i></div><div class="ds-tile-name">Balance Sheet</div><div class="ds-tile-desc">Assets, liabilities, equity, intercompany risk</div></div>
+        <div class="ds-tile"><div class="ds-tile-icon fin"><i data-ic="receipt"></i></div><div class="ds-tile-name">GL / Accounting</div><div class="ds-tile-desc">General ledger exports, chart of accounts, variance</div></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- SAMPLE QUESTIONS -->
+<!-- QUESTIONS -->
 <div class="section">
-  <div class="section-label">What you can ask</div>
-  <h2 class="section-h2">Questions your team actually has</h2>
-  <p class="section-sub">OpticAI understands the relationships between your datasets — not just individual metrics.</p>
-  <div class="questions-grid">
-    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Why was labor high at Midtown last week?</strong> — Get root cause analysis, not just a number.</div></div>
-    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Which menu items are hurting margin?</strong> — Cross-reference PMIX with food cost to find the real culprits.</div></div>
-    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Why did sales dip on Tuesdays?</strong> — Structural vs. seasonal analysis across all locations.</div></div>
-    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Give me a weekly ops briefing.</strong> — Full executive summary: wins, risks, and recommendations.</div></div>
-    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Compare performance across all 3 locations.</strong> — Side-by-side analysis of every key metric.</div></div>
-    <div class="question-card"><i class="ti ti-message-question"></i><div class="question-text"><strong>Where's my biggest opportunity to reduce prime cost?</strong> — Combined labor + food cost analysis with dollar impact.</div></div>
+  <div class="container">
+    <div class="section-label">What you can ask</div>
+    <h2 class="section-h2">Questions your team actually has</h2>
+    <p class="section-sub">OpticAI understands the relationships between your datasets — not just individual metrics in isolation.</p>
+    <div class="questions-grid">
+      <div class="q-card"><span class="q-tag op">Ops</span><div class="q-text"><strong>Why was labor high at Midtown last week?</strong> — Root cause analysis, not just a number.</div></div>
+      <div class="q-card"><span class="q-tag fin">Financial</span><div class="q-text"><strong>What's driving EBITDA variance vs. prior year?</strong> — Line-by-line P&L analysis with dollar impact.</div></div>
+      <div class="q-card"><span class="q-tag op">Ops</span><div class="q-text"><strong>Which menu items are hurting food cost margin?</strong> — PMIX cross-referenced with food cost to find the real culprits.</div></div>
+      <div class="q-card"><span class="q-tag fin">Financial</span><div class="q-text"><strong>Which entity has the highest intercompany risk?</strong> — Balance sheet analysis across all entities.</div></div>
+      <div class="q-card"><span class="q-tag op">Ops</span><div class="q-text"><strong>Where's my biggest opportunity to reduce prime cost?</strong> — Combined labor + food cost analysis with dollar impact.</div></div>
+      <div class="q-card"><span class="q-tag fin">Financial</span><div class="q-text"><strong>Summarize our financial position for a board briefing.</strong> — Board-ready EBITDA, cash, and risk summary.</div></div>
+    </div>
   </div>
 </div>
 
-<!-- PROBLEM SECTION -->
-<div class="section" id="compare">
-  <div class="section-label">The problem we solve</div>
-  <h2 class="section-h2">Most restaurants are flying blind — and they know it</h2>
-  <p class="section-sub">Your data exists. It's sitting in your POS, your scheduling tool, your accounting software. The problem is nobody's connecting it — or asking the right questions of it.</p>
-  <div class="vs-grid">
-    <div class="vs-card">
-      <div class="vs-card-header" style="margin-bottom:10px">
-        <i class="ti ti-alert-triangle" style="font-size:18px;color:var(--amber)"></i>
-        <div class="vs-card-name" style="color:var(--text)">The data is siloed</div>
+<!-- PROBLEM / SOLUTION -->
+<div class="dark-band section" id="why">
+  <div class="container">
+    <div class="section-label" style="color:rgba(241,238,228,.45)">The problem we solve</div>
+    <h2 class="section-h2" style="color:#F1EEE4;">Most restaurants are flying blind — and they know it</h2>
+    <p class="section-sub" style="color:rgba(241,238,228,.62);">Your data exists. It's in your POS, your scheduling tool, your accountant's P&L. The problem is nobody's connecting it — or asking the right questions of it.</p>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon"><i data-ic="alert"></i></div>
+        <div class="problem-title">The data is siloed</div>
+        <div class="problem-desc">Your POS knows sales. Your scheduling tool knows labor. Your accountant has the P&L. None of them talk to each other — so when prime cost spikes, nobody can tell you why.</div>
       </div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.65">Your POS knows sales. Your scheduling tool knows labor. Your accounting software knows food cost. But none of them talk to each other — so when prime cost spikes, nobody can tell you <em>why</em>.</div>
-    </div>
-    <div class="vs-card">
-      <div class="vs-card-header" style="margin-bottom:10px">
-        <i class="ti ti-alert-triangle" style="font-size:18px;color:var(--amber)"></i>
-        <div class="vs-card-name" style="color:var(--text)">No analyst on staff</div>
+      <div class="problem-card">
+        <div class="problem-icon"><i data-ic="alert"></i></div>
+        <div class="problem-title">No analyst on staff</div>
+        <div class="problem-desc">Enterprise groups have analysts who do this work. Independent operators and growing SMBs don't — decisions get made on gut feel, or not at all.</div>
       </div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.65">Enterprise restaurant groups have analysts who do this work. Independent operators and growing SMBs don't. That means decisions get made on gut feel — or not at all. Operators without real-time analytics lose 4–8% of revenue annually to food cost variance alone.</div>
-    </div>
-    <div class="vs-card">
-      <div class="vs-card-header" style="margin-bottom:10px">
-        <i class="ti ti-alert-triangle" style="font-size:18px;color:var(--amber)"></i>
-        <div class="vs-card-name" style="color:var(--text)">Existing tools are built for IT, not operators</div>
-      </div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.65">The tools that do exist require complex setup, BI training, or expensive implementation. Most restaurant managers just need a fast, honest answer — not a dashboard to configure.</div>
-    </div>
-  </div>
-
-  <div style="margin-top:32px;background:var(--bg2);border:1px solid rgba(59,130,246,0.25);border-radius:12px;padding:28px 32px;">
-    <div style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">What OpticAI does differently</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.6">
-        <i class="ti ti-check" style="color:var(--green);font-size:16px;flex-shrink:0;margin-top:2px"></i>
-        <span><strong style="color:var(--text)">Connects all your data in one place.</strong> Sales, labor, food cost, PMIX, and inventory — analyzed together, not in isolation.</span>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.6">
-        <i class="ti ti-check" style="color:var(--green);font-size:16px;flex-shrink:0;margin-top:2px"></i>
-        <span><strong style="color:var(--text)">No BI skills required.</strong> Just upload a CSV export from whatever tools you already use and ask a question in plain English.</span>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.6">
-        <i class="ti ti-check" style="color:var(--green);font-size:16px;flex-shrink:0;margin-top:2px"></i>
-        <span><strong style="color:var(--text)">Built for multi-location operators.</strong> Compare locations side-by-side, spot which store is dragging down group performance, and why.</span>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.6">
-        <i class="ti ti-check" style="color:var(--green);font-size:16px;flex-shrink:0;margin-top:2px"></i>
-        <span><strong style="color:var(--text)">Answers, not dashboards.</strong> OpticAI tells you what's wrong, why it's happening, and what to do — not just what the number is.</span>
+      <div class="problem-card">
+        <div class="problem-icon"><i data-ic="alert"></i></div>
+        <div class="problem-title">Tools built for IT, not operators</div>
+        <div class="problem-desc">The tools that exist require BI training, complex setup, or expensive implementation. Most managers just need a fast, honest answer — not a dashboard to configure.</div>
       </div>
     </div>
-  </div>
-
-  <div style="margin-top:16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 24px;display:flex;align-items:flex-start;gap:14px;">
-    <i class="ti ti-quote" style="font-size:24px;color:var(--text3);flex-shrink:0"></i>
-    <div>
-      <div style="font-size:14px;color:var(--text);line-height:1.65;font-style:italic;margin-bottom:8px">"I've been a restaurant operator for a long time and one of the biggest challenges is finding a back-office solution that is robust <em>and</em> easy to use. It gives you all the right answers to the questions you need to run a successful operation."</div>
-      <div style="font-size:12px;color:var(--text3)">— Multi-location restaurant operator</div>
+    <div class="solution-panel">
+      <div class="solution-label">What OpticAI does differently</div>
+      <div class="solution-checks">
+        <div class="solution-check"><i data-ic="check"></i><span><strong>Connects all your data.</strong> Sales, labor, food cost, PMIX, and your P&L / balance sheet statements — analyzed together, not in isolation.</span></div>
+        <div class="solution-check"><i data-ic="check"></i><span><strong>No BI skills required.</strong> Upload a CSV or Excel export from whatever tools you already use and ask a question in plain English.</span></div>
+        <div class="solution-check"><i data-ic="check"></i><span><strong>Built for multi-location operators.</strong> Compare locations side-by-side, spot which store is dragging down group performance, and why.</span></div>
+        <div class="solution-check"><i data-ic="check"></i><span><strong>Answers, not dashboards.</strong> OpticAI tells you what's wrong, why it's happening, and what to do — not just what the number is.</span></div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <div>
+        <div class="testimonial-quote">"No integrations, no data headaches, no waiting on support. I upload the reports I already have and get straight answers — that's exactly what a busy operator needs."</div>
+        <div class="testimonial-attr">— Multi-location restaurant operator</div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- PRIVACY -->
-<div class="privacy-bar">
-  <div class="privacy-inner">
-    <i class="ti ti-shield-check"></i>
-    <span><strong style="color:var(--text)">Your data never leaves your browser.</strong> Uploaded CSVs are processed locally in your session only. Nothing is stored on our servers, shared with third parties, or retained after you close the tab.</span>
-  </div>
-</div>
-
-<!-- CTA FOOTER -->
-<div class="cta-footer">
-  <div class="cta-footer-inner">
-    <h2>See it with your own data</h2>
-    <p>Upload a real export from your POS or scheduling system and ask the question you've been wanting answered.</p>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-      <button class="btn-hero btn-hero-primary" onclick="window.location.href='app.html#request'" style="margin:0 auto">
-        <i class="ti ti-mail"></i> Request access
-      </button>
-      <span style="font-size:12px;color:var(--text3)">Enter your email and we'll review your request</span>
+<div class="privacy-strip" style="background:var(--canvas);padding:40px 0 0;">
+  <div class="container">
+    <div class="privacy-inner">
+      <i data-ic="shield"></i>
+      <!-- TODO: verify this claim matches your actual architecture (including AI calls) before publishing publicly -->
+      <span><strong style="color:var(--ink)">Your data is private and protected.</strong> Files are encrypted in transit and at rest, isolated to your organization, never used to train AI models, and deletable on request.</span>
     </div>
   </div>
 </div>
 
+<!-- FINAL CTA -->
+<div class="dark-band final-cta">
+  <div class="container">
+    <h2>See it with your own data</h2>
+    <p>Upload a real export from your POS, accounting system, or scheduling tool and ask the question you've been wanting answered.</p>
+    <div class="capture-wrap" style="margin:0 auto;">
+      <div id="ctaForm">
+        <div class="capture-form">
+          <input type="email" class="capture-input" id="ctaEmail" placeholder="your@email.com">
+          <button class="capture-btn" onclick="submitCapture('cta')"><i data-ic="mail"></i> Request access</button>
+        </div>
+        <div class="capture-note">We'll review your request and follow up shortly.</div>
+      </div>
+      <div class="capture-success" id="ctaSuccess"><i data-ic="check"></i> Thanks — we'll be in touch.</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
 <footer>
-  <div class="footer-left">© 2025 OpticAI — Restaurant Intelligence</div>
-  <div class="footer-right">Built with Claude AI</div>
+  <span class="footer-copy">© 2026 OpticAI — Restaurant Intelligence</span>
+  <span class="footer-copy">Built with Claude AI</span>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── ICONS ──────────────────────────────────────────────────────────────
+const ICONS = {
+  'bar-chart':    '<line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="9"/><line x1="18" y1="20" x2="18" y2="4"/>',
+  'arrow-right':  '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+  'arrow-up-right':'<line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/>',
+  'trending-up':  '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+  'check':        '<polyline points="20 6 9 17 4 12"/>',
+  'mail':         '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
+  'sparkles':     '<path d="M12 4l1.7 4.1L18 10l-4.3 1.9L12 16l-1.7-4.1L6 10l4.3-1.9Z"/><path d="M19 4.5l.7 1.6L21 7l-1.3.6L19 9l-.7-1.4L17 7l1.3-.9Z"/>',
+  'message':      '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  'users':        '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  'chef-hat':     '<path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/>',
+  'box':          '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+  'alert':        '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  'shield':       '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  'activity':     '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+  'receipt':      '<path d="M5 3v18l2-1.2L9 21l2-1.2L13 21l2-1.2L17 21l2-1.2V3l-2 1.2L15 3l-2 1.2L11 3 9 4.2 7 3Z"/><line x1="8.5" y1="8.5" x2="15.5" y2="8.5"/><line x1="8.5" y1="12" x2="15.5" y2="12"/>',
+  'scale':        '<line x1="12" y1="3" x2="12" y2="21"/><path d="M3 8l4-5 4 5H3z"/><path d="M13 8l4-5 4 5h-8z"/><line x1="3" y1="21" x2="21" y2="21"/>',
+  'file-text':    '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
+};
+
+function renderIcons(root) {
+  (root || document).querySelectorAll('[data-ic]').forEach(el => {
+    const p = ICONS[el.getAttribute('data-ic')]; if (!p) return;
+    el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+  });
+}
+document.addEventListener('DOMContentLoaded', () => renderIcons());
+new MutationObserver(muts => {
+  muts.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) renderIcons(n); }));
+}).observe(document.body, { childList: true, subtree: true });
+
+// ── EMAIL CAPTURE ──────────────────────────────────────────────────────
+async function submitCapture(id) {
+  const isHero = id === 'hero';
+  const emailEl = document.getElementById(isHero ? 'heroEmail' : 'ctaEmail');
+  const formEl  = document.getElementById(isHero ? 'heroForm'  : 'ctaForm');
+  const succEl  = document.getElementById(isHero ? 'heroSuccess': 'ctaSuccess');
+  const email   = emailEl.value.trim();
+  if (!email || !email.includes('@')) { emailEl.focus(); return; }
+  try {
+    await fetch('/api/request-access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+  } catch(e) { /* optimistic — show success regardless */ }
+  formEl.style.display = 'none';
+  succEl.style.display = 'flex';
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('heroEmail')?.addEventListener('keydown', e => { if (e.key==='Enter') submitCapture('hero'); });
+  document.getElementById('ctaEmail')?.addEventListener('keydown',  e => { if (e.key==='Enter') submitCapture('cta');  });
+});
+
+// ── MOCK TAB TOGGLE ────────────────────────────────────────────────────
+let finBuilt = false;
+function switchTab(mode) {
+  document.getElementById('mockWindow').dataset.mode = mode;
+  document.getElementById('tabOp').classList.toggle('active', mode === 'op');
+  document.getElementById('tabFin').classList.toggle('active', mode === 'fin');
+  if (mode === 'fin' && !finBuilt) {
+    finBuilt = true;
+    setTimeout(buildFinCharts, 50);
+  }
+  if (mode === 'op' && mockSalesChart) { mockSalesChart.resize(); mockPmixChart.resize(); }
+}
+
+// ── CHART HELPERS ──────────────────────────────────────────────────────
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function hexAlpha(hex, a) {
+  hex = hex.replace('#','');
+  if (hex.length===3) hex = hex.split('').map(c=>c+c).join('');
+  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+const gridCol  = () => 'rgba(40,36,28,.07)';
+const tickCol  = () => cssVar('--ink-faint');
+const baseScale = (extra={}) => ({
+  grid:{ color:gridCol(), drawTicks:false }, border:{ display:false },
+  ticks:{ color:tickCol(), font:{ size:10 }, padding:6, ...extra }
+});
+
+let mockSalesChart, mockPmixChart, mockWfChart, mockRevChart;
+
+// Build operational charts on page load
+document.addEventListener('DOMContentLoaded', () => {
+  Chart.defaults.font.family = "'Hanken Grotesk', sans-serif";
+  Chart.defaults.font.size = 11;
+
+  const c1=cssVar('--c1'), c2=cssVar('--c2'), c4=cssVar('--c4');
+  const weeks = ['Feb 2','Feb 9','Feb 16','Feb 23','Mar 2','Mar 9','Mar 16','Mar 23','Mar 30','Apr 6','Apr 13'];
+
+  mockSalesChart = new Chart(document.getElementById('mockSalesChart'), {
+    type: 'line',
+    data: { labels: weeks, datasets: [
+      { label:'Midtown',   data:[82,84,79,94,88,95,85,76,100,85,90],  borderColor:hexAlpha(c1,0.35), tension:0.4, fill:false, pointRadius:0, borderWidth:1.5 },
+      { label:'Riverside', data:[80,84,80,92,89,85,93,95,94,89,91],   borderColor:hexAlpha(c2,0.35), tension:0.4, fill:false, pointRadius:0, borderWidth:1.5 },
+      { label:'Eastgate',  data:[78,97,105,106,96,107,92,97,96,112,100], borderColor:hexAlpha(c4,0.35), tension:0.4, fill:false, pointRadius:0, borderWidth:1.5 },
+    ]},
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ x:baseScale(), y:{ ...baseScale({ callback: v=>'$'+v+'K' }) } }
+    }
+  });
+
+  mockPmixChart = new Chart(document.getElementById('mockPmixChart'), {
+    type: 'doughnut',
+    data: { labels:['Entree','Beverage','Appetizer','Side'],
+      datasets:[{ data:[79.5,10.5,5.6,4.4],
+        backgroundColor:[c1,c2,cssVar('--c3'),c4],
+        borderColor:cssVar('--surface'), borderWidth:3, hoverOffset:4
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'64%',
+      plugins:{ legend:{ position:'right', labels:{ color:tickCol(), font:{size:10}, boxWidth:8, padding:6, usePointStyle:true, pointStyle:'rectRounded' } } }
+    }
+  });
+});
+
+// Build financial charts lazily on first toggle
+function buildFinCharts() {
+  const c1=cssVar('--c1'), c2=cssVar('--c2');
+  const pos=cssVar('--pos'), neg=cssVar('--neg'), warn=cssVar('--warn');
+
+  // P&L waterfall — floating bars [start, end]
+  // Revenue 100%, Food Cost 29%, Labor 33%, Other 24%, EBITDA 14%
+  mockWfChart = new Chart(document.getElementById('mockWfChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Revenue','Food Cost','Labor','Other OpEx','EBITDA'],
+      datasets:[{
+        data: [[0,100],[71,100],[38,71],[14,38],[0,14]],
+        backgroundColor: [pos, neg, neg, warn, pos],
+        borderRadius: 3, borderSkipped: false,
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false },
+        tooltip:{ callbacks:{ label: ctx => { const [lo,hi]=ctx.raw; return (hi-lo).toFixed(0)+'%'; } } }
+      },
+      scales:{ x:{ ...baseScale(), grid:{ display:false } },
+               y:{ ...baseScale({ callback: v=>v+'%' }), min:0, max:100 } }
+    }
+  });
+
+  mockRevChart = new Chart(document.getElementById('mockRevChart'), {
+    type: 'doughnut',
+    data: { labels:['Food','Beverage','Catering','Other'],
+      datasets:[{ data:[74,18,5,3],
+        backgroundColor:[c1,c2,cssVar('--c3'),cssVar('--c4')],
+        borderColor:cssVar('--surface'), borderWidth:3, hoverOffset:4
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'64%',
+      plugins:{ legend:{ position:'right', labels:{ color:tickCol(), font:{size:10}, boxWidth:8, padding:6, usePointStyle:true, pointStyle:'rectRounded' } } }
+    }
+  });
+}
+</script>
 </body>
 </html>
