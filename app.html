@@ -1084,7 +1084,7 @@ function initCharts() {
     ticks: { color: tickColor(), font: { size: 11 }, padding: 8, ...extra }
   });
 
-  const darkColors = ['#2563eb','#d97706','#7c3aed','#059669','#dc2626'];
+  const darkColors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444'];
   const tooltipCfg = {
     mode: 'index', intersect: false,
     backgroundColor: 'rgba(20,22,28,0.95)', borderColor: 'var(--border2)', borderWidth: 1,
@@ -1101,11 +1101,11 @@ function initCharts() {
   salesChart = new Chart(document.getElementById('salesChart'), {
     type: 'line',
     data: { labels: DEMO.weeks, datasets: [
-      { label: 'Downtown',         data: DEMO.salesDowntown,    borderColor: darkColors[0], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2.5 },
-      { label: 'Freedom Square',   data: DEMO.salesFreedomSq,   borderColor: darkColors[1], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2.5 },
-      { label: 'Government Square',data: DEMO.salesGovernmentSq,borderColor: darkColors[2], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2.5 },
-      { label: 'Midtown',          data: DEMO.salesMidtown,     borderColor: darkColors[3], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2.5 },
-      { label: 'Westside',         data: DEMO.salesWestside,    borderColor: darkColors[4], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2.5 },
+      { label: 'Downtown',         data: DEMO.salesDowntown,    borderColor: darkColors[0], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2 },
+      { label: 'Freedom Square',   data: DEMO.salesFreedomSq,   borderColor: darkColors[1], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2 },
+      { label: 'Government Square',data: DEMO.salesGovernmentSq,borderColor: darkColors[2], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2 },
+      { label: 'Midtown',          data: DEMO.salesMidtown,     borderColor: darkColors[3], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2 },
+      { label: 'Westside',         data: DEMO.salesWestside,    borderColor: darkColors[4], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2 },
     ]},
     options: { responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
@@ -1125,11 +1125,11 @@ function initCharts() {
   laborChart = new Chart(document.getElementById('laborChart'), {
     type: 'line',
     data: { labels: DEMO.weeks, datasets: [
-      { label: 'Downtown',         data: DEMO.laborDowntown,    borderColor: darkColors[0], tension: 0.4, pointRadius: 0, borderWidth: 2, fill: false },
-      { label: 'Freedom Square',   data: DEMO.laborFreedomSq,   borderColor: darkColors[1], tension: 0.4, pointRadius: 0, borderWidth: 2, fill: false },
-      { label: 'Government Square',data: DEMO.laborGovernmentSq,borderColor: darkColors[2], tension: 0.4, pointRadius: 0, borderWidth: 2, fill: false },
-      { label: 'Midtown',          data: DEMO.laborMidtown,     borderColor: darkColors[3], tension: 0.4, pointRadius: 0, borderWidth: 2, fill: false },
-      { label: 'Westside',         data: DEMO.laborWestside,    borderColor: darkColors[4], tension: 0.4, pointRadius: 0, borderWidth: 2, fill: false },
+      { label: 'Downtown',         data: DEMO.laborDowntown,    borderColor: darkColors[0], tension: 0.4, pointRadius: 0, borderWidth: 1.5, fill: false },
+      { label: 'Freedom Square',   data: DEMO.laborFreedomSq,   borderColor: darkColors[1], tension: 0.4, pointRadius: 0, borderWidth: 1.5, fill: false },
+      { label: 'Government Square',data: DEMO.laborGovernmentSq,borderColor: darkColors[2], tension: 0.4, pointRadius: 0, borderWidth: 1.5, fill: false },
+      { label: 'Midtown',          data: DEMO.laborMidtown,     borderColor: darkColors[3], tension: 0.4, pointRadius: 0, borderWidth: 1.5, fill: false },
+      { label: 'Westside',         data: DEMO.laborWestside,    borderColor: darkColors[4], tension: 0.4, pointRadius: 0, borderWidth: 1.5, fill: false },
     ]},
     options: { responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
@@ -1479,7 +1479,7 @@ function buildSalesLookup(rows, salesCol, locationCol, dateCol) {
 
 function buildSalesChart(rows, salesCol, locationCol, dateCol, shouldAggregate) {
   if (!salesCol) return null;
-  const colors = ['#2563eb','#d97706','#7c3aed','#059669','#dc2626','#2563eb'];
+  const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#3b82f6'];
 
   if (locationCol) {
     const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].sort();
@@ -1509,7 +1509,7 @@ function buildSalesChart(rows, salesCol, locationCol, dateCol, shouldAggregate) 
         data: sortedWeeks.map(w => (weeklyData[w+'__'+loc]||0)/1000),
         borderColor: colors[i % colors.length],
         backgroundColor: colors[i % colors.length] + '14',
-        tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2.5
+        tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2
       }));
     } else {
       const uniqueDates = [...new Set(rows.map(r => r[dateCol]||''))].sort().slice(0,60);
@@ -1517,19 +1517,19 @@ function buildSalesChart(rows, salesCol, locationCol, dateCol, shouldAggregate) 
       datasets = locs.map((loc,i) => {
         const byDate = {};
         rows.filter(r=>r[locationCol]===loc).forEach(r=>{ byDate[r[dateCol]] = (byDate[r[dateCol]]||0)+(parseFloat(r[salesCol])||0); });
-        return { label: loc, data: uniqueDates.map(d=>(byDate[d]||0)/1000), borderColor: colors[i%colors.length], tension:0.4, fill:false, pointRadius:2, borderWidth:2.5 };
+        return { label: loc, data: uniqueDates.map(d=>(byDate[d]||0)/1000), borderColor: colors[i%colors.length], tension:0.4, fill:false, pointRadius:2, borderWidth:2 };
       });
     }
     return { labels, datasets, locations: locs };
   }
 
   const labels = dateCol ? rows.map(r=>r[dateCol]) : rows.map((_,i)=>'W'+(i+1));
-  return { labels, datasets: [{ label:'Sales', data:rows.map(r=>(parseFloat(r[salesCol])||0)/1000), borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.08)', tension:0.4, fill:true, pointRadius:2, borderWidth:2.5 }], locations:['All'] };
+  return { labels, datasets: [{ label:'Sales', data:rows.map(r=>(parseFloat(r[salesCol])||0)/1000), borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', tension:0.4, fill:true, pointRadius:2, borderWidth:2 }], locations:['All'] };
 }
 
 function buildLaborChart(rows, laborPctCol, locationCol, dateCol, fmt) {
   if (!laborPctCol) return null;
-  const colors = ['#2563eb','#d97706','#7c3aed','#059669','#dc2626','#0891b2'];
+  const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
   const getValue = r => normalizePct(r[laborPctCol], fmt || 'percent');
 
   if (locationCol) {
@@ -1560,19 +1560,19 @@ function buildLaborChart(rows, laborPctCol, locationCol, dateCol, fmt) {
       datasets = locs.map((loc,i) => ({
         label: loc,
         data: uniqueWeeks.map(w => { const vals = (weeklyData[w.label]||{})[loc]||[]; return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null; }),
-        borderColor: colors[i%colors.length], tension: 0.4, pointRadius: 2, borderWidth: 2, fill: false, spanGaps: true
+        borderColor: colors[i%colors.length], tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false, spanGaps: true
       }));
     } else {
       labels = uniqueDates.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
       datasets = locs.map((loc,i) => {
         const locRows = rows.filter(r=>r[locationCol]===loc);
-        return { label: loc, data: locRows.map(r=>getValue(r)), borderColor: colors[i%colors.length], tension:0.4, pointRadius:2, borderWidth:2, fill:false };
+        return { label: loc, data: locRows.map(r=>getValue(r)), borderColor: colors[i%colors.length], tension:0.4, pointRadius:2, borderWidth:1.5, fill:false };
       });
     }
     return { labels, datasets };
   }
   const labels = rows.map((_,i)=>'W'+(i+1));
-  return { labels, datasets: [{ label:'Labor %', data:rows.map(r=>getValue(r)), borderColor:'#2563eb', tension:0.4, pointRadius:2, borderWidth:2, fill:false }] };
+  return { labels, datasets: [{ label:'Labor %', data:rows.map(r=>getValue(r)), borderColor:'#3b82f6', tension:0.4, pointRadius:2, borderWidth:1.5, fill:false }] };
 }
 
 function buildPmixChart(rows, catCol, revCol) {
@@ -1685,7 +1685,7 @@ function updateDashboard(type, summary, filename) {
     salesChart.update();
     document.getElementById('salesChartSrc').textContent = 'live data — ' + filename;
     if (cd.locations) {
-      const colors = ['#2563eb','#d97706','#7c3aed','#059669','#dc2626','#0891b2'];
+      const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
       const legend = document.getElementById('salesLegend');
       if (legend) {
         legend.innerHTML = cd.locations.map((loc,i) =>
@@ -2891,8 +2891,8 @@ function applyLocationFilter() {
     salesChart.data.datasets.forEach((ds, i) => {
       const full = salesChart._fullColors[i] || '#888';
       if (!loc) {
-        ds.borderColor = full;
-        ds.borderWidth = 2.5;
+        ds.borderColor = hexAlpha(full, 0.35);
+        ds.borderWidth = 1.5;
       } else if (ds.label === loc) {
         ds.borderColor = full;
         ds.borderWidth = 2.5;
@@ -2909,8 +2909,8 @@ function applyLocationFilter() {
     laborChart.data.datasets.forEach((ds, i) => {
       const full = laborChart._fullColors[i] || '#888';
       if (!loc) {
-        ds.borderColor = full;
-        ds.borderWidth = 2;
+        ds.borderColor = hexAlpha(full, 0.35);
+        ds.borderWidth = 1.5;
       } else if (ds.label === loc) {
         ds.borderColor = full;
         ds.borderWidth = 2.5;
