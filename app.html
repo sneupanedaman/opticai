@@ -940,6 +940,7 @@ input[type=file].ds-file-input { position:absolute; inset:0; opacity:0; cursor:p
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // ---- STATE ----
 const uploadedData = { sales: null, labor: null, foodcost: null, pmix: null, inventory: null, custom: null };
@@ -2291,6 +2292,8 @@ function appendBriefingMsg(text) {
   const w = document.createElement('div');
   w.className = 'msg msg-ai';
   w.style.width = '100%';
+  w.dataset.briefingText = text;
+  w.dataset.briefingTitle = (typeof currentMode !== 'undefined' && currentMode === 'financial') ? 'Financial Briefing' : 'Weekly Ops Briefing';
 
   const label = document.createElement('div');
   label.className = 'msg-label';
@@ -2301,12 +2304,70 @@ function appendBriefingMsg(text) {
   bubble.className = 'msg-bubble bubble';
   bubble.style.cssText = 'background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;';
 
-  bubble.innerHTML = renderBubble(text);
+  let html = renderBubble(text);
+  html += `<div style="margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);text-align:right">
+    <button onclick="exportBriefingPDF(this)" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:6px;color:#93c5fd;font-size:11px;padding:5px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px;">
+      <i class="ti ti-file-type-pdf" style="font-size:13px"></i> Export as PDF
+    </button>
+  </div>`;
+  bubble.innerHTML = html;
   w.appendChild(label);
   w.appendChild(bubble);
   messagesEl.appendChild(w);
   messagesEl.scrollTop = messagesEl.scrollHeight;
   return w;
+}
+
+function exportBriefingPDF(btn) {
+  const wrapper = btn.closest('.msg-ai');
+  const text = wrapper.dataset.briefingText || '';
+  const title = wrapper.dataset.briefingTitle || 'Briefing';
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const margin = 50;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const maxWidth = pageWidth - margin * 2;
+  let y = margin;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.text(title, margin, y);
+  y += 10;
+  doc.setFontSize(9);
+  doc.setTextColor(120);
+  doc.setFont('helvetica', 'normal');
+  doc.text(new Date().toLocaleString(), margin, y + 14);
+  y += 28;
+  doc.setTextColor(0);
+
+  const lines = text.split('\n');
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) { y += 8; return; }
+
+    let fontStyle = 'normal', fontSize = 10, indent = 0;
+    if (trimmed === 'WEEKLY OPS BRIEFING' || trimmed === '===================') {
+      if (trimmed === '===================') return;
+      fontStyle = 'bold'; fontSize = 13;
+    } else if (trimmed.match(/^[A-Z][A-Z\s]+$/) && trimmed.length > 3) {
+      fontStyle = 'bold'; fontSize = 10.5;
+      y += 6;
+    } else if (trimmed.startsWith('- ') || trimmed.match(/^\d+\./)) {
+      indent = 14;
+    }
+
+    doc.setFont('helvetica', fontStyle);
+    doc.setFontSize(fontSize);
+    const wrapped = doc.splitTextToSize(trimmed, maxWidth - indent);
+    wrapped.forEach(wLine => {
+      if (y > pageHeight - margin) { doc.addPage(); y = margin; }
+      doc.text(wLine, margin + indent, y);
+      y += fontSize * 1.45;
+    });
+  });
+
+  doc.save(title.replace(/\s+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf');
 }
 
 // ── DYNAMIC SUGGESTED QUESTIONS — pool-based rotating system ──
