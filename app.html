@@ -187,7 +187,7 @@ input[type=file].ds-file-input { position:absolute; inset:0; opacity:0; cursor:p
 /* ── FEEDBACK ───────────────────────────────────────────────────────── */
 .feedback-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:200; }
 .feedback-overlay.open { display:flex; }
-.feedback-modal { background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:28px;width:360px;max-width:95vw; }
+.feedback-modal { background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:28px;width:360px;max-width:95vw;position:relative; }
 .feedback-modal h3 { font-size:16px;font-weight:600;margin-bottom:6px;letter-spacing:-0.01em;color:var(--ink); }
 .feedback-modal p { font-size:13px;color:var(--ink-soft);margin-bottom:20px;line-height:1.55; }
 .thumbs-row { display:flex;gap:10px;margin-bottom:18px; }
@@ -763,25 +763,45 @@ input[type=file].ds-file-input { position:absolute; inset:0; opacity:0; cursor:p
           <div class="chart-row">
             <div class="chart-card" style="flex:1" id="card-finPrime">
               <div class="chart-title">Prime cost by location
-                <span style="font-size:10px;color:var(--text3)" id="finSrcPrime">sample</span></div>
-              <div class="chart-wrap"><canvas id="finPrimeChart"></canvas></div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:10px;color:var(--text3)" id="finSrcPrime">sample</span>
+                  <button class="chart-toggle-btn" onclick="toggleChartGrid('finPrimeChart')" id="toggle-finPrimeChart"><i data-ic="table"></i> Grid</button>
+                </div>
+              </div>
+              <div class="chart-wrap" id="wrap-finPrimeChart"><canvas id="finPrimeChart"></canvas></div>
+              <div class="chart-grid-wrap" id="grid-finPrimeChart"></div>
             </div>
             <div class="chart-card" style="flex:1" id="card-finMix">
               <div class="chart-title">Revenue mix
-                <span style="font-size:10px;color:var(--text3)" id="finSrcMix">sample</span></div>
-              <div class="chart-wrap"><canvas id="finMixChart"></canvas></div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:10px;color:var(--text3)" id="finSrcMix">sample</span>
+                  <button class="chart-toggle-btn" onclick="toggleChartGrid('finMixChart')" id="toggle-finMixChart"><i data-ic="table"></i> Grid</button>
+                </div>
+              </div>
+              <div class="chart-wrap" id="wrap-finMixChart"><canvas id="finMixChart"></canvas></div>
+              <div class="chart-grid-wrap" id="grid-finMixChart"></div>
             </div>
           </div>
           <div class="chart-row">
             <div class="chart-card wide" id="card-finWf">
               <div class="chart-title">P&amp;L margin waterfall
-                <span style="font-size:10px;color:var(--text3)" id="finSrcWf">sample</span></div>
-              <div class="chart-wrap"><canvas id="finWfChart"></canvas></div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:10px;color:var(--text3)" id="finSrcWf">sample</span>
+                  <button class="chart-toggle-btn" onclick="toggleChartGrid('finWfChart')" id="toggle-finWfChart"><i data-ic="table"></i> Grid</button>
+                </div>
+              </div>
+              <div class="chart-wrap" id="wrap-finWfChart"><canvas id="finWfChart"></canvas></div>
+              <div class="chart-grid-wrap" id="grid-finWfChart"></div>
             </div>
             <div class="chart-card narrow" id="card-finTrail">
               <div class="chart-title"><span id="finTrailTitle">Trailing-13 sales &amp; EBITDA</span>
-                <span style="font-size:10px;color:var(--text3)" id="finSrcTrail">sample</span></div>
-              <div class="chart-wrap"><canvas id="finTrailChart"></canvas></div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:10px;color:var(--text3)" id="finSrcTrail">sample</span>
+                  <button class="chart-toggle-btn" onclick="toggleChartGrid('finTrailChart')" id="toggle-finTrailChart"><i data-ic="table"></i> Grid</button>
+                </div>
+              </div>
+              <div class="chart-wrap" id="wrap-finTrailChart"><canvas id="finTrailChart"></canvas></div>
+              <div class="chart-grid-wrap" id="grid-finTrailChart"></div>
             </div>
           </div>
         </div>
@@ -839,6 +859,7 @@ input[type=file].ds-file-input { position:absolute; inset:0; opacity:0; cursor:p
 <!-- FEEDBACK MODAL -->
 <div class="feedback-overlay" id="feedbackOverlay" onclick="if(event.target===this)closeFeedback()">
   <div class="feedback-modal">
+    <button onclick="closeFeedback()" aria-label="Close" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1;padding:2px 6px;border-radius:4px;transition:color 0.15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">&times;</button>
     <div id="feedbackForm">
       <h3>Is this valuable?</h3>
       <p>Quick signal helps us decide what to build next. No account needed.</p>
@@ -1062,20 +1083,36 @@ function initCharts() {
     ticks: { color: tickColor(), font: { size: 11 }, padding: 8, ...extra }
   });
 
+  const darkColors = ['#2563eb','#d97706','#7c3aed','#059669','#dc2626'];
+  const tooltipCfg = {
+    mode: 'index', intersect: false,
+    backgroundColor: 'rgba(20,22,28,0.95)', borderColor: 'var(--border2)', borderWidth: 1,
+    titleColor: '#fff', bodyColor: '#c8ccd6', padding: 10, boxPadding: 4, usePointStyle: true,
+    callbacks: {
+      label: function(ctx) {
+        const val = ctx.parsed.y;
+        const fmt = (this.chart.canvas.id === 'salesChart') ? '$' + val.toFixed(1) + 'K' : val.toFixed(1) + '%';
+        return ' ' + ctx.dataset.label + ': ' + fmt;
+      }
+    }
+  };
+
   salesChart = new Chart(document.getElementById('salesChart'), {
     type: 'line',
     data: { labels: DEMO.weeks, datasets: [
-      { label: 'Downtown',         data: DEMO.salesDowntown,    borderColor: hexAlpha(c1,0.35), tension: 0.4, fill: false, pointRadius: 0, borderWidth: 1.5 },
-      { label: 'Freedom Square',   data: DEMO.salesFreedomSq,   borderColor: hexAlpha(c2,0.35), tension: 0.4, fill: false, pointRadius: 0, borderWidth: 1.5 },
-      { label: 'Government Square',data: DEMO.salesGovernmentSq,borderColor: hexAlpha(c3,0.35), tension: 0.4, fill: false, pointRadius: 0, borderWidth: 1.5 },
-      { label: 'Midtown',          data: DEMO.salesMidtown,     borderColor: hexAlpha(c4,0.35), tension: 0.4, fill: false, pointRadius: 0, borderWidth: 1.5 },
-      { label: 'Westside',         data: DEMO.salesWestside,    borderColor: hexAlpha(c5,0.35), tension: 0.4, fill: false, pointRadius: 0, borderWidth: 1.5 },
+      { label: 'Downtown',         data: DEMO.salesDowntown,    borderColor: darkColors[0], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2.5 },
+      { label: 'Freedom Square',   data: DEMO.salesFreedomSq,   borderColor: darkColors[1], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2.5 },
+      { label: 'Government Square',data: DEMO.salesGovernmentSq,borderColor: darkColors[2], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2.5 },
+      { label: 'Midtown',          data: DEMO.salesMidtown,     borderColor: darkColors[3], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2.5 },
+      { label: 'Westside',         data: DEMO.salesWestside,    borderColor: darkColors[4], tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2.5 },
     ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+    options: { responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: tooltipCfg },
       scales: { x: baseScale(), y: { ...baseScale({ callback: v => '$' + v + 'K' }) } } }
   });
   // store full colors on each dataset for focus toggling
-  salesChart._fullColors = [c1,c2,c3,c4,c5];
+  salesChart._fullColors = darkColors.slice();
 
   pmixChart = new Chart(document.getElementById('pmixChart'), {
     type: 'doughnut',
@@ -1087,16 +1124,18 @@ function initCharts() {
   laborChart = new Chart(document.getElementById('laborChart'), {
     type: 'line',
     data: { labels: DEMO.weeks, datasets: [
-      { label: 'Downtown',         data: DEMO.laborDowntown,    borderColor: hexAlpha(c1,0.35), tension: 0.4, pointRadius: 0, borderWidth: 1.5, fill: false },
-      { label: 'Freedom Square',   data: DEMO.laborFreedomSq,   borderColor: hexAlpha(c2,0.35), tension: 0.4, pointRadius: 0, borderWidth: 1.5, fill: false },
-      { label: 'Government Square',data: DEMO.laborGovernmentSq,borderColor: hexAlpha(c3,0.35), tension: 0.4, pointRadius: 0, borderWidth: 1.5, fill: false },
-      { label: 'Midtown',          data: DEMO.laborMidtown,     borderColor: hexAlpha(c4,0.35), tension: 0.4, pointRadius: 0, borderWidth: 1.5, fill: false },
-      { label: 'Westside',         data: DEMO.laborWestside,    borderColor: hexAlpha(c5,0.35), tension: 0.4, pointRadius: 0, borderWidth: 1.5, fill: false },
+      { label: 'Downtown',         data: DEMO.laborDowntown,    borderColor: darkColors[0], tension: 0.4, pointRadius: 0, borderWidth: 2, fill: false },
+      { label: 'Freedom Square',   data: DEMO.laborFreedomSq,   borderColor: darkColors[1], tension: 0.4, pointRadius: 0, borderWidth: 2, fill: false },
+      { label: 'Government Square',data: DEMO.laborGovernmentSq,borderColor: darkColors[2], tension: 0.4, pointRadius: 0, borderWidth: 2, fill: false },
+      { label: 'Midtown',          data: DEMO.laborMidtown,     borderColor: darkColors[3], tension: 0.4, pointRadius: 0, borderWidth: 2, fill: false },
+      { label: 'Westside',         data: DEMO.laborWestside,    borderColor: darkColors[4], tension: 0.4, pointRadius: 0, borderWidth: 2, fill: false },
     ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+    options: { responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: tooltipCfg },
       scales: { x: baseScale(), y: { ...baseScale({ callback: v => v + '%' }) } } }
   });
-  laborChart._fullColors = [c1,c2,c3,c4,c5];
+  laborChart._fullColors = darkColors.slice();
 
   dowChart = new Chart(document.getElementById('dowChart'), {
     type: 'bar',
@@ -1439,7 +1478,7 @@ function buildSalesLookup(rows, salesCol, locationCol, dateCol) {
 
 function buildSalesChart(rows, salesCol, locationCol, dateCol, shouldAggregate) {
   if (!salesCol) return null;
-  const colors = [cssCol('--c1'),cssCol('--c2'),cssCol('--c3'),cssCol('--c4'),cssCol('--c5'),cssCol('--c1')];
+  const colors = ['#2563eb','#d97706','#7c3aed','#059669','#dc2626','#2563eb'];
 
   if (locationCol) {
     const locs = [...new Set(rows.map(r => r[locationCol]).filter(Boolean))].sort();
@@ -1469,7 +1508,7 @@ function buildSalesChart(rows, salesCol, locationCol, dateCol, shouldAggregate) 
         data: sortedWeeks.map(w => (weeklyData[w+'__'+loc]||0)/1000),
         borderColor: colors[i % colors.length],
         backgroundColor: colors[i % colors.length] + '14',
-        tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2
+        tension: 0.4, fill: true, pointRadius: 2, borderWidth: 2.5
       }));
     } else {
       const uniqueDates = [...new Set(rows.map(r => r[dateCol]||''))].sort().slice(0,60);
@@ -1477,19 +1516,19 @@ function buildSalesChart(rows, salesCol, locationCol, dateCol, shouldAggregate) 
       datasets = locs.map((loc,i) => {
         const byDate = {};
         rows.filter(r=>r[locationCol]===loc).forEach(r=>{ byDate[r[dateCol]] = (byDate[r[dateCol]]||0)+(parseFloat(r[salesCol])||0); });
-        return { label: loc, data: uniqueDates.map(d=>(byDate[d]||0)/1000), borderColor: colors[i%colors.length], tension:0.4, fill:false, pointRadius:2, borderWidth:2 };
+        return { label: loc, data: uniqueDates.map(d=>(byDate[d]||0)/1000), borderColor: colors[i%colors.length], tension:0.4, fill:false, pointRadius:2, borderWidth:2.5 };
       });
     }
     return { labels, datasets, locations: locs };
   }
 
   const labels = dateCol ? rows.map(r=>r[dateCol]) : rows.map((_,i)=>'W'+(i+1));
-  return { labels, datasets: [{ label:'Sales', data:rows.map(r=>(parseFloat(r[salesCol])||0)/1000), borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', tension:0.4, fill:true, pointRadius:2, borderWidth:2 }], locations:['All'] };
+  return { labels, datasets: [{ label:'Sales', data:rows.map(r=>(parseFloat(r[salesCol])||0)/1000), borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.08)', tension:0.4, fill:true, pointRadius:2, borderWidth:2.5 }], locations:['All'] };
 }
 
 function buildLaborChart(rows, laborPctCol, locationCol, dateCol, fmt) {
   if (!laborPctCol) return null;
-  const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
+  const colors = ['#2563eb','#d97706','#7c3aed','#059669','#dc2626','#0891b2'];
   const getValue = r => normalizePct(r[laborPctCol], fmt || 'percent');
 
   if (locationCol) {
@@ -1520,19 +1559,19 @@ function buildLaborChart(rows, laborPctCol, locationCol, dateCol, fmt) {
       datasets = locs.map((loc,i) => ({
         label: loc,
         data: uniqueWeeks.map(w => { const vals = (weeklyData[w.label]||{})[loc]||[]; return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null; }),
-        borderColor: colors[i%colors.length], tension: 0.4, pointRadius: 2, borderWidth: 1.5, fill: false, spanGaps: true
+        borderColor: colors[i%colors.length], tension: 0.4, pointRadius: 2, borderWidth: 2, fill: false, spanGaps: true
       }));
     } else {
       labels = uniqueDates.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
       datasets = locs.map((loc,i) => {
         const locRows = rows.filter(r=>r[locationCol]===loc);
-        return { label: loc, data: locRows.map(r=>getValue(r)), borderColor: colors[i%colors.length], tension:0.4, pointRadius:2, borderWidth:1.5, fill:false };
+        return { label: loc, data: locRows.map(r=>getValue(r)), borderColor: colors[i%colors.length], tension:0.4, pointRadius:2, borderWidth:2, fill:false };
       });
     }
     return { labels, datasets };
   }
   const labels = rows.map((_,i)=>'W'+(i+1));
-  return { labels, datasets: [{ label:'Labor %', data:rows.map(r=>getValue(r)), borderColor:'#3b82f6', tension:0.4, pointRadius:2, borderWidth:1.5, fill:false }] };
+  return { labels, datasets: [{ label:'Labor %', data:rows.map(r=>getValue(r)), borderColor:'#2563eb', tension:0.4, pointRadius:2, borderWidth:2, fill:false }] };
 }
 
 function buildPmixChart(rows, catCol, revCol) {
@@ -1645,7 +1684,7 @@ function updateDashboard(type, summary, filename) {
     salesChart.update();
     document.getElementById('salesChartSrc').textContent = 'live data — ' + filename;
     if (cd.locations) {
-      const colors = ['#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444','#06b6d4'];
+      const colors = ['#2563eb','#d97706','#7c3aed','#059669','#dc2626','#0891b2'];
       const legend = document.getElementById('salesLegend');
       if (legend) {
         legend.innerHTML = cd.locations.map((loc,i) =>
@@ -2559,10 +2598,77 @@ function toggleChartGrid(chartId) {
 }
 
 function buildGridHTML(chartId) {
-  const chartObj = { salesChart, pmixChart, laborChart, dowChart }[chartId];
+  const finC = (typeof Financial !== 'undefined' && Financial.charts) ? Financial.charts : {};
+  const chartObj = {
+    salesChart, pmixChart, laborChart, dowChart,
+    finPrimeChart: finC.prime,
+    finMixChart:   finC.mix,
+    finWfChart:    finC.wf,
+    finTrailChart: finC.trail
+  }[chartId];
   if (!chartObj) return '<div style="padding:12px;color:var(--text3);font-size:12px">No data available</div>';
 
   const { labels, datasets } = chartObj.data;
+
+  if (chartId === 'finMixChart') {
+    const data = datasets[0] ? datasets[0].data : [];
+    const total = data.reduce((a,b)=>a+(b||0), 0);
+    let html = '<table class="chart-grid-table"><thead><tr><th>Category</th><th>Sales</th><th>% of Mix</th></tr></thead><tbody>';
+    labels.forEach((lbl, i) => {
+      const val = data[i] || 0;
+      const pct = total > 0 ? (val/total*100).toFixed(1)+'%' : '—';
+      html += `<tr><td>${lbl}</td><td>$${Math.round(val).toLocaleString()}</td><td>${pct}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    return html;
+  }
+
+  if (chartId === 'finPrimeChart') {
+    let html = '<table class="chart-grid-table"><thead><tr><th>Location</th><th>Food %</th><th>Labor %</th><th>Prime %</th></tr></thead><tbody>';
+    labels.forEach((lbl, i) => {
+      const food  = datasets[0] && datasets[0].data[i] != null ? datasets[0].data[i] : null;
+      const labor = datasets[1] && datasets[1].data[i] != null ? datasets[1].data[i] : null;
+      const prime = (food !== null && labor !== null) ? (food + labor).toFixed(1)+'%' : '—';
+      html += `<tr><td>${lbl}</td><td>${food !== null ? food.toFixed(1)+'%' : '—'}</td><td>${labor !== null ? labor.toFixed(1)+'%' : '—'}</td><td>${prime}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    return html;
+  }
+
+  if (chartId === 'finWfChart') {
+    let html = '<table class="chart-grid-table"><thead><tr><th>Stage</th><th>Value</th></tr></thead><tbody>';
+    labels.forEach((lbl, i) => {
+      const val = datasets[0] ? datasets[0].data[i] : null;
+      const fmt = val != null ? val.toFixed(1)+'%' : '—';
+      html += `<tr><td>${lbl}</td><td>${fmt}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    return html;
+  }
+
+  if (chartId === 'finTrailChart') {
+    if (finC.trailKind === 'ebitda') {
+      let html = '<table class="chart-grid-table"><thead><tr><th>Location</th><th>EBITDA %</th></tr></thead><tbody>';
+      labels.forEach((lbl, i) => {
+        const val = datasets[0] ? datasets[0].data[i] : null;
+        const fmt = val != null ? val.toFixed(1)+'%' : '—';
+        html += `<tr><td>${lbl}</td><td>${fmt}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      return html;
+    } else {
+      let html = '<table class="chart-grid-table"><thead><tr><th>Period</th><th>Sales</th><th>EBITDA %</th></tr></thead><tbody>';
+      labels.forEach((lbl, i) => {
+        const sales   = datasets[0] ? datasets[0].data[i] : null;
+        const ebitda  = datasets[1] ? datasets[1].data[i] : null;
+        const salesFmt  = sales  != null ? '$'+Math.round(sales).toLocaleString()+'K' : '—';
+        const ebitdaFmt = ebitda != null ? ebitda.toFixed(1)+'%' : '—';
+        html += `<tr><td>${lbl}</td><td>${salesFmt}</td><td>${ebitdaFmt}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      return html;
+    }
+  }
 
   if (chartId === 'pmixChart') {
     // Doughnut — single dataset, show label + value + % 
@@ -2724,8 +2830,8 @@ function applyLocationFilter() {
     salesChart.data.datasets.forEach((ds, i) => {
       const full = salesChart._fullColors[i] || '#888';
       if (!loc) {
-        ds.borderColor = hexAlpha(full, 0.35);
-        ds.borderWidth = 1.5;
+        ds.borderColor = full;
+        ds.borderWidth = 2.5;
       } else if (ds.label === loc) {
         ds.borderColor = full;
         ds.borderWidth = 2.5;
@@ -2742,8 +2848,8 @@ function applyLocationFilter() {
     laborChart.data.datasets.forEach((ds, i) => {
       const full = laborChart._fullColors[i] || '#888';
       if (!loc) {
-        ds.borderColor = hexAlpha(full, 0.35);
-        ds.borderWidth = 1.5;
+        ds.borderColor = full;
+        ds.borderWidth = 2;
       } else if (ds.label === loc) {
         ds.borderColor = full;
         ds.borderWidth = 2.5;
@@ -3487,7 +3593,7 @@ Write for an owner/operator. Real numbers only, no invented figures.`;
   function init(){ /* charts built lazily on first financial view */ }
 
   return { parseSheet, SAMPLE, state, activeData, selectEntity, render, renderKpis, renderCharts,
-    renderSuggested, buildContext, briefingPrompt, stageFiles, applyStaged, init };
+    renderSuggested, buildContext, briefingPrompt, stageFiles, applyStaged, init, charts };
 })();
 
 initCharts();
